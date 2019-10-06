@@ -1,7 +1,7 @@
 from typing import List
 
 from models import LexingState
-from preparators import BasePreparator, include_preparator
+from preparators import BasePreparator, include_preparator, comments_preparator
 from preparators.errors import PreparationError
 from utils import printer
 
@@ -15,7 +15,8 @@ class Lexer:
     token_start_line_number: int = 0
 
     preparators: List[BasePreparator] = [
-        include_preparator
+        include_preparator,
+        comments_preparator
     ]
 
     def __init__(self, text: str) -> None:
@@ -28,14 +29,14 @@ class Lexer:
             except PreparationError as error:
                 printer.error(str(error), 'Preparation error')
                 return False
-
-        print('Prepared:')
-        print(self.text)
         return True
 
     def lex(self):
         if not self.prepare():
             return
+
+        with open('result.f12', 'w') as f:
+            f.writelines([self.text])
 
 
 if __name__ == '__main__':
@@ -43,7 +44,7 @@ if __name__ == '__main__':
         source_text = ''.join(main_file.readlines())
 
         lexer = Lexer(source_text)
-        lexer.prepare()
+        lexer.lex()
 
 
 

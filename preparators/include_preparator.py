@@ -7,11 +7,11 @@ from .errors import PreparationError
 
 class IncludePreparator(BasePreparator):
 
-    helper_pattern = ">include \"(.*)\""
+    include_regex = regex.compile(">include \"(.*)\"")
 
     def prepare(self, text: str) -> str:
         while True:
-            match = regex.search(self.helper_pattern, text)
+            match = self.include_regex.search(text)
             if match is None:
                 break
 

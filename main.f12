@@ -12,9 +12,13 @@ unit Human {
 
 fun main => int {
 
-    fun inner {
+    fun inner { /* parameterless function */
         --> "Hello"
     }
+
+    /*
+        Multi line comment
+    */
 
     inner();
 
