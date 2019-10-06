@@ -28,6 +28,9 @@ class Lexer:
             except PreparationError as error:
                 printer.error(str(error), 'Preparation error')
                 return False
+
+        print('Prepared:')
+        print(self.text)
         return True
 
     def lex(self):

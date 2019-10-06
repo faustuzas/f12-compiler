@@ -1,4 +1,4 @@
->include "../file.ext"; // will copy the file content into this file
+>include "include.f12" // will copy the file content into this file
 
 fun add(int x[], int y) => int {
     ret x[0] + y;
