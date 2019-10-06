@@ -1,0 +1,2 @@
+class PreparationError(ValueError):
+    pass
