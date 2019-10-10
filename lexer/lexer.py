@@ -89,6 +89,7 @@ class Lexer:
     Have to be initialized one to optimize memory consumption and performance
     """
     start_switch: Switcher
+    end_switch: Switcher
 
     def __init__(self, text: str) -> None:
         assert len(text)
@@ -103,29 +104,30 @@ class Lexer:
             '+': lambda: self.add_token(Token(TokenType.OP_PLUS, self.line_number))
         })
 
-    def add_token(self, op_token: Token):
+        self.end_switch = Switcher.from_dict({
+            LexingState.START: lambda: self.add_token(Token(TokenType.EOF, self.line_number))
+        })
+
+    def add_token(self, op_token: Token, rollback=False):
         self.tokens.append(op_token)
-        self.proceed()
+        self.token_buffer = ''
+        self.state = LexingState.START
+        if rollback:
+            self.offset -= 1
 
-    def proceed(self, string=False, clear_buffer=False) -> None:
-        """
-        If string is set to true, then don't increase line number on new line symbol
-        """
-        if string:
+    def lex_start(self):
+        pass
+
+    def lex(self):
+        pass
+
+    def lex_all(self):
+        while self.offset < len(self.text):
+            self.lex()
             self.offset += 1
-        else:
-            if self.current_char == '\n':
-                self.line_number += 1
-                self.offset = 0
-            else:
-                self.offset += 1
 
-        if clear_buffer:
-            self.token_buffer = ''
-
-        self.current_char = self.text[self.offset]
-
-    # def lex_start(self):
+        self.current_char = ' '
+        self.lex()
 
 
 if __name__ == '__main__':

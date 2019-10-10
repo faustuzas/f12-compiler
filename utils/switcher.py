@@ -1,8 +1,9 @@
 from typing import Any, Callable, Dict, Union, List, Tuple
+from enum import Enum
 from collections.abc import Iterable
 
 Action = Callable[[], Any]
-Case = Union[str, int, float, List, Tuple]
+Case = Union[str, int, float, List, Tuple, Enum]
 
 
 class Switcher:

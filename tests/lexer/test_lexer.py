@@ -1,34 +1,28 @@
 from unittest import TestCase
 
+from models import LexingState, Token, TokenType
 from lexer.lexer import Lexer
 
 
 class LexerTests(TestCase):
 
-    def test_proceed_new_line(self):
-        lexer = Lexer("12\n3")
-        lexer.proceed()
-        lexer.proceed()
-        lexer.proceed()
-        self.assertEqual(0, lexer.offset)
-        self.assertEqual(2, lexer.line_number)
+    def test_add_token_no_rollback(self):
+        lexer = Lexer('123')
+        lexer.token_buffer = '12345'
+        lexer.state = LexingState.LIT_STR
+        lexer.offset = 4
 
-    def test_proceed_new_line_in_string(self):
-        lexer = Lexer("12\n3")
-        lexer.proceed(string=True)
-        lexer.proceed(string=True)
-        lexer.proceed(string=True)
-        self.assertEqual(3, lexer.offset)
-        self.assertEqual(1, lexer.line_number)
+        lexer.add_token(Token(TokenType.OP_PLUS, 4))
 
-    def test_proceed_keep_token_buffer(self):
-        lexer = Lexer("12\n3")
-        lexer.token_buffer = '123'
-        lexer.proceed()
-        self.assertEqual('123', lexer.token_buffer)
-
-    def test_proceed_clear_token_buffer(self):
-        lexer = Lexer("12\n3")
-        lexer.token_buffer = '123'
-        lexer.proceed(clear_buffer=True)
+        self.assertEqual(1, len(lexer.tokens))
         self.assertEqual('', lexer.token_buffer)
+        self.assertEqual(LexingState.START, lexer.state)
+        self.assertEqual(lexer.offset, 4)
+
+    def test_add_token_rollback(self):
+        lexer = Lexer('123')
+        lexer.offset = 4
+
+        lexer.add_token(Token(TokenType.OP_PLUS, 4), rollback=True)
+
+        self.assertEqual(lexer.offset, 3)
