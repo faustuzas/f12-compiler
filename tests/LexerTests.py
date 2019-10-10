@@ -20,8 +20,3 @@ class LexerTests(TestCase):
         lexer.proceed(True)
         self.assertEqual(3, lexer.offset)
         self.assertEqual(1, lexer.line_number)
-
-    def test_check_future(self):
-        lexer = Lexer("12345678")
-        self.assertTrue(lexer.check_future("123"))
-        self.assertTrue(not lexer.check_future("23"))

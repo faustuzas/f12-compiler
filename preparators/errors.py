@@ -1,2 +1,0 @@
-class PreparationError(ValueError):
-    pass
