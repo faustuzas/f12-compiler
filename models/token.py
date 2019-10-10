@@ -3,6 +3,7 @@ from models.enums import ExtendedEnum
 
 class TokenType(ExtendedEnum):
     OP_PLUS = 'OP_PLUS'
+    OP_MINUS = 'OP_MINUS'
     LIT_STR = 'LIT_STR'
     EOF = 'EOF'
 

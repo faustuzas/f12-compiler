@@ -77,13 +77,13 @@ What can I found?
 
 
 class Lexer:
-    state: LexingState = LexingState.START
-    token_buffer: str = ''
-    line_number: int = 1
-    offset: int = 0
-    tokens: List[Token] = []
-    token_start_line_number: int = 0
-    current_char: str = None
+    state: LexingState
+    token_buffer: str
+    line_number: int
+    offset: int
+    tokens: List[Token]
+    token_start_line_number: int
+    current_char: str
 
     """
     Switch imitating objects
@@ -96,6 +96,12 @@ class Lexer:
     def __init__(self, text: str) -> None:
         assert len(text)
 
+        self.state = LexingState.START
+        self.token_buffer = ''
+        self.line_number = 1
+        self.offset = 0
+        self.tokens: List[Token] = []
+        self.token_start_line_number = 0
         self.text = text
         self.current_char = text[0]
 
@@ -107,11 +113,12 @@ class Lexer:
         })
 
         self.start_switch = Switcher.from_dict({
-            '+': lambda: self.add_token(Token(TokenType.OP_PLUS, self.line_number))
+            '+': lambda: self.add_token(TokenType.OP_PLUS),
+            '-': lambda: self.add_token(TokenType.OP_MINUS),
         })
 
         self.end_switch = Switcher.from_dict({
-            LexingState.START: lambda: self.add_token(Token(TokenType.EOF, self.line_number))
+            LexingState.START: lambda: self.add_token(TokenType.EOF)
         })
 
     def begin_token(self, new_state: LexingState = None):
@@ -119,8 +126,8 @@ class Lexer:
         if new_state:
             self.state = new_state
 
-    def add_token(self, op_token: Token, rollback=False):
-        self.tokens.append(op_token)
+    def add_token(self, token_type: TokenType, rollback=False):
+        self.tokens.append(Token(token_type, self.line_number, self.token_buffer))
         self.token_buffer = ''
         self.state = LexingState.START
         if rollback:
