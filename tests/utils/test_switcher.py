@@ -9,7 +9,7 @@ class SwitcherTests(TestCase):
         4: lambda: 'number',
         range(10): lambda: 'number range',
         ranges.letters: lambda: 'letters range'
-    }, lambda: 'default')
+    }).default(lambda: 'default')
 
     def test_matches_number(self):
         self.assertEqual('number', self.switch.exec(4))

@@ -7,8 +7,11 @@ Case = Union[str, int, float, List, Tuple, Enum]
 
 
 class Switcher:
-    __cases: Dict[Case, Action] = {}
-    __default: Action = None
+    __cases: Dict[Case, Action]
+    __default: Action
+
+    def __init__(self) -> None:
+        self.__cases = {}
 
     def case(self, case: Case, action: Action) -> None:
         if not callable(action):
@@ -18,8 +21,8 @@ class Switcher:
     def default(self, action: Action):
         if action is not None and not callable(action):
             raise ValueError("Default action must be callable")
-
         self.__default = action
+        return self
 
     def exec(self, value):
         for case in self.__cases:

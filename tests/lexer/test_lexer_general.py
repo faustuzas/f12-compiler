@@ -17,7 +17,7 @@ class LexerGeneralTests(TestCase):
         self.assertEqual(1, len(lexer.tokens))
         self.assertEqual('', lexer.token_buffer)
         self.assertEqual(LexingState.START, lexer.state)
-        self.assertEqual(lexer.offset, 4)
+        self.assertEqual(4, lexer.offset)
 
     def test_add_token_rollback(self):
         lexer = Lexer('123')
@@ -27,6 +27,13 @@ class LexerGeneralTests(TestCase):
 
         self.assertEqual(lexer.offset, 3)
 
+    def test_add_token_keep_state(self):
+        lexer = Lexer('123')
+
+        lexer.add_token(TokenType.OP_PLUS, keep_state=True)
+
+        self.assertEqual(LexingState.START, lexer.state)
+
     def test_begin_tokenizing_no_new_state(self):
         lexer = Lexer('123')
         lexer.line_number = 5
@@ -35,7 +42,6 @@ class LexerGeneralTests(TestCase):
         lexer.begin_tokenizing()
 
         self.assertEqual(LexingState.LIT_STR, lexer.state)
-        self.assertEqual('1', lexer.token_buffer)
         self.assertEqual(5, lexer.token_start_line_number)
 
     def test_begin_tokenizing_new_state(self):
@@ -44,3 +50,10 @@ class LexerGeneralTests(TestCase):
         lexer.begin_tokenizing(LexingState.LIT_STR)
 
         self.assertEqual(LexingState.LIT_STR, lexer.state)
+
+    def test_to_state(self):
+        lexer = Lexer('123')
+
+        lexer.to_state(LexingState.OP_MINUS)
+
+        self.assertEqual(LexingState.OP_MINUS, lexer.state)

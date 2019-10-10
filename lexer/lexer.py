@@ -2,7 +2,6 @@ from typing import List
 from models import LexingState, Token, TokenType
 from utils import Switcher
 
-
 """
 What can I found? 
     - "+"
@@ -95,10 +94,10 @@ class Lexer:
         self.tokens: List[Token] = []
         self.token_start_line_number = 0
         self.text = text
-        self.current_char = text[0]
 
     def lex_all(self):
         while self.offset < len(self.text):
+            self.current_char = self.text[self.offset]
             self.lex()
             self.offset += 1
 
@@ -112,7 +111,8 @@ class Lexer:
     def lex(self):
         Switcher.from_dict({
             LexingState.START: self.lex_start,
-            LexingState.OP_MINUS: self.lex_minus
+            LexingState.OP_MINUS: self.lex_op_minus,
+            LexingState.OP_MINUS_2: self.lex_op_minus_2,
         }).exec(self.state)
 
     def lex_start(self):
@@ -121,30 +121,34 @@ class Lexer:
             '-': lambda: self.begin_tokenizing(LexingState.OP_MINUS),
         }).exec(self.current_char)
 
-    def start_minus(self):
-        self.token_buffer += '-'
-        self.state = LexingState.OP_MINUS
-
-    def lex_minus(self):
+    def lex_op_minus(self):
         Switcher.from_dict({
-            ' ': lambda: self.add_token(TokenType.OP_MINUS)
+            ' ': lambda: self.add_token(TokenType.OP_MINUS),
+            '-': lambda: self.to_state(LexingState.OP_MINUS_2)
         }).exec(self.current_char)
+
+    def lex_op_minus_2(self):
+        s = Switcher.from_dict({
+            '>': lambda: self.add_token(TokenType.KW_TO_STDOUT),
+            '-': lambda: self.add_token(TokenType.OP_MINUS, keep_state=True)
+        }, lambda: (self.add_token(TokenType.OP_MINUS),
+                    self.add_token(TokenType.OP_MINUS)))
+
+        s.exec(self.current_char)
 
     def begin_tokenizing(self, new_state: LexingState = None):
         self.token_start_line_number = self.line_number
-        self.token_buffer += self.current_char
         if new_state:
-            self.state = new_state
+            self.to_state(new_state)
 
-    def add_token(self, token_type: TokenType, rollback=False):
+    def add_token(self, token_type: TokenType, rollback=False, keep_state=False):
         self.tokens.append(Token(token_type, self.line_number, self.token_buffer))
         self.token_buffer = ''
-        self.state = LexingState.START
+        if not keep_state:
+            self.state = LexingState.START
         if rollback:
             self.offset -= 1
 
-
-
-
-
-
+    def to_state(self, state: LexingState):
+        assert state is not None
+        self.state = state
