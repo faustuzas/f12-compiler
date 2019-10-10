@@ -26,3 +26,20 @@ class LexerTests(TestCase):
         lexer.add_token(Token(TokenType.OP_PLUS, 4), rollback=True)
 
         self.assertEqual(lexer.offset, 3)
+
+    def test_begin_token_no_new_state(self):
+        lexer = Lexer('123')
+        lexer.line_number = 5
+        lexer.state = LexingState.LIT_STR
+
+        lexer.begin_token()
+
+        self.assertEqual(LexingState.LIT_STR, lexer.state)
+        self.assertEqual(5, lexer.token_start_line_number)
+
+    def test_begin_token_new_state(self):
+        lexer = Lexer('123')
+
+        lexer.begin_token(LexingState.LIT_STR)
+
+        self.assertEqual(LexingState.LIT_STR, lexer.state)

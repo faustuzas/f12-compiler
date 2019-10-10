@@ -108,6 +108,11 @@ class Lexer:
             LexingState.START: lambda: self.add_token(Token(TokenType.EOF, self.line_number))
         })
 
+    def begin_token(self, new_state: LexingState = None):
+        self.token_start_line_number = self.line_number
+        if new_state:
+            self.state = new_state
+
     def add_token(self, op_token: Token, rollback=False):
         self.tokens.append(op_token)
         self.token_buffer = ''
