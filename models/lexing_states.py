@@ -1,5 +1,5 @@
-from enum import Enum
+from models.enums import ExtendedEnum
 
 
-class LexingState(Enum):
+class LexingState(ExtendedEnum):
     START = 'ROOT'

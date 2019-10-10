@@ -1,12 +1,7 @@
-from enum import Enum
+from models.enums import ExtendedEnum
 
 
-class Lexem(Enum):
-    def __str__(self):
-        return self.value
-
-
-class KeyWord(Lexem):
+class KeyWord(ExtendedEnum):
     FUN = 'fun'
     HELPER_START = '>'
     IF = 'if'
@@ -24,13 +19,10 @@ class KeyWord(Lexem):
     NULL = 'null'
 
 
-class PrimitiveType(Lexem):
+class PrimitiveType(ExtendedEnum):
     INT = 'int'
     FLOAT = 'float'
     STRING = 'str'
     BOOL = 'bool'
     CHAR = 'char'
     BYTE = 'byte'
-
-    def __str__(self):
-        return self.value

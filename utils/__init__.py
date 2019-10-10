@@ -1,6 +1,6 @@
 from .terminal_printer import TerminalPrinter
 from .switcher import Switcher
-from .ranges import *
+import utils.ranges as ranges
 
 
 def throw(ex):
