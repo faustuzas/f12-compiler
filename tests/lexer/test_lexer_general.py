@@ -34,16 +34,6 @@ class LexerGeneralTests(TestCase):
 
         self.assertEqual(LexingState.START, lexer.state)
 
-    def test_begin_tokenizing_no_new_state(self):
-        lexer = Lexer('123')
-        lexer.line_number = 5
-        lexer.state = LexingState.LIT_STR
-
-        lexer.begin_tokenizing()
-
-        self.assertEqual(LexingState.LIT_STR, lexer.state)
-        self.assertEqual(5, lexer.token_start_line_number)
-
     def test_begin_tokenizing_new_state(self):
         lexer = Lexer('123')
 
