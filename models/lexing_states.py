@@ -11,3 +11,5 @@ class LexingState(ExtendedEnum):
     OP_DIV = 'OP_DIV'
 
     SL_COMMENT = 'SL_COMMENT'
+    ML_COMMENT = 'ML_COMMENT'
+    ML_COMMENT_END = 'ML_COMMENT_END'

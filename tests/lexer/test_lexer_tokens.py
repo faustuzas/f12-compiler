@@ -104,12 +104,32 @@ class LexerTokensTests(TestCase):
         self.assertEqual(4, lexer.tokens[2].line_number)
         self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
 
-    # def test_multi_comment_start(self):
-    #     lexer = Lexer('/* /* /*')
-    #
-    #     lexer.lex_all()
-    #
-    #     self.assertEqual(TokenType.MULTI_COMMENT_START, lexer.tokens[0].type)
-    #     self.assertEqual(TokenType.MULTI_COMMENT_START, lexer.tokens[1].type)
-    #     self.assertEqual(TokenType.MULTI_COMMENT_START, lexer.tokens[2].type)
-    #     self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
+    def test_multi_comment_start(self):
+        lexer = Lexer('\n / \n + /* test \n + test - \n * test */ \n - \n')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_DIV, lexer.tokens[0].type)
+        self.assertEqual(2, lexer.tokens[0].line_number)
+        self.assertEqual(TokenType.OP_PLUS, lexer.tokens[1].type)
+        self.assertEqual(3, lexer.tokens[1].line_number)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[2].type)
+        self.assertEqual(6, lexer.tokens[2].line_number)
+        self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
+
+    def test_op_mul(self):
+        lexer = Lexer('* /* + */ *')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_MUL, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_MUL, lexer.tokens[1].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[2].type)
+
+    def test_op_pov(self):
+        lexer = Lexer('^')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_POV, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)

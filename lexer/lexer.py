@@ -114,12 +114,16 @@ class Lexer:
             LexingState.OP_MINUS: self.lex_op_minus,
             LexingState.OP_MINUS_2: self.lex_op_minus_2,
             LexingState.OP_DIV: self.lex_op_div,
-            LexingState.SL_COMMENT: self.lex_sl_comment
+            LexingState.SL_COMMENT: self.lex_sl_comment,
+            LexingState.ML_COMMENT: self.lex_ml_comment,
+            LexingState.ML_COMMENT_END: self.lex_ml_comment_end
         }).exec(self.state)
 
     def lex_start(self):
         Switcher.from_dict({
             '+': lambda: self.add_token(TokenType.OP_PLUS),
+            '*': lambda: self.add_token(TokenType.OP_MUL),
+            '^': lambda: self.add_token(TokenType.OP_POV),
             '-': lambda: self.begin_tokenizing(LexingState.OP_MINUS),
             '/': lambda: self.begin_tokenizing(LexingState.OP_DIV),
             '\n': self.inc_new_line,
@@ -143,13 +147,24 @@ class Lexer:
     def lex_op_div(self):
         Switcher.from_dict({
             '/': lambda: self.to_state(LexingState.SL_COMMENT),
-            # '*': lambda: self.to_state(TokenType.MULTI_COMMENT_START)
+            '*': lambda: self.to_state(LexingState.ML_COMMENT)
         }).default(lambda: self.add_token(TokenType.OP_DIV, rollback=True)).exec(self.current_char)
 
     def lex_sl_comment(self):
         Switcher.from_dict({
             '\n': lambda: (self.to_state(LexingState.START), self.inc_new_line())
         }).exec(self.current_char)
+
+    def lex_ml_comment(self):
+        Switcher.from_dict({
+            '\n': self.inc_new_line,
+            '*': lambda: self.to_state(LexingState.ML_COMMENT_END)
+        }).exec(self.current_char)
+
+    def lex_ml_comment_end(self):
+        Switcher.from_dict({
+            '/': lambda: self.to_state(LexingState.START)
+        }).default(lambda: self.to_state(LexingState.ML_COMMENT)).exec(self.current_char)
 
     def begin_tokenizing(self, new_state: LexingState):
         self.token_start_line_number = self.line_number

@@ -9,6 +9,8 @@ class TokenType(ExtendedEnum):
     OP_PLUS = 'OP_PLUS'
     OP_MINUS = 'OP_MINUS'
     OP_DIV = 'OP_DIV'
+    OP_MUL = 'OP_MUL'
+    OP_POV = 'OP_POV'
 
     KW_TO_STDOUT = 'KW_TO_STDOUT'
 
