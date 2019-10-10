@@ -1,18 +1,17 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Union, List, Tuple
+from collections.abc import Iterable
 
 Action = Callable[[], Any]
-Case = Callable[[], bool]
+Case = Union[str, int, float, List, Tuple]
 
 
 class Switcher:
-    __cases: Dict[Any, Action] = {}
+    __cases: Dict[Case, Action] = {}
     __default: Action = None
 
     def case(self, case: Case, action: Action) -> None:
         if not callable(action):
             raise ValueError("Action must be callable")
-        if not callable(case):
-            raise ValueError("case must be callable")
         self.__cases[case] = action
 
     def default(self, action: Action):
@@ -21,9 +20,9 @@ class Switcher:
 
         self.__default = action
 
-    def exec(self):
+    def exec(self, value):
         for case in self.__cases:
-            if case():
+            if self.__check_case(case, value):
                 return self.__cases.get(case)()
 
         if self.__default is not None:
@@ -31,10 +30,21 @@ class Switcher:
         return None
 
     @staticmethod
-    def from_dict(cases: Dict[Any, Action], default: Action = None):
+    def __check_case(case: Case, value):
+        if isinstance(case, str):
+            return case == value
+
+        if isinstance(case, Iterable):
+            return value in case
+
+        return case == value
+
+    @staticmethod
+    def from_dict(cases: Dict[Case, Action], default: Action = None):
         switcher = Switcher()
         switcher.default(default)
 
         for case in cases.keys():
             switcher.case(case, cases.get(case))
         return switcher
+
