@@ -4,7 +4,7 @@ from models import LexingState, Token, TokenType
 from lexer.lexer import Lexer
 
 
-class LexerTests(TestCase):
+class LexerGeneralTests(TestCase):
 
     def test_add_token_no_rollback(self):
         lexer = Lexer('123')
@@ -38,6 +38,18 @@ class LexerTests(TestCase):
         self.assertEqual(5, lexer.token_start_line_number)
 
     def test_begin_token_new_state(self):
+        lexer = Lexer('123')
+
+        lexer.begin_token(LexingState.LIT_STR)
+
+        self.assertEqual(LexingState.LIT_STR, lexer.state)
+
+
+
+    """
+    
+    """
+    def test_lex_all_op_plus(self):
         lexer = Lexer('123')
 
         lexer.begin_token(LexingState.LIT_STR)

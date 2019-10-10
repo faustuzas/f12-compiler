@@ -1,3 +1,4 @@
+from typing import List
 from models import LexingState, Token, TokenType
 from utils import Switcher
 
@@ -80,7 +81,7 @@ class Lexer:
     token_buffer: str = ''
     line_number: int = 1
     offset: int = 0
-    tokens: list = []
+    tokens: List[Token] = []
     token_start_line_number: int = 0
     current_char: str = None
 
@@ -88,6 +89,7 @@ class Lexer:
     Switch imitating objects
     Have to be initialized one to optimize memory consumption and performance
     """
+    main_switch: Switcher
     start_switch: Switcher
     end_switch: Switcher
 
@@ -100,6 +102,10 @@ class Lexer:
         self.init_switches()
 
     def init_switches(self) -> None:
+        self.main_switch = Switcher.from_dict({
+            LexingState.START: self.lex_start
+        })
+
         self.start_switch = Switcher.from_dict({
             '+': lambda: self.add_token(Token(TokenType.OP_PLUS, self.line_number))
         })
@@ -121,10 +127,10 @@ class Lexer:
             self.offset -= 1
 
     def lex_start(self):
-        pass
+        self.start_switch.exec(self.current_char)
 
     def lex(self):
-        pass
+        self.main_switch.exec(self.current_char)
 
     def lex_all(self):
         while self.offset < len(self.text):
@@ -133,6 +139,8 @@ class Lexer:
 
         self.current_char = ' '
         self.lex()
+
+        self.end_switch.exec(self.state)
 
 
 if __name__ == '__main__':
