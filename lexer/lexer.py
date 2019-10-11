@@ -183,7 +183,7 @@ class Lexer:
     def lex_kw_from_stdin(self):
         Switcher.from_dict({
             '-': lambda: self.add_token(TokenType.KW_FROM_STDIN)
-        }).default(lambda: (self.add_token(TokenType.OP_MINUS),
+        }).default(lambda: (self.add_token(TokenType.OP_LT),
                             self.add_token(TokenType.OP_MINUS, rollback=True))).exec(self.current_char)
 
     """
