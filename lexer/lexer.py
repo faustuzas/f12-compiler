@@ -1,6 +1,6 @@
 from typing import List
 from models import LexingState, Token, TokenType, TokenError
-from utils import Switcher
+from utils import Switcher, throw
 
 """
 What can I found? 
@@ -90,7 +90,9 @@ class Lexer:
             LexingState.ML_COMMENT: self.lex_ml_comment,
             LexingState.ML_COMMENT_END: self.lex_ml_comment_end,
             LexingState.OP_NOT: self.lex_op_not,
-            LexingState.OP_ASSIGN: self.lex_op_assign
+            LexingState.OP_ASSIGN: self.lex_op_assign,
+            LexingState.OP_AND: self.lex_op_and,
+            LexingState.OP_OR: self.lex_op_or
         }).exec(self.state)
 
     def lex_start(self):
@@ -112,9 +114,11 @@ class Lexer:
             '/': lambda: self.begin_tokenizing(LexingState.OP_DIV),
             '!': lambda: self.begin_tokenizing(LexingState.OP_NOT),
             '=': lambda: self.begin_tokenizing(LexingState.OP_ASSIGN),
+            '&': lambda: self.begin_tokenizing(LexingState.OP_AND),
+            '|': lambda: self.begin_tokenizing(LexingState.OP_OR),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
-        }).default(self.error).exec(self.current_char)
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
 
     def lex_op_minus(self):
         Switcher.from_dict({
@@ -161,6 +165,16 @@ class Lexer:
             '=': lambda: self.add_token(TokenType.OP_EQ)
         }).default(lambda: self.add_token(TokenType.OP_ASSIGN, rollback=True)).exec(self.current_char)
 
+    def lex_op_and(self):
+        Switcher.from_dict({
+            '&': lambda: self.add_token(TokenType.OP_AND)
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
+
+    def lex_op_or(self):
+        Switcher.from_dict({
+            '|': lambda: self.add_token(TokenType.OP_OR)
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
+
     """
     Helper methods
     """
@@ -182,6 +196,3 @@ class Lexer:
 
     def inc_new_line(self):
         self.line_number += 1
-
-    def error(self):
-        raise TokenError()

@@ -16,6 +16,8 @@ class TokenType(ExtendedEnum):
     OP_NOT = 'OP_NOT'
     OP_EQ = 'OP_EQ'
     OP_ASSIGN = 'OP_ASSIGN'
+    OP_AND = 'OP_AND'
+    OP_OR = 'OP_OR'
 
     C_SEMI = 'C_SEMI'
     C_COLON = 'C_COLON'

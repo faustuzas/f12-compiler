@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from models import TokenError
+
 from models import TokenType
 from lexer.lexer import Lexer
 
@@ -193,3 +195,29 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.C_CURLY_R, lexer.tokens[7].type)
         self.assertEqual(TokenType.C_ROUND_R, lexer.tokens[8].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[9].type)
+
+    def test_op_and(self):
+        lexer = Lexer('&&')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_AND, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_op_and_error(self):
+        lexer = Lexer('&')
+
+        self.assertRaises(TokenError, lexer.lex_all)
+
+    def test_op_or(self):
+        lexer = Lexer('||')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_OR, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_op_or_error(self):
+        lexer = Lexer('|')
+
+        self.assertRaises(TokenError, lexer.lex_all)
