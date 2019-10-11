@@ -133,3 +133,11 @@ class LexerTokensTests(TestCase):
 
         self.assertEqual(TokenType.OP_POV, lexer.tokens[0].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_op_mod(self):
+        lexer = Lexer('%')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_MOD, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)

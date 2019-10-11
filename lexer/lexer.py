@@ -1,5 +1,5 @@
 from typing import List
-from models import LexingState, Token, TokenType
+from models import LexingState, Token, TokenType, TokenError
 from utils import Switcher
 
 """
@@ -124,12 +124,12 @@ class Lexer:
             '+': lambda: self.add_token(TokenType.OP_PLUS),
             '*': lambda: self.add_token(TokenType.OP_MUL),
             '^': lambda: self.add_token(TokenType.OP_POV),
+            '%': lambda: self.add_token(TokenType.OP_MOD),
             '-': lambda: self.begin_tokenizing(LexingState.OP_MINUS),
             '/': lambda: self.begin_tokenizing(LexingState.OP_DIV),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
-            # TODO: Add unrecognised char handling
-        }).exec(self.current_char)
+        }).default(self.error).exec(self.current_char)
 
     def lex_op_minus(self):
         Switcher.from_dict({
@@ -184,3 +184,6 @@ class Lexer:
 
     def inc_new_line(self):
         self.line_number += 1
+
+    def error(self):
+        raise TokenError()
