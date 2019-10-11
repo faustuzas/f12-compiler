@@ -1,6 +1,5 @@
 from unittest import TestCase
-
-from models import TokenError
+from unittest.mock import patch
 
 from models import TokenType
 from lexer.lexer import Lexer
@@ -208,9 +207,11 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_op_and_error(self):
-        lexer = Lexer('&')
+        with patch('lexer.lexer.printer.error') as mocked_error:
+            lexer = Lexer('&')
+            lexer.lex_all()
 
-        self.assertRaises(TokenError, lexer.lex_all)
+            self.assertTrue(mocked_error.called)
 
     def test_op_or(self):
         lexer = Lexer('||')
@@ -221,9 +222,12 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_op_or_error(self):
-        lexer = Lexer('|')
+        with patch('lexer.lexer.printer.error') as mocked_error:
+            lexer = Lexer('|')
 
-        self.assertRaises(TokenError, lexer.lex_all)
+            lexer.lex_all()
+
+            self.assertTrue(mocked_error.called)
 
     def test_op_lt(self):
         lexer = Lexer('<')
