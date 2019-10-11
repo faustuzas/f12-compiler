@@ -17,6 +17,16 @@ class TokenType(ExtendedEnum):
     OP_EQ = 'OP_EQ'
     OP_ASSIGN = 'OP_ASSIGN'
 
+    C_SEMI = 'C_SEMI'
+    C_COLON = 'C_COLON'
+    C_COMMA = 'C_COMMA'
+    C_ROUND_L = 'C_ROUND_L'
+    C_ROUND_R = 'C_ROUND_R'
+    C_CURLY_L = 'C_CURLY_L'
+    C_CURLY_R = 'C_CURLY_R'
+    C_SQUARE_L = 'C_SQUARE_L'
+    C_SQUARE_R = 'C_SQUARE_R'
+
     KW_TO_STDOUT = 'KW_TO_STDOUT'
 
 

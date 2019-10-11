@@ -23,15 +23,6 @@ What can I found?
         + "&"
     - "|"
         + "|"
-    - ";"
-    - ":"
-    - ","
-    - "("
-    - ")"
-    - "{"
-    - "}"
-    - "["
-    - "]"
     - "[0-9]*"
         + "" // int
         + "."
@@ -108,6 +99,15 @@ class Lexer:
             '*': lambda: self.add_token(TokenType.OP_MUL),
             '^': lambda: self.add_token(TokenType.OP_POV),
             '%': lambda: self.add_token(TokenType.OP_MOD),
+            ';': lambda: self.add_token(TokenType.C_SEMI),
+            ':': lambda: self.add_token(TokenType.C_COLON),
+            ',': lambda: self.add_token(TokenType.C_COMMA),
+            '(': lambda: self.add_token(TokenType.C_ROUND_L),
+            ')': lambda: self.add_token(TokenType.C_ROUND_R),
+            '{': lambda: self.add_token(TokenType.C_CURLY_L),
+            '}': lambda: self.add_token(TokenType.C_CURLY_R),
+            '[': lambda: self.add_token(TokenType.C_SQUARE_L),
+            ']': lambda: self.add_token(TokenType.C_SQUARE_R),
             '-': lambda: self.begin_tokenizing(LexingState.OP_MINUS),
             '/': lambda: self.begin_tokenizing(LexingState.OP_DIV),
             '!': lambda: self.begin_tokenizing(LexingState.OP_NOT),

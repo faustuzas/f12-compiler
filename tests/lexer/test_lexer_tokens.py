@@ -177,3 +177,19 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_NE, lexer.tokens[5].type)
         self.assertEqual(TokenType.OP_NOT, lexer.tokens[6].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[7].type)
+
+    def test_bunch_of_single_chars(self):
+        lexer = Lexer(',:;({[]})')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.C_COMMA, lexer.tokens[0].type)
+        self.assertEqual(TokenType.C_COLON, lexer.tokens[1].type)
+        self.assertEqual(TokenType.C_SEMI, lexer.tokens[2].type)
+        self.assertEqual(TokenType.C_ROUND_L, lexer.tokens[3].type)
+        self.assertEqual(TokenType.C_CURLY_L, lexer.tokens[4].type)
+        self.assertEqual(TokenType.C_SQUARE_L, lexer.tokens[5].type)
+        self.assertEqual(TokenType.C_SQUARE_R, lexer.tokens[6].type)
+        self.assertEqual(TokenType.C_CURLY_R, lexer.tokens[7].type)
+        self.assertEqual(TokenType.C_ROUND_R, lexer.tokens[8].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[9].type)
