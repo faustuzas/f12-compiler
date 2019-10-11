@@ -4,19 +4,6 @@ from utils import Switcher
 
 """
 What can I found? 
-    - "+"
-    - "-"
-        + "-"
-            + ">"
-    - "/"
-        + ""
-        + "/"
-        + "*"
-    - "*"
-        + ""
-        + "/"
-    - "%"
-    - "^"
     - "."
         + "[0-9]*"
             + ""
@@ -116,7 +103,8 @@ class Lexer:
             LexingState.OP_DIV: self.lex_op_div,
             LexingState.SL_COMMENT: self.lex_sl_comment,
             LexingState.ML_COMMENT: self.lex_ml_comment,
-            LexingState.ML_COMMENT_END: self.lex_ml_comment_end
+            LexingState.ML_COMMENT_END: self.lex_ml_comment_end,
+            LexingState.OP_NOT: self.lex_op_not
         }).exec(self.state)
 
     def lex_start(self):
@@ -127,6 +115,7 @@ class Lexer:
             '%': lambda: self.add_token(TokenType.OP_MOD),
             '-': lambda: self.begin_tokenizing(LexingState.OP_MINUS),
             '/': lambda: self.begin_tokenizing(LexingState.OP_DIV),
+            '!': lambda: self.begin_tokenizing(LexingState.OP_NOT),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
         }).default(self.error).exec(self.current_char)
@@ -160,6 +149,11 @@ class Lexer:
             '\n': self.inc_new_line,
             '*': lambda: self.to_state(LexingState.ML_COMMENT_END)
         }).exec(self.current_char)
+
+    def lex_op_not(self):
+        Switcher.from_dict({
+            '=': lambda: self.add_token(TokenType.OP_NE)
+        }).default(lambda: self.add_token(TokenType.OP_NOT, rollback=True)).exec(self.current_char)
 
     def lex_ml_comment_end(self):
         Switcher.from_dict({
