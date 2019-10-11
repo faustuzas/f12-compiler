@@ -142,7 +142,7 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_MOD, lexer.tokens[0].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
-    def test_op_ne(self):
+    def test_op_ne_and_op_not(self):
         lexer = Lexer('!=!!!=!')
 
         lexer.lex_all()
