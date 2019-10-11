@@ -167,7 +167,7 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
 
     def test_op_eq_and_op_assign_2(self):
-        lexer = Lexer('!=!====!!=!')
+        lexer = Lexer('!= != == = ! != != => == =>')
 
         lexer.lex_all()
 
@@ -177,8 +177,11 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_ASSIGN, lexer.tokens[3].type)
         self.assertEqual(TokenType.OP_NOT, lexer.tokens[4].type)
         self.assertEqual(TokenType.OP_NE, lexer.tokens[5].type)
-        self.assertEqual(TokenType.OP_NOT, lexer.tokens[6].type)
-        self.assertEqual(TokenType.EOF, lexer.tokens[7].type)
+        self.assertEqual(TokenType.OP_NE, lexer.tokens[6].type)
+        self.assertEqual(TokenType.KW_FAT_ARROW, lexer.tokens[7].type)
+        self.assertEqual(TokenType.OP_EQ, lexer.tokens[8].type)
+        self.assertEqual(TokenType.KW_FAT_ARROW, lexer.tokens[9].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[10].type)
 
     def test_bunch_of_single_chars(self):
         lexer = Lexer(',:;({[]})')
@@ -248,3 +251,12 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_MINUS, lexer.tokens[2].type)
         self.assertEqual(TokenType.OP_LT, lexer.tokens[3].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[4].type)
+
+    def test_op_access(self):
+        lexer = Lexer('..')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_ACCESS, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_ACCESS, lexer.tokens[1].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[2].type)

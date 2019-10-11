@@ -5,6 +5,9 @@ class TokenType(ExtendedEnum):
     EOF = 'EOF'
 
     LIT_STR = 'LIT_STR'
+    LIT_FLOAT = 'LIT_FLOAT'
+    LIT_INT = 'LIT_INT'
+    LIT_BOOL = 'LIT_BOOL'
 
     OP_PLUS = 'OP_PLUS'
     OP_MINUS = 'OP_MINUS'
@@ -20,6 +23,7 @@ class TokenType(ExtendedEnum):
     OP_OR = 'OP_OR'
     OP_LT = 'OP_LT'
     OP_LE = 'OP_LE'
+    OP_ACCESS = 'OP_ACCESS'
 
     C_SEMI = 'C_SEMI'
     C_COLON = 'C_COLON'
@@ -31,6 +35,7 @@ class TokenType(ExtendedEnum):
     C_SQUARE_L = 'C_SQUARE_L'
     C_SQUARE_R = 'C_SQUARE_R'
 
+    KW_FAT_ARROW = 'KW_FAT_ARROW'
     KW_TO_STDOUT = 'KW_TO_STDOUT'
     KW_FROM_STDIN = 'KW_FROM_STDIN'
 

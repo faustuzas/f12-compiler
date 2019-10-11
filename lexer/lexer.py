@@ -1,10 +1,11 @@
 from typing import List
 from models import LexingState, Token, TokenType, TokenError
-from utils import Switcher, throw
+from utils import Switcher, throw, ranges, printer
 
 """
 What can I found? 
     - "."
+        + ""
         + "[0-9]*"
             + ""
             + "E" or "e"
@@ -14,11 +15,6 @@ What can I found?
         + ""
         + "="
         + "include"
-    - "<"
-        + ""
-        + "="
-        + "-"
-            + "-"
     - "[0-9]*"
         + "" // int
         + "."
@@ -48,6 +44,7 @@ class Lexer:
     token_buffer: str
     line_number: int
     offset: int
+    offset_in_line: int
     tokens: List[Token]
     token_start_line_number: int
     current_char: str
@@ -59,18 +56,23 @@ class Lexer:
         self.token_buffer = ''
         self.line_number = 1
         self.offset = 0
+        self.offset_in_line = 0
         self.tokens: List[Token] = []
         self.token_start_line_number = 0
         self.text = text
 
     def lex_all(self):
-        while self.offset < len(self.text):
-            self.current_char = self.text[self.offset]
-            self.lex()
-            self.offset += 1
+        try:
+            while self.offset < len(self.text):
+                self.current_char = self.text[self.offset]
+                self.lex()
+                self.offset += 1
+                self.offset_in_line += 1
 
-        self.current_char = ' '
-        self.lex()
+            self.current_char = ' '
+            self.lex()
+        except TokenError:
+            self.print_error()
 
         Switcher.from_dict({
             (LexingState.START, LexingState.SL_COMMENT): lambda: self.add_token(TokenType.EOF)
@@ -90,7 +92,9 @@ class Lexer:
             LexingState.OP_AND: self.lex_op_and,
             LexingState.OP_OR: self.lex_op_or,
             LexingState.OP_LT: self.lex_op_lt,
-            LexingState.KW_FROM_STDIN: self.lex_kw_from_stdin
+            LexingState.KW_FROM_STDIN: self.lex_kw_from_stdin,
+            LexingState.OP_ACCESS: self.lex_op_access,
+            LexingState.LIT_INT: self.lex_lit_int
         }).exec(self.state)
 
     def lex_start(self):
@@ -115,6 +119,8 @@ class Lexer:
             '&': lambda: self.begin_tokenizing(LexingState.OP_AND),
             '|': lambda: self.begin_tokenizing(LexingState.OP_OR),
             '<': lambda: self.begin_tokenizing(LexingState.OP_LT),
+            '.': lambda: self.begin_tokenizing(LexingState.OP_ACCESS),
+            ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
         }).default(lambda: throw(TokenError())).exec(self.current_char)
@@ -161,7 +167,8 @@ class Lexer:
 
     def lex_op_assign(self):
         Switcher.from_dict({
-            '=': lambda: self.add_token(TokenType.OP_EQ)
+            '=': lambda: self.add_token(TokenType.OP_EQ),
+            '>': lambda: self.add_token(TokenType.KW_FAT_ARROW)
         }).default(lambda: self.add_token(TokenType.OP_ASSIGN, rollback=True)).exec(self.current_char)
 
     def lex_op_and(self):
@@ -186,6 +193,14 @@ class Lexer:
         }).default(lambda: (self.add_token(TokenType.OP_LT),
                             self.add_token(TokenType.OP_MINUS, rollback=True))).exec(self.current_char)
 
+    def lex_op_access(self):
+        Switcher.from_dict({
+            ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT))
+        }).default(lambda: self.add_token(TokenType.OP_ACCESS, rollback=True)).exec(self.current_char)
+
+    def lex_lit_int(self):
+        pass
+
     """
     Helper methods
     """
@@ -200,6 +215,10 @@ class Lexer:
             self.state = LexingState.START
         if rollback:
             self.offset -= 1
+            self.offset_in_line -= 1
+
+    def add_to_buff(self):
+        self.token_buffer += self.current_char
 
     def to_state(self, state: LexingState):
         assert state is not None
@@ -207,3 +226,23 @@ class Lexer:
 
     def inc_new_line(self):
         self.line_number += 1
+        self.offset_in_line = 0
+
+    def print_error(self):
+        all_lines = self.text.split('\n')
+        lines_to_show = []
+        line_in_array = self.line_number - 1
+        if self.line_number - 1 >= 1:
+            lines_to_show.append(f'{self.line_number_prefix(self.line_number - 1)}{all_lines[line_in_array - 1]}')
+
+        lines_to_show.append(f'{self.line_number_prefix(self.line_number)}{all_lines[line_in_array]}')
+        lines_to_show.append(' ' * (self.offset_in_line + len(self.line_number_prefix(self.line_number))) + '^')
+
+        if self.line_number + 1 <= len(all_lines):
+            lines_to_show.append(f'{self.line_number_prefix(self.line_number + 1)}{all_lines[line_in_array + 1]}')
+
+        printer.error('\n'.join(lines_to_show), 'Lexing error')
+
+    @staticmethod
+    def line_number_prefix(number):
+        return f'{number}. '
