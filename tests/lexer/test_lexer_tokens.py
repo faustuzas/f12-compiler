@@ -153,3 +153,27 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_NE, lexer.tokens[3].type)
         self.assertEqual(TokenType.OP_NOT, lexer.tokens[4].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[5].type)
+
+    def test_op_eq_and_op_assign(self):
+        lexer = Lexer('=====')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_EQ, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_EQ, lexer.tokens[1].type)
+        self.assertEqual(TokenType.OP_ASSIGN, lexer.tokens[2].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
+
+    def test_op_eq_and_op_assign_2(self):
+        lexer = Lexer('!=!====!!=!')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_NE, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_NE, lexer.tokens[1].type)
+        self.assertEqual(TokenType.OP_EQ, lexer.tokens[2].type)
+        self.assertEqual(TokenType.OP_ASSIGN, lexer.tokens[3].type)
+        self.assertEqual(TokenType.OP_NOT, lexer.tokens[4].type)
+        self.assertEqual(TokenType.OP_NE, lexer.tokens[5].type)
+        self.assertEqual(TokenType.OP_NOT, lexer.tokens[6].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[7].type)

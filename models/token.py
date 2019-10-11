@@ -14,6 +14,8 @@ class TokenType(ExtendedEnum):
     OP_MOD = 'OP_MOD'
     OP_NE = 'OP_NE'
     OP_NOT = 'OP_NOT'
+    OP_EQ = 'OP_EQ'
+    OP_ASSIGN = 'OP_ASSIGN'
 
     KW_TO_STDOUT = 'KW_TO_STDOUT'
 

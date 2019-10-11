@@ -10,12 +10,6 @@ What can I found?
             + "E" or "e"
                 + "" or "+" or "-"
                     + "[0-9]*"
-    - "!"
-        + ""
-        + "="
-    - "="
-        + ""
-        + "="
     - ">"
         + ""
         + "="
@@ -104,7 +98,8 @@ class Lexer:
             LexingState.SL_COMMENT: self.lex_sl_comment,
             LexingState.ML_COMMENT: self.lex_ml_comment,
             LexingState.ML_COMMENT_END: self.lex_ml_comment_end,
-            LexingState.OP_NOT: self.lex_op_not
+            LexingState.OP_NOT: self.lex_op_not,
+            LexingState.OP_ASSIGN: self.lex_op_assign
         }).exec(self.state)
 
     def lex_start(self):
@@ -116,6 +111,7 @@ class Lexer:
             '-': lambda: self.begin_tokenizing(LexingState.OP_MINUS),
             '/': lambda: self.begin_tokenizing(LexingState.OP_DIV),
             '!': lambda: self.begin_tokenizing(LexingState.OP_NOT),
+            '=': lambda: self.begin_tokenizing(LexingState.OP_ASSIGN),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
         }).default(self.error).exec(self.current_char)
@@ -150,16 +146,24 @@ class Lexer:
             '*': lambda: self.to_state(LexingState.ML_COMMENT_END)
         }).exec(self.current_char)
 
-    def lex_op_not(self):
-        Switcher.from_dict({
-            '=': lambda: self.add_token(TokenType.OP_NE)
-        }).default(lambda: self.add_token(TokenType.OP_NOT, rollback=True)).exec(self.current_char)
-
     def lex_ml_comment_end(self):
         Switcher.from_dict({
             '/': lambda: self.to_state(LexingState.START)
         }).default(lambda: self.to_state(LexingState.ML_COMMENT)).exec(self.current_char)
 
+    def lex_op_not(self):
+        Switcher.from_dict({
+            '=': lambda: self.add_token(TokenType.OP_NE)
+        }).default(lambda: self.add_token(TokenType.OP_NOT, rollback=True)).exec(self.current_char)
+
+    def lex_op_assign(self):
+        Switcher.from_dict({
+            '=': lambda: self.add_token(TokenType.OP_EQ)
+        }).default(lambda: self.add_token(TokenType.OP_ASSIGN, rollback=True)).exec(self.current_char)
+
+    """
+    Helper methods
+    """
     def begin_tokenizing(self, new_state: LexingState):
         self.token_start_line_number = self.line_number
         self.to_state(new_state)

@@ -10,6 +10,7 @@ class LexingState(ExtendedEnum):
 
     OP_DIV = 'OP_DIV'
     OP_NOT = 'OP_NOT'
+    OP_ASSIGN = 'OP_ASSIGN'
 
     SL_COMMENT = 'SL_COMMENT'
     ML_COMMENT = 'ML_COMMENT'
