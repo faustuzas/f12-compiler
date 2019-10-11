@@ -90,7 +90,7 @@ class Lexer:
             LexingState.OP_AND: self.lex_op_and,
             LexingState.OP_OR: self.lex_op_or,
             LexingState.OP_LT: self.lex_op_lt,
-            LexingState.KW_FROM_STDOUT: self.lex_kw_from_stdin
+            LexingState.KW_FROM_STDIN: self.lex_kw_from_stdin
         }).exec(self.state)
 
     def lex_start(self):
