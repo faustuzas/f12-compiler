@@ -221,3 +221,30 @@ class LexerTokensTests(TestCase):
         lexer = Lexer('|')
 
         self.assertRaises(TokenError, lexer.lex_all)
+
+    def test_op_lt(self):
+        lexer = Lexer('<')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_LT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_op_le(self):
+        lexer = Lexer('<=')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_LE, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_kw_from_stdin(self):
+        lexer = Lexer('<-- <- <')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.KW_FROM_STDIN, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_LT, lexer.tokens[1].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[2].type)
+        self.assertEqual(TokenType.OP_LT, lexer.tokens[3].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[4].type)

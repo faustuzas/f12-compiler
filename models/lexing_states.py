@@ -13,7 +13,10 @@ class LexingState(ExtendedEnum):
     OP_ASSIGN = 'OP_ASSIGN'
     OP_AND = 'OP_AND'
     OP_OR = 'OP_OR'
+    OP_LT = 'OP_LT'
 
     SL_COMMENT = 'SL_COMMENT'
     ML_COMMENT = 'ML_COMMENT'
     ML_COMMENT_END = 'ML_COMMENT_END'
+
+    KW_FROM_STDOUT = 'KW_FROM_STDOUT'

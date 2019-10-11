@@ -18,6 +18,8 @@ class TokenType(ExtendedEnum):
     OP_ASSIGN = 'OP_ASSIGN'
     OP_AND = 'OP_AND'
     OP_OR = 'OP_OR'
+    OP_LT = 'OP_LT'
+    OP_LE = 'OP_LE'
 
     C_SEMI = 'C_SEMI'
     C_COLON = 'C_COLON'
@@ -30,6 +32,7 @@ class TokenType(ExtendedEnum):
     C_SQUARE_R = 'C_SQUARE_R'
 
     KW_TO_STDOUT = 'KW_TO_STDOUT'
+    KW_FROM_STDIN = 'KW_FROM_STDIN'
 
 
 class Token:

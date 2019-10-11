@@ -19,10 +19,6 @@ What can I found?
         + "="
         + "-"
             + "-"
-    - "&"
-        + "&"
-    - "|"
-        + "|"
     - "[0-9]*"
         + "" // int
         + "."
@@ -92,7 +88,9 @@ class Lexer:
             LexingState.OP_NOT: self.lex_op_not,
             LexingState.OP_ASSIGN: self.lex_op_assign,
             LexingState.OP_AND: self.lex_op_and,
-            LexingState.OP_OR: self.lex_op_or
+            LexingState.OP_OR: self.lex_op_or,
+            LexingState.OP_LT: self.lex_op_lt,
+            LexingState.KW_FROM_STDOUT: self.lex_kw_from_stdin
         }).exec(self.state)
 
     def lex_start(self):
@@ -116,6 +114,7 @@ class Lexer:
             '=': lambda: self.begin_tokenizing(LexingState.OP_ASSIGN),
             '&': lambda: self.begin_tokenizing(LexingState.OP_AND),
             '|': lambda: self.begin_tokenizing(LexingState.OP_OR),
+            '<': lambda: self.begin_tokenizing(LexingState.OP_LT),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
         }).default(lambda: throw(TokenError())).exec(self.current_char)
@@ -174,6 +173,18 @@ class Lexer:
         Switcher.from_dict({
             '|': lambda: self.add_token(TokenType.OP_OR)
         }).default(lambda: throw(TokenError())).exec(self.current_char)
+
+    def lex_op_lt(self):
+        Switcher.from_dict({
+            '=': lambda: self.add_token(TokenType.OP_LE),
+            '-': lambda: self.to_state(LexingState.KW_FROM_STDIN)
+        }).default(lambda: self.add_token(TokenType.OP_LT, rollback=True)).exec(self.current_char)
+
+    def lex_kw_from_stdin(self):
+        Switcher.from_dict({
+            '-': lambda: self.add_token(TokenType.KW_FROM_STDIN)
+        }).default(lambda: (self.add_token(TokenType.OP_MINUS),
+                            self.add_token(TokenType.OP_MINUS, rollback=True))).exec(self.current_char)
 
     """
     Helper methods
