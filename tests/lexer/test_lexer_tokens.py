@@ -264,3 +264,28 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_ACCESS, lexer.tokens[0].type)
         self.assertEqual(TokenType.OP_ACCESS, lexer.tokens[1].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[2].type)
+
+    def test_lit_int(self):
+        lexer = Lexer('1234567890')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[0].type)
+        self.assertEqual('1234567890', lexer.tokens[0].value)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_lit_int_2(self):
+        lexer = Lexer('123 456 789 01')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[1].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[3].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[4].type)
+
+        self.assertEqual('123', lexer.tokens[0].value)
+        self.assertEqual('456', lexer.tokens[1].value)
+        self.assertEqual('789', lexer.tokens[2].value)
+        self.assertEqual('01', lexer.tokens[3].value)

@@ -7,7 +7,8 @@ class SwitcherTests(TestCase):
     switch = Switcher.from_dict({
         't': lambda: 'char',
         4: lambda: 'number',
-        range(10): lambda: 'number range',
+        ranges.digits: lambda: 'str number',
+        range(6, 10): lambda: 'number range',
         ranges.letters: lambda: 'letters range'
     }).default(lambda: 'default')
 
@@ -16,6 +17,9 @@ class SwitcherTests(TestCase):
 
     def test_matches_char(self):
         self.assertEqual('char', self.switch.exec('t'))
+
+    def test_matches_str_number(self):
+        self.assertEqual('str number', self.switch.exec('2'))
 
     def test_matches_number_range(self):
         self.assertEqual('number range', self.switch.exec(8))

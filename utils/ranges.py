@@ -8,4 +8,4 @@ def char_range(c1, c2) -> Tuple[str]:
 lower_letters = char_range('a', 'z')
 upper_letters = char_range('A', 'Z')
 letters = lower_letters + upper_letters
-digits = range(10)
+digits = char_range('0', '9')

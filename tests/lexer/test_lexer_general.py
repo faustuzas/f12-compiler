@@ -36,10 +36,21 @@ class LexerGeneralTests(TestCase):
 
     def test_begin_tokenizing_new_state(self):
         lexer = Lexer('123')
+        lexer.current_char = '1'
 
         lexer.begin_tokenizing(LexingState.LIT_STR)
 
         self.assertEqual(LexingState.LIT_STR, lexer.state)
+        self.assertEqual('', lexer.token_buffer)
+
+    def test_begin_tokenizing_new_state_to_buffer(self):
+        lexer = Lexer('123')
+        lexer.current_char = '1'
+
+        lexer.begin_tokenizing(LexingState.LIT_STR, to_buffer=True)
+
+        self.assertEqual(LexingState.LIT_STR, lexer.state)
+        self.assertEqual('1', lexer.token_buffer)
 
     def test_to_state(self):
         lexer = Lexer('123')

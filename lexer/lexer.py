@@ -60,6 +60,7 @@ class Lexer:
         self.tokens: List[Token] = []
         self.token_start_line_number = 0
         self.text = text
+        self.current_char = ''
 
     def lex_all(self):
         try:
@@ -120,7 +121,7 @@ class Lexer:
             '|': lambda: self.begin_tokenizing(LexingState.OP_OR),
             '<': lambda: self.begin_tokenizing(LexingState.OP_LT),
             '.': lambda: self.begin_tokenizing(LexingState.OP_ACCESS),
-            ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT),
+            ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
         }).default(lambda: throw(TokenError())).exec(self.current_char)
@@ -199,14 +200,19 @@ class Lexer:
         }).default(lambda: self.add_token(TokenType.OP_ACCESS, rollback=True)).exec(self.current_char)
 
     def lex_lit_int(self):
-        pass
+        Switcher.from_dict({
+            ranges.digits: self.add_to_buff
+        }).default(lambda: self.add_token(TokenType.LIT_INT)).exec(self.current_char)
 
     """
     Helper methods
     """
-    def begin_tokenizing(self, new_state: LexingState):
+    def begin_tokenizing(self, new_state: LexingState, to_buffer=False):
         self.token_start_line_number = self.line_number
         self.to_state(new_state)
+
+        if to_buffer:
+            self.add_to_buff()
 
     def add_token(self, token_type: TokenType, rollback=False, keep_state=False):
         self.tokens.append(Token(token_type, self.line_number, self.token_buffer))
