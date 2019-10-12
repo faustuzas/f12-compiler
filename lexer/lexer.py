@@ -95,7 +95,12 @@ class Lexer:
             LexingState.OP_LT: self.lex_op_lt,
             LexingState.KW_FROM_STDIN: self.lex_kw_from_stdin,
             LexingState.OP_ACCESS: self.lex_op_access,
-            LexingState.LIT_INT: self.lex_lit_int
+            LexingState.LIT_INT: self.lex_lit_int,
+            LexingState.LIT_FLOAT_START: self.lex_lit_float_start,
+            LexingState.LIT_FLOAT: self.lex_lit_float,
+            LexingState.LIT_FLOAT_EXP: self.lex_lit_float_exp,
+            LexingState.LIT_FLOAT_PRE_END: self.lex_lit_float_pre_end,
+            LexingState.LIT_FLOAT_END: self.lex_lit_float_end
         }).exec(self.state)
 
     def lex_start(self):
@@ -196,13 +201,41 @@ class Lexer:
 
     def lex_op_access(self):
         Switcher.from_dict({
-            ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT))
+            ranges.digits: lambda: (self.add_to_buff('.'), self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT))
         }).default(lambda: self.add_token(TokenType.OP_ACCESS, rollback=True)).exec(self.current_char)
 
     def lex_lit_int(self):
         Switcher.from_dict({
+            ranges.digits: self.add_to_buff,
+            '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START))
+        }).default(lambda: self.add_token(TokenType.LIT_INT, rollback=True)).exec(self.current_char)
+
+    def lex_lit_float_start(self):
+        Switcher.from_dict({
+            ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT)),
+        }).default(lambda: self.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self.current_char)
+
+    def lex_lit_float(self):
+        Switcher.from_dict({
+            ranges.digits: self.add_to_buff,
+            ('e', 'E'): lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_EXP))
+        }).default(lambda: self.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self.current_char)
+
+    def lex_lit_float_exp(self):
+        Switcher.from_dict({
+            ('+', '-'): lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_PRE_END)),
+            ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_END))
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
+
+    def lex_lit_float_pre_end(self):
+        Switcher.from_dict({
+            ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_END))
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
+
+    def lex_lit_float_end(self):
+        Switcher.from_dict({
             ranges.digits: self.add_to_buff
-        }).default(lambda: self.add_token(TokenType.LIT_INT)).exec(self.current_char)
+        }).default(lambda: self.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self.current_char)
 
     """
     Helper methods
@@ -223,8 +256,11 @@ class Lexer:
             self.offset -= 1
             self.offset_in_line -= 1
 
-    def add_to_buff(self):
-        self.token_buffer += self.current_char
+    def add_to_buff(self, symbol=None):
+        if symbol is None:
+            self.token_buffer += self.current_char
+        else:
+            self.token_buffer += symbol
 
     def to_state(self, state: LexingState):
         assert state is not None

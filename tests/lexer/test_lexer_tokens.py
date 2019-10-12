@@ -289,3 +289,29 @@ class LexerTokensTests(TestCase):
         self.assertEqual('456', lexer.tokens[1].value)
         self.assertEqual('789', lexer.tokens[2].value)
         self.assertEqual('01', lexer.tokens[3].value)
+
+    def test_lit_float(self):
+        lexer = Lexer('123 12. 12.45 78.80E5 789.4e7 852.78E+50 369.78e-789 .789 .789E-70')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[1].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[3].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[4].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[5].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[6].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[7].type)
+        self.assertEqual(TokenType.LIT_FLOAT, lexer.tokens[8].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[9].type)
+
+        self.assertEqual('123', lexer.tokens[0].value)
+        self.assertEqual('12.', lexer.tokens[1].value)
+        self.assertEqual('12.45', lexer.tokens[2].value)
+        self.assertEqual('78.80E5', lexer.tokens[3].value)
+        self.assertEqual('789.4e7', lexer.tokens[4].value)
+        self.assertEqual('852.78E+50', lexer.tokens[5].value)
+        self.assertEqual('369.78e-789', lexer.tokens[6].value)
+        self.assertEqual('.789', lexer.tokens[7].value)
+        self.assertEqual('.789E-70', lexer.tokens[8].value)
