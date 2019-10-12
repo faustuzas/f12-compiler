@@ -275,7 +275,7 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_lit_int_2(self):
-        lexer = Lexer('123 456 789 01')
+        lexer = Lexer('123 456 789 0')
 
         lexer.lex_all()
 
@@ -288,7 +288,15 @@ class LexerTokensTests(TestCase):
         self.assertEqual('123', lexer.tokens[0].value)
         self.assertEqual('456', lexer.tokens[1].value)
         self.assertEqual('789', lexer.tokens[2].value)
-        self.assertEqual('01', lexer.tokens[3].value)
+        self.assertEqual('0', lexer.tokens[3].value)
+
+    def test_lit_int_no_leading_zero(self):
+        with patch('lexer.lexer.printer.error') as mocked_error:
+            lexer = Lexer('0123')
+
+            lexer.lex_all()
+
+            self.assertTrue(mocked_error.called)
 
     def test_lit_float(self):
         lexer = Lexer('123 12. 12.45 78.80E5 789.4e7 852.78E+50 369.78e-789 .789 .789E-70')
@@ -385,3 +393,32 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[5].type)
 
         self.assertEqual('hello', lexer.tokens[1].value)
+
+    def test_helper(self):
+        lexer = Lexer('>include')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.HELPER_INCLUDE, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_helper_2(self):
+        lexer = Lexer('>includ 5>0 >123include')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_GT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.OP_GT, lexer.tokens[3].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[4].type)
+        self.assertEqual(TokenType.OP_GT, lexer.tokens[5].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[6].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[7].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[8].type)
+
+        self.assertEqual('includ', lexer.tokens[1].value)
+        self.assertEqual('5', lexer.tokens[2].value)
+        self.assertEqual('0', lexer.tokens[4].value)
+        self.assertEqual('123', lexer.tokens[6].value)
+        self.assertEqual('include', lexer.tokens[7].value)

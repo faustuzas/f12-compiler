@@ -5,14 +5,7 @@ from utils import Switcher, throw, ranges, printer, get
 
 """
 What can I found? 
-    - ">include"
-    
-    - [a-zA-z_]
-        + [a-zA-z1-9_]
-            = keyword
-            = identifier
-            = type
-    
+    - ">include"    
 """
 
 
@@ -72,6 +65,7 @@ class Lexer:
             LexingState.OP_LT: self.lex_op_lt,
             LexingState.KW_FROM_STDIN: self.lex_kw_from_stdin,
             LexingState.OP_ACCESS: self.lex_op_access,
+            LexingState.LIT_INT_FIRST_ZERO: self.lex_lit_int_first_zero,
             LexingState.LIT_INT: self.lex_lit_int,
             LexingState.LIT_FLOAT_START: self.lex_lit_float_start,
             LexingState.LIT_FLOAT: self.lex_lit_float,
@@ -109,9 +103,10 @@ class Lexer:
             '.': lambda: self.begin_tokenizing(LexingState.OP_ACCESS),
             '>': lambda: self.begin_tokenizing(LexingState.OP_GT),
             '"': lambda: self.begin_tokenizing(LexingState.LIT_STR),
+            '0': lambda: self.begin_tokenizing(LexingState.LIT_INT_FIRST_ZERO, to_buffer=True),
+            ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
             '_': lambda: self.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
             ranges.letters: lambda: self.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
-            ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
         }).default(lambda: throw(TokenError())).exec(self.current_char)
@@ -188,6 +183,12 @@ class Lexer:
         Switcher.from_dict({
             ranges.digits: lambda: (self.add_to_buff('.'), self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT))
         }).default(lambda: self.add_token(TokenType.OP_ACCESS, rollback=True)).exec(self.current_char)
+
+    def lex_lit_int_first_zero(self):
+        Switcher.from_dict({
+            '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START)),
+            ' ': lambda: self.add_token(TokenType.LIT_INT)
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
 
     def lex_lit_int(self):
         Switcher.from_dict({
