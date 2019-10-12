@@ -345,15 +345,3 @@ class Lexer:
     def line_number_prefix(number):
         return f'{number}. '
 
-
-if __name__ == '__main__':
-    with open('../main.f12') as f:
-        content = ''.join(f.readlines())
-
-        try:
-            lexer = Lexer(content)
-            lexer.lex_all()
-
-            lexer.print_tokens()
-        except ValueError:
-            pass
