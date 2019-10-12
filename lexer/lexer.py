@@ -314,10 +314,11 @@ class Lexer:
         self.offset_in_line = 0
 
     def print_tokens(self):
-        header = '{:>4} | {:>4} | {:>10} | {:>10}'.format('ID', 'LINE', 'TYPE', 'VALUE')
+        template = '{:>5} | {:>5} | {:>17} | {:>10}'
+        header = template.format('ID', 'LINE', 'TYPE', 'VALUE')
         body = ''
         for (i, token) in enumerate(self.tokens):
-            body += '{:>4} | {:>4} | {:>10} | {:>10}'.format(i + 1, token.line_number, token.type, token.value)
+            body += template.format(i + 1, token.line_number, token.type, token.value) + '\n'
 
         printer.success(body, header)
 

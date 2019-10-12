@@ -26,7 +26,7 @@ class TerminalPrinter:
                 output += self.header_format(header)
 
         if colour:
-            output += colored(main, self.colour_error)
+            output += colored(main, colour)
         else:
             output += main
 
