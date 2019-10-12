@@ -21,7 +21,7 @@ class TerminalPrinter:
         if header:
             h_len = header_len
             if not h_len:
-                h_len = len(main.split('\n')[0])
+                h_len = len(header.split('\n')[0])
 
             if colour:
                 output += colored(self.header_format(header, h_len), colour)

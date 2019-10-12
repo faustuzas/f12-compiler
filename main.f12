@@ -22,12 +22,14 @@ fun main => int {
 
     inner();
 
+
     unit HumanInner {
         string name;
         int age;
     }
 
-    const int x = 5;
+    const int age = 22;
+    const int x = age + 6.5E;
     int y = add(x, 5);
 
     Human human = Human(name: "Faustas");

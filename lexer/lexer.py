@@ -37,12 +37,14 @@ class Lexer:
 
             self.current_char = ' '
             self.lex()
-        except TokenError:
-            self.print_error()
 
-        Switcher.from_dict({
-            (LexingState.START, LexingState.SL_COMMENT): lambda: self.add_token(TokenType.EOF)
-        }).exec(self.state)
+            Switcher.from_dict({
+                (LexingState.START, LexingState.SL_COMMENT): lambda: self.add_token(TokenType.EOF),
+                LexingState.LIT_STR: throw(TokenError('Unterminated string'))
+            }).exec(self.state)
+        except TokenError as e:
+            self.print_error(str(e))
+            raise ValueError()
 
         return self.tokens
 
@@ -107,7 +109,7 @@ class Lexer:
             ranges.letters: lambda: self.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+        }).default(lambda: throw(TokenError('Unrecognised token'))).exec(self.current_char)
 
     def lex_op_minus(self):
         Switcher.from_dict({
@@ -158,12 +160,12 @@ class Lexer:
     def lex_op_and(self):
         Switcher.from_dict({
             '&': lambda: self.add_token(TokenType.OP_AND)
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+        }).default(lambda: throw(TokenError('Missing &'))).exec(self.current_char)
 
     def lex_op_or(self):
         Switcher.from_dict({
             '|': lambda: self.add_token(TokenType.OP_OR)
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+        }).default(lambda: throw(TokenError('Missing |'))).exec(self.current_char)
 
     def lex_op_lt(self):
         Switcher.from_dict({
@@ -185,7 +187,7 @@ class Lexer:
     def lex_lit_int_first_zero(self):
         Switcher.from_dict({
             '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START)),
-            ranges.digits: lambda: throw(TokenError())
+            ranges.digits: lambda: throw(TokenError('Multi digit integer cannot start with 0'))
         }).default(lambda: self.add_token(TokenType.LIT_INT, rollback=True)).exec(self.current_char)
 
     def lex_lit_int(self):
@@ -209,12 +211,12 @@ class Lexer:
         Switcher.from_dict({
             ('+', '-'): lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_PRE_END)),
             ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_END))
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+        }).default(lambda: throw(TokenError('After exponent has to follow number or sign'))).exec(self.current_char)
 
     def lex_lit_float_pre_end(self):
         Switcher.from_dict({
             ranges.digits: lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_END))
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+        }).default(lambda: throw(TokenError('Exponent power is missing'))).exec(self.current_char)
 
     def lex_lit_float_end(self):
         Switcher.from_dict({
@@ -244,7 +246,7 @@ class Lexer:
             '"': lambda: self.add_to_buff('\"'),
             't': lambda: self.add_to_buff('\t'),
             'n': lambda: self.add_to_buff('\n')
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+        }).default(lambda: throw(TokenError('Unrecognized escaped character'))).exec(self.current_char)
 
         self.to_state(LexingState.LIT_STR)
 
@@ -324,20 +326,20 @@ class Lexer:
 
         printer.success(body, header)
 
-    def print_error(self):
+    def print_error(self, cause):
         all_lines = self.text.split('\n')
         lines_to_show = []
         line_in_array = self.line_number - 1
-        if self.line_number - 1 >= 1:
+        if self.line_number - 1 >= 1 and len(all_lines[line_in_array - 1].strip()) > 0:
             lines_to_show.append(f'{self.line_number_prefix(self.line_number - 1)}{all_lines[line_in_array - 1]}')
 
         lines_to_show.append(f'{self.line_number_prefix(self.line_number)}{all_lines[line_in_array]}')
-        lines_to_show.append(' ' * (self.offset_in_line + len(self.line_number_prefix(self.line_number))) + '^')
+        lines_to_show.append(' ' * (self.offset_in_line + len(self.line_number_prefix(self.line_number)) - 1) + '^')
 
-        if self.line_number + 1 <= len(all_lines):
+        if self.line_number + 1 <= len(all_lines) and len(all_lines[line_in_array + 1].strip()) > 0:
             lines_to_show.append(f'{self.line_number_prefix(self.line_number + 1)}{all_lines[line_in_array + 1]}')
 
-        printer.error('\n'.join(lines_to_show), 'Lexing error')
+        printer.error('\n'.join(lines_to_show), f'Lexing error: {cause}')
 
     @staticmethod
     def line_number_prefix(number):
@@ -346,9 +348,12 @@ class Lexer:
 
 if __name__ == '__main__':
     with open('../main.f12') as f:
-        content = '\n'.join(f.readlines())
+        content = ''.join(f.readlines())
 
-        lexer = Lexer(content)
-        lexer.lex_all()
+        try:
+            lexer = Lexer(content)
+            lexer.lex_all()
 
-        lexer.print_tokens()
+            lexer.print_tokens()
+        except ValueError:
+            pass
