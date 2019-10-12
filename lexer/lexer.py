@@ -40,7 +40,7 @@ class Lexer:
 
             Switcher.from_dict({
                 (LexingState.START, LexingState.SL_COMMENT): lambda: self.add_token(TokenType.EOF),
-                LexingState.LIT_STR: throw(TokenError('Unterminated string'))
+                LexingState.LIT_STR: lambda: throw(TokenError('Unterminated string'))
             }).exec(self.state)
         except TokenError as e:
             self.print_error(str(e))

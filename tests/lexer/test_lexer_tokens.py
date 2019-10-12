@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 from models import TokenType
 from lexer.lexer import Lexer
@@ -207,11 +206,8 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_op_and_error(self):
-        with patch('lexer.lexer.printer.error') as mocked_error:
-            lexer = Lexer('&')
-            lexer.lex_all()
-
-            self.assertTrue(mocked_error.called)
+        lexer = Lexer('&')
+        self.assertRaises(ValueError, lexer.lex_all)
 
     def test_op_or(self):
         lexer = Lexer('||')
@@ -222,12 +218,8 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_op_or_error(self):
-        with patch('lexer.lexer.printer.error') as mocked_error:
-            lexer = Lexer('|')
-
-            lexer.lex_all()
-
-            self.assertTrue(mocked_error.called)
+        lexer = Lexer('|')
+        self.assertRaises(ValueError, lexer.lex_all)
 
     def test_op_lt(self):
         lexer = Lexer('<')
@@ -291,12 +283,8 @@ class LexerTokensTests(TestCase):
         self.assertEqual('0', lexer.tokens[3].value)
 
     def test_lit_int_no_leading_zero(self):
-        with patch('lexer.lexer.printer.error') as mocked_error:
-            lexer = Lexer('0123')
-
-            lexer.lex_all()
-
-            self.assertTrue(mocked_error.called)
+        lexer = Lexer('0123')
+        self.assertRaises(ValueError, lexer.lex_all)
 
     def test_lit_float(self):
         lexer = Lexer('123 12. 12.45 78.80E5 789.4e7 852.78E+50 369.78e-789 .789 .789E-70')
@@ -463,3 +451,13 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.C_SEMI, lexer.tokens[21].type)
         self.assertEqual(TokenType.C_CURLY_R, lexer.tokens[22].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[23].type)
+
+    def test_i_addition(self):
+        lexer = Lexer('5 + 5')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_PLUS, lexer.tokens[1].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
