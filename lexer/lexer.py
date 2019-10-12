@@ -44,6 +44,8 @@ class Lexer:
             (LexingState.START, LexingState.SL_COMMENT): lambda: self.add_token(TokenType.EOF)
         }).exec(self.state)
 
+        return self.tokens
+
     def lex(self):
         Switcher.from_dict({
             LexingState.START: self.lex_start,
@@ -314,7 +316,7 @@ class Lexer:
         self.offset_in_line = 0
 
     def print_tokens(self):
-        template = '{:>5} | {:>5} | {:>17} | {:>10}'
+        template = '{:>5} | {:>5} | {:>17} | {:>17}'
         header = template.format('ID', 'LINE', 'TYPE', 'VALUE')
         body = ''
         for (i, token) in enumerate(self.tokens):
