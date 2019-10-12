@@ -7,11 +7,4 @@ def throw(ex):
     raise ex
 
 
-def get(dictionary: dict, key):
-    try:
-        return dictionary[key]
-    except KeyError:
-        return None
-
-
 printer = TerminalPrinter()

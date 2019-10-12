@@ -25,8 +25,10 @@ class LexingState(ExtendedEnum):
     OP_AND = 'OP_AND'
     OP_OR = 'OP_OR'
     OP_LT = 'OP_LT'
-    OP_GT = 'OP_GT'
     OP_ACCESS = 'OP_ACCESS'
+
+    OP_GT = 'OP_GT'
+    AFTER_GT = 'AFTER_GT'
 
     SL_COMMENT = 'SL_COMMENT'
     ML_COMMENT = 'ML_COMMENT'

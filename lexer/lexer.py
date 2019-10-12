@@ -1,7 +1,7 @@
 from typing import List
 from models import LexingState, Token, TokenType, TokenError
-from models.builtins import keywords, primitive_types, constants
-from utils import Switcher, throw, ranges, printer, get
+from models.builtins import keywords, primitive_types, constants, helpers
+from utils import Switcher, throw, ranges, printer
 
 """
 What can I found? 
@@ -73,6 +73,7 @@ class Lexer:
             LexingState.LIT_FLOAT_PRE_END: self.lex_lit_float_pre_end,
             LexingState.LIT_FLOAT_END: self.lex_lit_float_end,
             LexingState.OP_GT: self.lex_op_gt,
+            LexingState.AFTER_GT: self.lex_after_gt,
             LexingState.LIT_STR: self.lex_lit_str,
             LexingState.LIT_STR_ESCAPE: self.lex_lit_str_escape,
             LexingState.IDENTIFIER: self.lex_identifier
@@ -225,8 +226,14 @@ class Lexer:
 
     def lex_op_gt(self):
         Switcher.from_dict({
-            '=': lambda: self.add_token(TokenType.OP_GE)
+            '=': lambda: self.add_token(TokenType.OP_GE),
+            ranges.letters: lambda: (self.add_to_buff(), self.to_state(LexingState.AFTER_GT))
         }).default(lambda: self.add_token(TokenType.OP_GT, rollback=True)).exec(self.current_char)
+
+    def lex_after_gt(self):
+        Switcher.from_dict({
+            ranges.letters: self.add_to_buff
+        }).default(self.complete_helper).exec(self.current_char)
 
     def lex_lit_str(self):
         Switcher.from_dict({
@@ -255,20 +262,28 @@ class Lexer:
     Helper methods
     """
     def complete_identifier(self):
-        kw = get(keywords, self.token_buffer)
+        kw = keywords.get(self.token_buffer, None)
         if kw:
-            self.add_token(kw, with_value=False)
+            self.add_token(kw, with_value=False, line_number=self.line_number)
             return
-        primitive_type = get(primitive_types, self.token_buffer)
+        primitive_type = primitive_types.get(self.token_buffer, None)
         if primitive_type:
-            self.add_token(primitive_type, with_value=False)
+            self.add_token(primitive_type, with_value=False, line_number=self.line_number)
             return
-        constant = get(constants, self.token_buffer)
+        constant = constants.get(self.token_buffer, None)
         if constant:
-            self.add_token(constant, with_value=False)
+            self.add_token(constant, with_value=False, line_number=self.line_number)
             return
 
         self.add_token(TokenType.IDENTIFIER)
+
+    def complete_helper(self):
+        helper = helpers.get(self.token_buffer, None)
+        if helper:
+            self.add_token(helper, with_value=False)
+        else:
+            self.add_token(TokenType.OP_GT, with_value=False, keep_buffer=True)
+            self.complete_identifier()
 
     def begin_tokenizing(self, new_state: LexingState, to_buffer=False):
         self.token_start_line_number = self.line_number
@@ -277,9 +292,12 @@ class Lexer:
         if to_buffer:
             self.add_to_buff()
 
-    def add_token(self, token_type: TokenType, rollback=False, keep_state=False, with_value=True):
-        self.tokens.append(Token(token_type, self.line_number, self.token_buffer if with_value else ''))
-        self.token_buffer = ''
+    def add_token(self, token_type: TokenType, line_number=None, rollback=False,
+                  keep_state=False, with_value=True, keep_buffer=False):
+        self.tokens.append(Token(token_type, line_number if line_number else self.line_number,
+                                 self.token_buffer if with_value else ''))
+        if not keep_buffer:
+            self.token_buffer = ''
         if not keep_state:
             self.state = LexingState.START
         if rollback:
