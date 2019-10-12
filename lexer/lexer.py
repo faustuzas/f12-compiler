@@ -3,11 +3,6 @@ from models import LexingState, Token, TokenType, TokenError
 from models.builtins import keywords, primitive_types, constants, helpers
 from utils import Switcher, throw, ranges, printer
 
-"""
-What can I found? 
-    - ">include"    
-"""
-
 
 class Lexer:
     state: LexingState
@@ -188,8 +183,8 @@ class Lexer:
     def lex_lit_int_first_zero(self):
         Switcher.from_dict({
             '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START)),
-            ' ': lambda: self.add_token(TokenType.LIT_INT)
-        }).default(lambda: throw(TokenError())).exec(self.current_char)
+            ranges.digits: lambda: throw(TokenError())
+        }).default(lambda: self.add_token(TokenType.LIT_INT, rollback=True)).exec(self.current_char)
 
     def lex_lit_int(self):
         Switcher.from_dict({
@@ -264,18 +259,18 @@ class Lexer:
     def complete_identifier(self):
         kw = keywords.get(self.token_buffer, None)
         if kw:
-            self.add_token(kw, with_value=False, line_number=self.line_number)
+            self.add_token(kw, with_value=False, line_number=self.line_number, rollback=True)
             return
         primitive_type = primitive_types.get(self.token_buffer, None)
         if primitive_type:
-            self.add_token(primitive_type, with_value=False, line_number=self.line_number)
+            self.add_token(primitive_type, with_value=False, line_number=self.line_number, rollback=True)
             return
         constant = constants.get(self.token_buffer, None)
         if constant:
-            self.add_token(constant, with_value=False, line_number=self.line_number)
+            self.add_token(constant, with_value=False, line_number=self.line_number, rollback=True)
             return
 
-        self.add_token(TokenType.IDENTIFIER)
+        self.add_token(TokenType.IDENTIFIER, line_number=self.line_number, rollback=True)
 
     def complete_helper(self):
         helper = helpers.get(self.token_buffer, None)
@@ -318,6 +313,14 @@ class Lexer:
         self.line_number += 1
         self.offset_in_line = 0
 
+    def print_tokens(self):
+        header = '{:>4} | {:>4} | {:>10} | {:>10}'.format('ID', 'LINE', 'TYPE', 'VALUE')
+        body = ''
+        for (i, token) in enumerate(self.tokens):
+            body += '{:>4} | {:>4} | {:>10} | {:>10}'.format(i + 1, token.line_number, token.type, token.value)
+
+        printer.success(body, header)
+
     def print_error(self):
         all_lines = self.text.split('\n')
         lines_to_show = []
@@ -336,3 +339,13 @@ class Lexer:
     @staticmethod
     def line_number_prefix(number):
         return f'{number}. '
+
+
+if __name__ == '__main__':
+    with open('../main.f12') as f:
+        content = '\n'.join(f.readlines())
+
+        lexer = Lexer(content)
+        lexer.lex_all()
+
+        lexer.print_tokens()

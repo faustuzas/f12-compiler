@@ -422,3 +422,44 @@ class LexerTokensTests(TestCase):
         self.assertEqual('0', lexer.tokens[4].value)
         self.assertEqual('123', lexer.tokens[6].value)
         self.assertEqual('include', lexer.tokens[7].value)
+
+    def test_i_array_access(self):
+        lexer = Lexer('x[0]')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[0].type)
+        self.assertEqual(TokenType.C_SQUARE_L, lexer.tokens[1].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.C_SQUARE_R, lexer.tokens[3].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[4].type)
+
+    def test_i_fun_declaration(self):
+        lexer = Lexer('fun add(int x[], int y) => int {\nret x[0] + y;\n}')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.KW_FUN, lexer.tokens[0].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
+        self.assertEqual(TokenType.C_ROUND_L, lexer.tokens[2].type)
+        self.assertEqual(TokenType.PRIMITIVE_INT, lexer.tokens[3].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[4].type)
+        self.assertEqual(TokenType.C_SQUARE_L, lexer.tokens[5].type)
+        self.assertEqual(TokenType.C_SQUARE_R, lexer.tokens[6].type)
+        self.assertEqual(TokenType.C_COMMA, lexer.tokens[7].type)
+        self.assertEqual(TokenType.PRIMITIVE_INT, lexer.tokens[8].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[9].type)
+        self.assertEqual(TokenType.C_ROUND_R, lexer.tokens[10].type)
+        self.assertEqual(TokenType.KW_FAT_ARROW, lexer.tokens[11].type)
+        self.assertEqual(TokenType.PRIMITIVE_INT, lexer.tokens[12].type)
+        self.assertEqual(TokenType.C_CURLY_L, lexer.tokens[13].type)
+        self.assertEqual(TokenType.KW_RETURN, lexer.tokens[14].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[15].type)
+        self.assertEqual(TokenType.C_SQUARE_L, lexer.tokens[16].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[17].type)
+        self.assertEqual(TokenType.C_SQUARE_R, lexer.tokens[18].type)
+        self.assertEqual(TokenType.OP_PLUS, lexer.tokens[19].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[20].type)
+        self.assertEqual(TokenType.C_SEMI, lexer.tokens[21].type)
+        self.assertEqual(TokenType.C_CURLY_R, lexer.tokens[22].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[23].type)
