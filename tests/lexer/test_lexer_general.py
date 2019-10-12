@@ -34,6 +34,16 @@ class LexerGeneralTests(TestCase):
 
         self.assertEqual(LexingState.START, lexer.state)
 
+    def test_add_token_without_value(self):
+        lexer = Lexer('123')
+        lexer.token_buffer = '12345'
+
+        lexer.add_token(TokenType.IDENTIFIER, with_value=False)
+
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[0].type)
+        self.assertEqual('', lexer.tokens[0].value)
+        self.assertEqual('', lexer.token_buffer)
+
     def test_begin_tokenizing_new_state(self):
         lexer = Lexer('123')
         lexer.current_char = '1'

@@ -31,3 +31,11 @@ class ExtendedEnumTest(TestCase):
         enum2 = TestEnum.VALUE_2
 
         self.assertNotEqual(enum, enum2)
+
+    def test_from_value(self):
+        enum = TestEnum['VALUE_1']
+        self.assertEqual(TestEnum.VALUE_1, enum)
+
+    def test_from_value_2(self):
+        enum = TestEnum['NO']
+        self.assertEqual(None, enum)

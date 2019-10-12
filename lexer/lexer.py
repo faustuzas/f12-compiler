@@ -1,18 +1,13 @@
 from typing import List
 from models import LexingState, Token, TokenType, TokenError
-from utils import Switcher, throw, ranges, printer
+from models.builtins import keywords, primitive_types, constants
+from utils import Switcher, throw, ranges, printer, get
 
 """
 What can I found? 
     - ">include"
-        
-    - "\""
-        + ".*"
-            + "\""
-        + "\\"
-            + "n" or "t" or "\"" or "r"
-                + back to string
-    - [a-zA-z]
+    
+    - [a-zA-z_]
         + [a-zA-z1-9_]
             = keyword
             = identifier
@@ -85,7 +80,8 @@ class Lexer:
             LexingState.LIT_FLOAT_END: self.lex_lit_float_end,
             LexingState.OP_GT: self.lex_op_gt,
             LexingState.LIT_STR: self.lex_lit_str,
-            LexingState.LIT_STR_ESCAPE: self.lex_lit_str_escape
+            LexingState.LIT_STR_ESCAPE: self.lex_lit_str_escape,
+            LexingState.IDENTIFIER: self.lex_identifier
         }).exec(self.state)
 
     def lex_start(self):
@@ -113,6 +109,8 @@ class Lexer:
             '.': lambda: self.begin_tokenizing(LexingState.OP_ACCESS),
             '>': lambda: self.begin_tokenizing(LexingState.OP_GT),
             '"': lambda: self.begin_tokenizing(LexingState.LIT_STR),
+            '_': lambda: self.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
+            ranges.letters: lambda: self.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
             ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
@@ -245,9 +243,32 @@ class Lexer:
 
         self.to_state(LexingState.LIT_STR)
 
+    def lex_identifier(self):
+        Switcher.from_dict({
+            ranges.letters: self.add_to_buff,
+            ranges.digits: self.add_to_buff,
+            '_': self.add_to_buff,
+        }).default(self.complete_identifier).exec(self.current_char)
+
     """
     Helper methods
     """
+    def complete_identifier(self):
+        kw = get(keywords, self.token_buffer)
+        if kw:
+            self.add_token(kw, with_value=False)
+            return
+        primitive_type = get(primitive_types, self.token_buffer)
+        if primitive_type:
+            self.add_token(primitive_type, with_value=False)
+            return
+        constant = get(constants, self.token_buffer)
+        if constant:
+            self.add_token(constant, with_value=False)
+            return
+
+        self.add_token(TokenType.IDENTIFIER)
+
     def begin_tokenizing(self, new_state: LexingState, to_buffer=False):
         self.token_start_line_number = self.line_number
         self.to_state(new_state)
@@ -255,8 +276,8 @@ class Lexer:
         if to_buffer:
             self.add_to_buff()
 
-    def add_token(self, token_type: TokenType, rollback=False, keep_state=False):
-        self.tokens.append(Token(token_type, self.line_number, self.token_buffer))
+    def add_token(self, token_type: TokenType, rollback=False, keep_state=False, with_value=True):
+        self.tokens.append(Token(token_type, self.line_number, self.token_buffer if with_value else ''))
         self.token_buffer = ''
         if not keep_state:
             self.state = LexingState.START

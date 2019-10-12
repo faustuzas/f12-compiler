@@ -1,7 +1,15 @@
-from enum import Enum
+from enum import Enum, EnumMeta
 
 
-class ExtendedEnum(Enum):
+class ExtendedEnumMeta(EnumMeta):
+    def __getitem__(self, item):
+        try:
+            return super().__getitem__(item)
+        except KeyError:
+            return None
+
+
+class ExtendedEnum(Enum, metaclass=ExtendedEnumMeta):
     def __str__(self):
         return self.value
 

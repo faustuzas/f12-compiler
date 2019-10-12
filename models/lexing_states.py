@@ -32,3 +32,5 @@ class LexingState(ExtendedEnum):
     ML_COMMENT_END = 'ML_COMMENT_END'
 
     KW_FROM_STDIN = 'KW_FROM_STDIN'
+
+    IDENTIFIER = 'IDENTIFIER'
