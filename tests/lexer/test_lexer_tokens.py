@@ -334,3 +334,31 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.KW_FAT_ARROW, lexer.tokens[1].type)
         self.assertEqual(TokenType.OP_GT, lexer.tokens[2].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
+
+    def test_lit_str(self):
+        lexer = Lexer('"hello"')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_STR, lexer.tokens[0].type)
+        self.assertEqual('hello', lexer.tokens[0].value)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_lit_str_multiline(self):
+        lexer = Lexer('"hello\nmy\nname\nis"')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_STR, lexer.tokens[0].type)
+        self.assertEqual('hello\nmy\nname\nis', lexer.tokens[0].value)
+        self.assertEqual(4, lexer.line_number)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
+    def test_lit_str_escape(self):
+        lexer = Lexer('"hello \\n \\t \\\" ha"')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.LIT_STR, lexer.tokens[0].type)
+        self.assertEqual('hello \n \t \" ha', lexer.tokens[0].value)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)

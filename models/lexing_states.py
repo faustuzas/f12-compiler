@@ -5,6 +5,8 @@ class LexingState(ExtendedEnum):
     START = 'START'
 
     LIT_STR = 'LIT_STR'
+    LIT_STR_ESCAPE = 'LIT_STR_ESCAPE'
+
     LIT_INT = 'LIT_INT'
 
     LIT_FLOAT_START = 'LIT_FLOAT_START'

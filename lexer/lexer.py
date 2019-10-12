@@ -4,10 +4,7 @@ from utils import Switcher, throw, ranges, printer
 
 """
 What can I found? 
-    - ">"
-        + ""
-        + "="
-        + "include"
+    - ">include"
         
     - "\""
         + ".*"
@@ -86,7 +83,9 @@ class Lexer:
             LexingState.LIT_FLOAT_EXP: self.lex_lit_float_exp,
             LexingState.LIT_FLOAT_PRE_END: self.lex_lit_float_pre_end,
             LexingState.LIT_FLOAT_END: self.lex_lit_float_end,
-            LexingState.OP_GT: self.lex_op_gt
+            LexingState.OP_GT: self.lex_op_gt,
+            LexingState.LIT_STR: self.lex_lit_str,
+            LexingState.LIT_STR_ESCAPE: self.lex_lit_str_escape
         }).exec(self.state)
 
     def lex_start(self):
@@ -113,6 +112,7 @@ class Lexer:
             '<': lambda: self.begin_tokenizing(LexingState.OP_LT),
             '.': lambda: self.begin_tokenizing(LexingState.OP_ACCESS),
             '>': lambda: self.begin_tokenizing(LexingState.OP_GT),
+            '"': lambda: self.begin_tokenizing(LexingState.LIT_STR),
             ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
@@ -228,6 +228,22 @@ class Lexer:
         Switcher.from_dict({
             '=': lambda: self.add_token(TokenType.OP_GE)
         }).default(lambda: self.add_token(TokenType.OP_GT, rollback=True)).exec(self.current_char)
+
+    def lex_lit_str(self):
+        Switcher.from_dict({
+            '"': lambda: self.add_token(TokenType.LIT_STR),
+            '\\': lambda: self.to_state(LexingState.LIT_STR_ESCAPE),
+            '\n': lambda: (self.add_to_buff(), self.inc_new_line())
+        }).default(self.add_to_buff).exec(self.current_char)
+
+    def lex_lit_str_escape(self):
+        Switcher.from_dict({
+            '"': lambda: self.add_to_buff('\"'),
+            't': lambda: self.add_to_buff('\t'),
+            'n': lambda: self.add_to_buff('\n')
+        }).default(lambda: throw(TokenError())).exec(self.current_char)
+
+        self.to_state(LexingState.LIT_STR)
 
     """
     Helper methods
