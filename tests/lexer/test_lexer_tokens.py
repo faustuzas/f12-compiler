@@ -315,3 +315,22 @@ class LexerTokensTests(TestCase):
         self.assertEqual('369.78e-789', lexer.tokens[6].value)
         self.assertEqual('.789', lexer.tokens[7].value)
         self.assertEqual('.789E-70', lexer.tokens[8].value)
+
+    def test_op_gt(self):
+        lexer = Lexer('>>')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_GT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.OP_GT, lexer.tokens[1].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[2].type)
+
+    def test_op_ge(self):
+        lexer = Lexer('>==>>')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.OP_GE, lexer.tokens[0].type)
+        self.assertEqual(TokenType.KW_FAT_ARROW, lexer.tokens[1].type)
+        self.assertEqual(TokenType.OP_GT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[3].type)

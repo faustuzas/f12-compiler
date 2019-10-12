@@ -3,13 +3,10 @@ from models.enums import ExtendedEnum
 
 class KeyWord(ExtendedEnum):
     FUN = 'fun'
-    HELPER_START = '>'
     IF = 'if'
     RETURN = 'ret'
     FAT_ARROW = '=>'
     UNIT = 'unit'
-    TO_STDOUT = '-->'
-    FROM_STDOUT = '<--'
     ELSE = 'else'
     EACH = 'each'
     WHILE = 'while'
@@ -26,3 +23,7 @@ class PrimitiveType(ExtendedEnum):
     BOOL = 'bool'
     CHAR = 'char'
     BYTE = 'byte'
+
+
+class Helper(ExtendedEnum):
+    INCLUDE = 'INCLUDE'

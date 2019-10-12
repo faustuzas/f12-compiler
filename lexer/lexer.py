@@ -4,26 +4,11 @@ from utils import Switcher, throw, ranges, printer
 
 """
 What can I found? 
-    - "."
-        + ""
-        + "[0-9]*"
-            + ""
-            + "E" or "e"
-                + "" or "+" or "-"
-                    + "[0-9]*"
     - ">"
         + ""
         + "="
         + "include"
-    - "[0-9]*"
-        + "" // int
-        + "."
-            + ""
-            + "[0-9]*"
-                + ""
-                + "E" or "e"
-                    + "" or "+" or "-"
-                        + "[0-9]*"
+        
     - "\""
         + ".*"
             + "\""
@@ -100,7 +85,8 @@ class Lexer:
             LexingState.LIT_FLOAT: self.lex_lit_float,
             LexingState.LIT_FLOAT_EXP: self.lex_lit_float_exp,
             LexingState.LIT_FLOAT_PRE_END: self.lex_lit_float_pre_end,
-            LexingState.LIT_FLOAT_END: self.lex_lit_float_end
+            LexingState.LIT_FLOAT_END: self.lex_lit_float_end,
+            LexingState.OP_GT: self.lex_op_gt
         }).exec(self.state)
 
     def lex_start(self):
@@ -126,6 +112,7 @@ class Lexer:
             '|': lambda: self.begin_tokenizing(LexingState.OP_OR),
             '<': lambda: self.begin_tokenizing(LexingState.OP_LT),
             '.': lambda: self.begin_tokenizing(LexingState.OP_ACCESS),
+            '>': lambda: self.begin_tokenizing(LexingState.OP_GT),
             ranges.digits: lambda: self.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
             '\n': self.inc_new_line,
             ' ': lambda: ()  # ignore
@@ -236,6 +223,11 @@ class Lexer:
         Switcher.from_dict({
             ranges.digits: self.add_to_buff
         }).default(lambda: self.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self.current_char)
+
+    def lex_op_gt(self):
+        Switcher.from_dict({
+            '=': lambda: self.add_token(TokenType.OP_GE)
+        }).default(lambda: self.add_token(TokenType.OP_GT, rollback=True)).exec(self.current_char)
 
     """
     Helper methods

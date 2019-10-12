@@ -6,6 +6,7 @@ class LexingState(ExtendedEnum):
 
     LIT_STR = 'LIT_STR'
     LIT_INT = 'LIT_INT'
+
     LIT_FLOAT_START = 'LIT_FLOAT_START'
     LIT_FLOAT = 'LIT_FLOAT'
     LIT_FLOAT_EXP = 'LIT_FLOAT_EXP'
@@ -21,6 +22,7 @@ class LexingState(ExtendedEnum):
     OP_AND = 'OP_AND'
     OP_OR = 'OP_OR'
     OP_LT = 'OP_LT'
+    OP_GT = 'OP_GT'
     OP_ACCESS = 'OP_ACCESS'
 
     SL_COMMENT = 'SL_COMMENT'

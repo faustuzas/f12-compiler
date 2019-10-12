@@ -23,6 +23,8 @@ class TokenType(ExtendedEnum):
     OP_OR = 'OP_OR'
     OP_LT = 'OP_LT'
     OP_LE = 'OP_LE'
+    OP_GT = 'OP_GT'
+    OP_GE = 'OP_GE'
     OP_ACCESS = 'OP_ACCESS'
 
     C_SEMI = 'C_SEMI'
@@ -38,6 +40,8 @@ class TokenType(ExtendedEnum):
     KW_FAT_ARROW = 'KW_FAT_ARROW'
     KW_TO_STDOUT = 'KW_TO_STDOUT'
     KW_FROM_STDIN = 'KW_FROM_STDIN'
+
+    HELPER_INCLUDE = 'HELPER_INCLUDE'
 
 
 class Token:
