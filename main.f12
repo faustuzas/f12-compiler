@@ -29,7 +29,7 @@ fun main => int {
     }
 
     const int age = 22;
-    const int x = age + 6.5E;
+    // const int x = age + 6.5E;
     int y = add(x, 5);
 
     Human human = Human(name: "Faustas");

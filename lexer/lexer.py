@@ -113,9 +113,8 @@ class Lexer:
 
     def lex_op_minus(self):
         Switcher.from_dict({
-            ' ': lambda: self.add_token(TokenType.OP_MINUS),
             '-': lambda: self.to_state(LexingState.OP_MINUS_2)
-        }).exec(self.current_char)
+        }).default(lambda: self.add_token(TokenType.OP_MINUS, rollback=True)).exec(self.current_char)
 
     def lex_op_minus_2(self):
         Switcher.from_dict({

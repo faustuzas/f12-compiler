@@ -43,14 +43,16 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
 
     def test_op_minus_3(self):
-        lexer = Lexer('- - -')
+        lexer = Lexer('5-5 - -')
 
         lexer.lex_all()
 
-        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[0].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[0].type)
         self.assertEqual(TokenType.OP_MINUS, lexer.tokens[1].type)
-        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[2].type)
-        self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[2].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[3].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[4].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[5].type)
 
     def test_to_stdout(self):
         lexer = Lexer('-->')
