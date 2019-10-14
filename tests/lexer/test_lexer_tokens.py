@@ -393,7 +393,7 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_helper_2(self):
-        lexer = Lexer('>includ 5>0 >123include')
+        lexer = Lexer('>includ 5>0 >123 include')
 
         lexer.lex_all()
 
@@ -463,3 +463,8 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_PLUS, lexer.tokens[1].type)
         self.assertEqual(TokenType.LIT_INT, lexer.tokens[2].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
+
+    def test_i_int_id(self):
+        lexer = Lexer('55555labas')
+
+        self.assertRaises(ValueError, lexer.lex_all)

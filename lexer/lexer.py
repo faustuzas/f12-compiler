@@ -192,7 +192,9 @@ class Lexer:
     def lex_lit_int(self):
         Switcher.from_dict({
             ranges.digits: self.add_to_buff,
-            '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START))
+            '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START)),
+            '_': lambda: throw(TokenError('Unrecognized character')),
+            ranges.letters: lambda: throw(TokenError('Unrecognized character'))
         }).default(lambda: self.add_token(TokenType.LIT_INT, rollback=True)).exec(self.current_char)
 
     def lex_lit_float_start(self):
