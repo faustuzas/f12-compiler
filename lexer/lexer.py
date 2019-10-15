@@ -40,6 +40,7 @@ class Lexer:
 
             Switcher.from_dict({
                 (LexingState.START, LexingState.SL_COMMENT): lambda: self.add_token(TokenType.EOF),
+                (LexingState.ML_COMMENT, LexingState.ML_COMMENT_END): lambda: throw(TokenError("Unterminanted multiline comment")),
                 LexingState.LIT_STR: lambda: throw(TokenError('Unterminated string'))
             }).exec(self.state)
         except TokenError as e:
@@ -193,8 +194,8 @@ class Lexer:
         Switcher.from_dict({
             ranges.digits: self.add_to_buff,
             '.': lambda: (self.add_to_buff(), self.to_state(LexingState.LIT_FLOAT_START)),
-            '_': lambda: throw(TokenError('Unrecognized character')),
-            ranges.letters: lambda: throw(TokenError('Unrecognized character'))
+            '_': lambda: throw(TokenError('Integer with invalid prefix')),
+            ranges.letters: lambda: throw(TokenError('Integer with invalid prefix'))
         }).default(lambda: self.add_token(TokenType.LIT_INT, rollback=True)).exec(self.current_char)
 
     def lex_lit_float_start(self):
@@ -340,7 +341,7 @@ class Lexer:
         if self.line_number + 1 <= len(all_lines) and len(all_lines[line_in_array + 1].strip()) > 0:
             lines_to_show.append(f'{self.line_number_prefix(self.line_number + 1)}{all_lines[line_in_array + 1]}')
 
-        printer.error('\n'.join(lines_to_show), f'Lexing error: {cause}')
+        printer.error('\n'.join(lines_to_show), f'Lexing error [{self.line_number}:{self.offset_in_line}] : {cause}')
 
     @staticmethod
     def line_number_prefix(number):
