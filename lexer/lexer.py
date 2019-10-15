@@ -1,7 +1,7 @@
 from typing import List
 from models import LexingState, Token, TokenType, TokenError
 from models.builtins import keywords, primitive_types, constants, helpers
-from utils import Switcher, throw, ranges, printer
+from utils import FasterSwitcher as Switcher, throw, ranges, printer
 
 
 class Lexer:

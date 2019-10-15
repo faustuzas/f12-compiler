@@ -52,3 +52,66 @@ class Switcher:
             switcher.case(case, cases.get(case))
         return switcher
 
+class FasterSwitcher:
+    __ascii_actions: List[Action]
+    __others_cases: Dict[Any, Action]
+
+    def __init__(self):
+        self.__ascii_actions = [None] * 256
+        self.__others_cases = {}
+        
+
+    def case(self, case: Union[Iterable, int], action: Action) -> None:
+        if not callable(action):
+            raise ValueError("Action must be callable")
+
+        if isinstance(case, int):
+            str_int = str(case)
+            if len(str_int) != 1:
+                raise ValueError("Integer has to be single digit")
+            self.__ascii_actions[ord(str_int)] = action
+            return
+
+        for c in case:
+            if isinstance(c, str) and len(c) == 1:
+                self.__ascii_actions[ord(c)] = action
+            else:
+                self.__others_cases[case] = action
+
+    def default(self, action: Action):
+        if action is not None and not callable(action):
+            raise ValueError("Default action must be callable")
+        self.__default = action
+        return self
+
+    def exec(self, value):
+        if isinstance(value, int):
+            str_int = str(value)
+            if len(str_int) != 1:
+                raise ValueError("Integer has to be single digit")
+            action = self.__ascii_actions[ord(str_int)]
+            if action is not None:
+                return action()
+
+        action = None
+        if isinstance(value, str) and len(value) == 1:
+            action = self.__ascii_actions[ord(value)]
+        else:
+            action = self.__others_cases[value]
+
+        if action is not None:
+            return action()
+
+        if self.__default is not None:
+            return self.__default()
+            
+        return None
+
+    @staticmethod
+    def from_dict(cases: Dict[Iterable, Action], default: Action = None):
+        switcher = Switcher()
+        switcher.default(default)
+
+        for case in cases.keys():
+            switcher.case(case, cases.get(case))
+        return switcher
