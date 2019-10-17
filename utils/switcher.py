@@ -120,3 +120,37 @@ class FasterSwitcher:
         for case in cases.keys():
             switcher.case(case, cases.get(case))
         return switcher
+
+
+    def lex_start(self):
+        Switcher.from_dict({
+            '+': lambda ctx: ctx.add_token(TokenType.OP_PLUS),
+            '*': lambda ctx: ctx.add_token(TokenType.OP_MUL),
+            '^': lambda ctx: ctx.add_token(TokenType.OP_POV),
+            '%': lambda ctx: ctx.add_token(TokenType.OP_MOD),
+            ';': lambda ctx: ctx.add_token(TokenType.C_SEMI),
+            ':': lambda ctx: ctx.add_token(TokenType.C_COLON),
+            ',': lambda ctx: ctx.add_token(TokenType.C_COMMA),
+            '(': lambda ctx: ctx.add_token(TokenType.C_ROUND_L),
+            ')': lambda ctx: ctx.add_token(TokenType.C_ROUND_R),
+            '{': lambda ctx: ctx.add_token(TokenType.C_CURLY_L),
+            '}': lambda ctx: ctx.add_token(TokenType.C_CURLY_R),
+            '[': lambda ctx: ctx.add_token(TokenType.C_SQUARE_L),
+            ']': lambda ctx: ctx.add_token(TokenType.C_SQUARE_R),
+            '-': lambda ctx: ctx.begin_tokenizing(LexingState.OP_MINUS),
+            '/': lambda ctx: ctx.begin_tokenizing(LexingState.OP_DIV),
+            '!': lambda ctx: ctx.begin_tokenizing(LexingState.OP_NOT),
+            '=': lambda ctx: ctx.begin_tokenizing(LexingState.OP_ASSIGN),
+            '&': lambda ctx: ctx.begin_tokenizing(LexingState.OP_AND),
+            '|': lambda ctx: ctx.begin_tokenizing(LexingState.OP_OR),
+            '<': lambda ctx: ctx.begin_tokenizing(LexingState.OP_LT),
+            '.': lambda ctx: ctx.begin_tokenizing(LexingState.OP_ACCESS),
+            '>': lambda ctx: ctx.begin_tokenizing(LexingState.OP_GT),
+            '"': lambda ctx: ctx.begin_tokenizing(LexingState.LIT_STR),
+            '0': lambda ctx: ctx.begin_tokenizing(LexingState.LIT_INT_FIRST_ZERO, to_buffer=True),
+            ranges.digits_without_zero: lambda ctx: ctx.begin_tokenizing(LexingState.LIT_INT, to_buffer=True),
+            '_': lambda ctx: ctx.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
+            ranges.letters: lambda ctx: ctx.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
+            '\n': lambda ctx: ctx.inc_new_line(),
+            ' ': lambda ctx: ()  # ignore
+        }).default(lambda ctx: throw(TokenError('Unrecognised token'))).exec(self, self.current_char)

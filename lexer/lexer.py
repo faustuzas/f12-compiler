@@ -27,6 +27,14 @@ class Lexer:
         self.text = text
         self.current_char = ''
 
+    _s_fallback = Switcher.from_dict({
+                (LexingState.START, LexingState.SL_COMMENT): lambda ctx: ctx.add_token(TokenType.EOF),
+                (LexingState.ML_COMMENT, LexingState.ML_COMMENT_END): lambda ctx: throw(TokenError('Unterminanted '
+                                                                                                   'multiline '
+                                                                                                   'comment')),
+                LexingState.LIT_STR: lambda ctx: throw(TokenError('Unterminated string'))
+            })
+
     def lex_all(self):
         try:
             while self.offset < len(self.text):
@@ -38,21 +46,14 @@ class Lexer:
             self.current_char = ' '
             self.lex()
 
-            Switcher.from_dict({
-                (LexingState.START, LexingState.SL_COMMENT): lambda ctx: ctx.add_token(TokenType.EOF),
-                (LexingState.ML_COMMENT, LexingState.ML_COMMENT_END): lambda ctx: throw(TokenError('Unterminanted '
-                                                                                                   'multiline '
-                                                                                                   'comment')),
-                LexingState.LIT_STR: lambda ctx: throw(TokenError('Unterminated string'))
-            }).exec(self, self.state)
+            Lexer._s_fallback.exec(self, self.state)
         except TokenError as e:
             self.print_error(str(e))
             raise ValueError()
 
         return self.tokens
 
-    def lex(self):
-        Switcher.from_dict({
+    _s_main = Switcher.from_dict({
             LexingState.START: lambda ctx: ctx.lex_start(),
             LexingState.OP_MINUS: lambda ctx: ctx.lex_op_minus(),
             LexingState.OP_MINUS_2: lambda ctx: ctx.lex_op_minus_2(),
@@ -79,10 +80,12 @@ class Lexer:
             LexingState.LIT_STR: lambda ctx: ctx.lex_lit_str(),
             LexingState.LIT_STR_ESCAPE: lambda ctx: ctx.lex_lit_str_escape(),
             LexingState.IDENTIFIER: lambda ctx: ctx.lex_identifier()
-        }).exec(self, self.state)
+        })
 
-    def lex_start(self):
-        Switcher.from_dict({
+    def lex(self):
+        Lexer._s_main.exec(self, self.state)
+
+    _s_start = Switcher.from_dict({
             '+': lambda ctx: ctx.add_token(TokenType.OP_PLUS),
             '*': lambda ctx: ctx.add_token(TokenType.OP_MUL),
             '^': lambda ctx: ctx.add_token(TokenType.OP_POV),
@@ -112,155 +115,207 @@ class Lexer:
             ranges.letters: lambda ctx: ctx.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
             '\n': lambda ctx: ctx.inc_new_line(),
             ' ': lambda ctx: ()  # ignore
-        }).default(lambda ctx: throw(TokenError('Unrecognised token'))).exec(self, self.current_char)
+        }).default(lambda ctx: throw(TokenError('Unrecognised token')))
+
+    def lex_start(self):
+        Lexer._s_start.exec(self, self.current_char)
+
+    _s_op_minus = Switcher.from_dict({
+            '-': lambda ctx: ctx.to_state(LexingState.OP_MINUS_2)
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_MINUS, rollback=True))
 
     def lex_op_minus(self):
-        Switcher.from_dict({
-            '-': lambda ctx: ctx.to_state(LexingState.OP_MINUS_2)
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_MINUS, rollback=True)).exec(self, self.current_char)
+        Lexer._s_op_minus.exec(self, self.current_char)
 
-    def lex_op_minus_2(self):
-        Switcher.from_dict({
+    _s_op_minus_2 = Switcher.from_dict({
             '>': lambda ctx: ctx.add_token(TokenType.KW_TO_STDOUT),
             '-': lambda ctx: ctx.add_token(TokenType.OP_MINUS, keep_state=True)
         }).default(lambda ctx: (ctx.add_token(TokenType.OP_MINUS),
-                                ctx.add_token(TokenType.OP_MINUS))).exec(self, self.current_char)
+                                ctx.add_token(TokenType.OP_MINUS)))
 
-    def lex_op_div(self):
-        Switcher.from_dict({
+    def lex_op_minus_2(self):
+        Lexer._s_op_minus_2.exec(self, self.current_char)
+
+    _s_op_div = Switcher.from_dict({
             '/': lambda ctx: ctx.to_state(LexingState.SL_COMMENT),
             '*': lambda ctx: ctx.to_state(LexingState.ML_COMMENT)
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_DIV, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_DIV, rollback=True))
+
+    def lex_op_div(self):
+        Lexer._s_op_div.exec(self, self.current_char)
+
+    _s_sl_comment = Switcher.from_dict({
+            '\n': lambda ctx: (ctx.to_state(LexingState.START), ctx.inc_new_line())
+        })
 
     def lex_sl_comment(self):
-        Switcher.from_dict({
-            '\n': lambda ctx: (ctx.to_state(LexingState.START), ctx.inc_new_line())
-        }).exec(self, self.current_char)
+        Lexer._s_sl_comment.exec(self, self.current_char)
 
-    def lex_ml_comment(self):
-        Switcher.from_dict({
+    _s_ml_comment = Switcher.from_dict({
             '\n': lambda ctx: ctx.inc_new_line(),
             '*': lambda ctx: ctx.to_state(LexingState.ML_COMMENT_END)
-        }).exec(self, self.current_char)
+        })
+
+    def lex_ml_comment(self):
+        Lexer._s_ml_comment.exec(self, self.current_char)
+
+    _s_ml_comment_end = Switcher.from_dict({
+            '/': lambda ctx: ctx.to_state(LexingState.START)
+        }).default(lambda ctx: ctx.to_state(LexingState.ML_COMMENT))
 
     def lex_ml_comment_end(self):
-        Switcher.from_dict({
-            '/': lambda ctx: ctx.to_state(LexingState.START)
-        }).default(lambda ctx: ctx.to_state(LexingState.ML_COMMENT)).exec(self, self.current_char)
+        Lexer._s_ml_comment_end.exec(self, self.current_char)
+
+    _s_op_not = Switcher.from_dict({
+            '=': lambda ctx: ctx.add_token(TokenType.OP_NE)
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_NOT, rollback=True))
 
     def lex_op_not(self):
-        Switcher.from_dict({
-            '=': lambda ctx: ctx.add_token(TokenType.OP_NE)
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_NOT, rollback=True)).exec(self, self.current_char)
+        Lexer._s_op_not.exec(self, self.current_char)
 
-    def lex_op_assign(self):
-        Switcher.from_dict({
+    _s_op_assign = Switcher.from_dict({
             '=': lambda ctx: ctx.add_token(TokenType.OP_EQ),
             '>': lambda ctx: ctx.add_token(TokenType.KW_FAT_ARROW)
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_ASSIGN, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_ASSIGN, rollback=True))
+
+    def lex_op_assign(self):
+        Lexer._s_op_assign.exec(self, self.current_char)
+
+    _s_op_and = Switcher.from_dict({
+            '&': lambda ctx: ctx.add_token(TokenType.OP_AND)
+        }).default(lambda ctx: throw(TokenError('Missing &')))
 
     def lex_op_and(self):
-        Switcher.from_dict({
-            '&': lambda ctx: ctx.add_token(TokenType.OP_AND)
-        }).default(lambda ctx: throw(TokenError('Missing &'))).exec(self, self.current_char)
+        Lexer._s_op_and.exec(self, self.current_char)
+
+    _s_op_or = Switcher.from_dict({
+            '|': lambda ctx: ctx.add_token(TokenType.OP_OR)
+        }).default(lambda ctx: throw(TokenError('Missing |')))
 
     def lex_op_or(self):
-        Switcher.from_dict({
-            '|': lambda ctx: ctx.add_token(TokenType.OP_OR)
-        }).default(lambda ctx: throw(TokenError('Missing |'))).exec(self, self.current_char)
+        Lexer._s_op_or.exec(self, self.current_char)
 
-    def lex_op_lt(self):
-        Switcher.from_dict({
+    _s_op_lt = Switcher.from_dict({
             '=': lambda ctx: ctx.add_token(TokenType.OP_LE),
             '-': lambda ctx: ctx.to_state(LexingState.KW_FROM_STDIN)
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_LT, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_LT, rollback=True))
 
-    def lex_kw_from_stdin(self):
-        Switcher.from_dict({
+    def lex_op_lt(self):
+        Lexer._s_op_lt.exec(self, self.current_char)
+
+    _s_kw_from_stdin = Switcher.from_dict({
             '-': lambda ctx: ctx.add_token(TokenType.KW_FROM_STDIN)
         }).default(lambda ctx: (ctx.add_token(TokenType.OP_LT),
-                                ctx.add_token(TokenType.OP_MINUS, rollback=True))).exec(self, self.current_char)
+                                ctx.add_token(TokenType.OP_MINUS, rollback=True)))
+
+    def lex_kw_from_stdin(self):
+        Lexer._s_kw_from_stdin.exec(self, self.current_char)
+
+    _s_op_access = Switcher.from_dict({
+            ranges.digits: lambda ctx: (ctx.add_to_buff('.'), ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT))
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_ACCESS, rollback=True))
 
     def lex_op_access(self):
-        Switcher.from_dict({
-            ranges.digits: lambda ctx: (ctx.add_to_buff('.'), ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT))
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_ACCESS, rollback=True)).exec(self, self.current_char)
+        Lexer._s_op_access.exec(self, self.current_char)
 
-    def lex_lit_int_first_zero(self):
-        Switcher.from_dict({
+    _s_lit_int_first_zero = Switcher.from_dict({
             '.': lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_START)),
             ranges.digits: lambda ctx: throw(TokenError('Multi digit integer cannot start with 0'))
-        }).default(lambda ctx: ctx.add_token(TokenType.LIT_INT, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.LIT_INT, rollback=True))
 
-    def lex_lit_int(self):
-        Switcher.from_dict({
+    def lex_lit_int_first_zero(self):
+        Lexer._s_lit_int_first_zero.exec(self, self.current_char)
+
+    _s_lit_int = Switcher.from_dict({
             ranges.digits: lambda ctx: ctx.add_to_buff(),
             '.': lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_START)),
             '_': lambda ctx: throw(TokenError('Integer with invalid prefix')),
             ranges.letters: lambda ctx: throw(TokenError('Integer with invalid prefix'))
-        }).default(lambda ctx: ctx.add_token(TokenType.LIT_INT, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.LIT_INT, rollback=True))
+
+    def lex_lit_int(self):
+        Lexer._s_lit_int.exec(self, self.current_char)
+
+    _s_lit_float_start = Switcher.from_dict({
+            ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT)),
+        }).default(lambda ctx: ctx.add_token(TokenType.LIT_FLOAT, rollback=True))
 
     def lex_lit_float_start(self):
-        Switcher.from_dict({
-            ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT)),
-        }).default(lambda ctx: ctx.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self, self.current_char)
+        Lexer._s_lit_float_start.exec(self, self.current_char)
 
-    def lex_lit_float(self):
-        Switcher.from_dict({
+    _s_lit_float = Switcher.from_dict({
             ranges.digits: lambda ctx: ctx.add_to_buff(),
             ('e', 'E'): lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_EXP))
-        }).default(lambda ctx: ctx.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.LIT_FLOAT, rollback=True))
 
-    def lex_lit_float_exp(self):
-        Switcher.from_dict({
+    def lex_lit_float(self):
+        Lexer._s_lit_float.exec(self, self.current_char)
+
+    _s_lit_float_exp = Switcher.from_dict({
             ('+', '-'): lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_PRE_END)),
             ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_END))
         }).default(lambda ctx: throw(TokenError('After exponent has to follow number or sign'))) \
-            .exec(self, self.current_char)
+
+
+    def lex_lit_float_exp(self):
+        Lexer._s_lit_float_exp.exec(self, self.current_char)
+
+    _s_lit_float_pre_end = Switcher.from_dict({
+            ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_END))
+        }).default(lambda ctx: throw(TokenError('Exponent power is missing')))
 
     def lex_lit_float_pre_end(self):
-        Switcher.from_dict({
-            ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_END))
-        }).default(lambda ctx: throw(TokenError('Exponent power is missing'))).exec(self, self.current_char)
+        Lexer._s_lit_float_pre_end.exec(self, self.current_char)
+
+    _s_lit_float_end = Switcher.from_dict({
+            ranges.digits: lambda ctx: ctx.add_to_buff()
+        }).default(lambda ctx: ctx.add_token(TokenType.LIT_FLOAT, rollback=True))
 
     def lex_lit_float_end(self):
-        Switcher.from_dict({
-            ranges.digits: lambda ctx: ctx.add_to_buff()
-        }).default(lambda ctx: ctx.add_token(TokenType.LIT_FLOAT, rollback=True)).exec(self, self.current_char)
+        Lexer._s_lit_float_end.exec(self, self.current_char)
 
-    def lex_op_gt(self):
-        Switcher.from_dict({
+    _s_op_gt = Switcher.from_dict({
             '=': lambda ctx: ctx.add_token(TokenType.OP_GE),
             ranges.letters: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.AFTER_GT))
-        }).default(lambda ctx: ctx.add_token(TokenType.OP_GT, rollback=True)).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_token(TokenType.OP_GT, rollback=True))
+
+    def lex_op_gt(self):
+        Lexer._s_op_gt.exec(self, self.current_char)
+
+    _s_after_gt = Switcher.from_dict({
+            ranges.letters: lambda ctx: ctx.add_to_buff()
+        }).default(lambda ctx: ctx.complete_helper())
 
     def lex_after_gt(self):
-        Switcher.from_dict({
-            ranges.letters: lambda ctx: ctx.add_to_buff()
-        }).default(lambda ctx: ctx.complete_helper()).exec(self, self.current_char)
+        Lexer._s_after_gt.exec(self, self.current_char)
 
-    def lex_lit_str(self):
-        Switcher.from_dict({
+    _s_lit_str = Switcher.from_dict({
             '"': lambda ctx: ctx.add_token(TokenType.LIT_STR),
             '\\': lambda ctx: ctx.to_state(LexingState.LIT_STR_ESCAPE),
             '\n': lambda ctx: (ctx.add_to_buff(), ctx.inc_new_line())
-        }).default(lambda ctx: ctx.add_to_buff()).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.add_to_buff())
 
-    def lex_lit_str_escape(self):
-        Switcher.from_dict({
+    def lex_lit_str(self):
+        Lexer._s_lit_str.exec(self, self.current_char)
+
+    _s_lit_str_escape = Switcher.from_dict({
             '"': lambda ctx: ctx.add_to_buff('\"'),
             't': lambda ctx: ctx.add_to_buff('\t'),
             'n': lambda ctx: ctx.add_to_buff('\n')
-        }).default(lambda ctx: throw(TokenError('Unrecognized escaped character'))).exec(self, self.current_char)
+        }).default(lambda ctx: throw(TokenError('Unrecognized escaped character')))
 
+    def lex_lit_str_escape(self):
+        Lexer._s_lit_str_escape.exec(self, self.current_char)
         self.to_state(LexingState.LIT_STR)
 
-    def lex_identifier(self):
-        Switcher.from_dict({
+    _s_identifier = Switcher.from_dict({
             ranges.letters: lambda ctx: ctx.add_to_buff(),
             ranges.digits: lambda ctx: ctx.add_to_buff(),
             '_': lambda ctx: ctx.add_to_buff(),
-        }).default(lambda ctx: ctx.complete_identifier()).exec(self, self.current_char)
+        }).default(lambda ctx: ctx.complete_identifier())
+
+    def lex_identifier(self):
+        Lexer._s_identifier.exec(self, self.current_char)
 
     """
     Helper methods
