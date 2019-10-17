@@ -9,3 +9,4 @@ lower_letters = char_range('a', 'z')
 upper_letters = char_range('A', 'Z')
 letters = lower_letters + upper_letters
 digits = char_range('0', '9')
+digits_without_zero = char_range('1', '9')
