@@ -160,6 +160,7 @@ class Lexer:
         Lexer._s_ml_comment.exec(self, self.current_char)
 
     _s_ml_comment_end = Switcher.from_dict({
+            '*': lambda ctx: (), # ignore
             '/': lambda ctx: ctx.to_state(LexingState.START)
         }).default(lambda ctx: ctx.to_state(LexingState.ML_COMMENT))
 

@@ -119,6 +119,13 @@ class LexerTokensTests(TestCase):
         self.assertEqual(6, lexer.tokens[2].line_number)
         self.assertEqual(TokenType.EOF, lexer.tokens[3].type)
 
+    def test_multi_comment_a_lot_of_stars(self):
+        lexer = Lexer('/* hello ****/ a')
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
     def test_op_mul(self):
         lexer = Lexer('* /* + */ *')
 
