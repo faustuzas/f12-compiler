@@ -115,7 +115,7 @@ class Lexer:
             ranges.letters: lambda ctx: ctx.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
             '\n': lambda ctx: ctx.inc_new_line(),
             ' ': lambda ctx: ()  # ignore
-        }).default(lambda ctx: throw(TokenError('Unrecognised token')))
+        }).default(lambda ctx: throw(TokenError('Unrecognized token')))
 
     def lex_start(self):
         Lexer._s_start.exec(self, self.current_char)
@@ -255,7 +255,6 @@ class Lexer:
             ('+', '-'): lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_PRE_END)),
             ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_END))
         }).default(lambda ctx: throw(TokenError('After exponent has to follow number or sign'))) \
-
 
     def lex_lit_float_exp(self):
         Lexer._s_lit_float_exp.exec(self, self.current_char)
