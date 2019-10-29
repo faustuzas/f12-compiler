@@ -13,7 +13,8 @@ class Lexer:
     tokens: List[Token]
     token_start_line_number: int
     current_char: str
-    multiline_comment_start: int
+    multiline_comment_start_line: int
+    multiline_comment_start_offset: int
 
     def __init__(self, text: str) -> None:
         assert len(text)
@@ -28,6 +29,7 @@ class Lexer:
         self.text = text
         self.current_char = ''
         self.multiline_comment_start = 0
+        self.multiline_comment_start_offset = 0
 
     _s_fallback = Switcher.from_dict({
                 (LexingState.START, LexingState.SL_COMMENT): lambda ctx: ctx.add_token(TokenType.EOF),
@@ -37,6 +39,7 @@ class Lexer:
 
     def ml_error(self):
         self.line_number = self.multiline_comment_start
+        self.offset_in_line = self.multiline_comment_start_offset
         throw(TokenError('Unterminated multiline comment'))
     
     def lex_all(self):
@@ -375,6 +378,7 @@ class Lexer:
 
     def start_ml_comment(self):
         self.multiline_comment_start = self.line_number
+        self.multiline_comment_start_offset = self.offset_in_line
         self.to_state(LexingState.ML_COMMENT)
 
     def to_state(self, state: LexingState):
