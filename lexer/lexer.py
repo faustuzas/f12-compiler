@@ -13,6 +13,7 @@ class Lexer:
     tokens: List[Token]
     token_start_line_number: int
     current_char: str
+    multiline_comment_start: int
 
     def __init__(self, text: str) -> None:
         assert len(text)
@@ -26,15 +27,18 @@ class Lexer:
         self.token_start_line_number = 0
         self.text = text
         self.current_char = ''
+        self.multiline_comment_start = 0
 
     _s_fallback = Switcher.from_dict({
                 (LexingState.START, LexingState.SL_COMMENT): lambda ctx: ctx.add_token(TokenType.EOF),
-                (LexingState.ML_COMMENT, LexingState.ML_COMMENT_END): lambda ctx: throw(TokenError('Unterminanted '
-                                                                                                   'multiline '
-                                                                                                   'comment')),
+                (LexingState.ML_COMMENT, LexingState.ML_COMMENT_END): lambda ctx: ctx.ml_error(),
                 LexingState.LIT_STR: lambda ctx: throw(TokenError('Unterminated string'))
             })
 
+    def ml_error(self):
+        self.line_number = self.multiline_comment_start
+        throw(TokenError('Unterminated multiline comment'))
+    
     def lex_all(self):
         try:
             while self.offset < len(self.text):
@@ -138,7 +142,7 @@ class Lexer:
 
     _s_op_div = Switcher.from_dict({
             '/': lambda ctx: ctx.to_state(LexingState.SL_COMMENT),
-            '*': lambda ctx: ctx.to_state(LexingState.ML_COMMENT)
+            '*': lambda ctx: ctx.start_ml_comment()
         }).default(lambda ctx: ctx.add_token(TokenType.OP_DIV, rollback=True))
 
     def lex_op_div(self):
@@ -368,6 +372,10 @@ class Lexer:
             self.token_buffer += self.current_char
         else:
             self.token_buffer += symbol
+
+    def start_ml_comment(self):
+        self.multiline_comment_start = self.line_number
+        self.to_state(LexingState.ML_COMMENT)
 
     def to_state(self, state: LexingState):
         assert state is not None
