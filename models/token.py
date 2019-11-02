@@ -66,10 +66,11 @@ class TokenType(ExtendedEnum):
 
 
 class Token:
-    def __init__(self, token_type: TokenType, line_number: int, value='') -> None:
+    def __init__(self, token_type: TokenType, line_number: int, file_name: str, value='') -> None:
         self.type = token_type
         self.value = value
         self.line_number = line_number
+        self.file_name = file_name
 
     def __repr__(self):
         value_part = f' | {self.value}' if self.value != '' else ''

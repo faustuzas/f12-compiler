@@ -15,8 +15,9 @@ class Lexer:
     current_char: str
     multiline_comment_start_line: int
     multiline_comment_start_offset: int
+    file_name: str
 
-    def __init__(self, text: str) -> None:
+    def __init__(self, text: str, file_name: str = '') -> None:
         assert len(text)
 
         self.state = LexingState.START
@@ -30,6 +31,7 @@ class Lexer:
         self.current_char = ''
         self.multiline_comment_start = 0
         self.multiline_comment_start_offset = 0
+        self.file_name = file_name
 
     _s_fallback = Switcher.from_dict({
                 (LexingState.START, LexingState.SL_COMMENT): lambda ctx: ctx.add_token(TokenType.EOF),
@@ -360,7 +362,7 @@ class Lexer:
 
     def add_token(self, token_type: TokenType, line_number=None, rollback=False,
                   keep_state=False, with_value=True, keep_buffer=False):
-        self.tokens.append(Token(token_type, line_number if line_number else self.line_number,
+        self.tokens.append(Token(token_type, line_number if line_number else self.line_number, self.file_name,
                                  self.token_buffer if with_value else ''))
         if not keep_buffer:
             self.token_buffer = ''

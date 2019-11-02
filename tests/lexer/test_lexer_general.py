@@ -68,3 +68,11 @@ class LexerGeneralTests(TestCase):
         lexer.to_state(LexingState.OP_MINUS)
 
         self.assertEqual(LexingState.OP_MINUS, lexer.state)
+
+    def test_file_name_is_set(self):
+        lexer = Lexer('2 + 2', 'main.f12')
+
+        lexer.lex_all()
+
+        for t in lexer.tokens:
+            self.assertEqual('main.f12', t.file_name)
