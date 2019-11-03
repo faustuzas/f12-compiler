@@ -1,30 +1,12 @@
-fun labas1 {
-
+unit Human {
+    string name;
+    int age;
+    string[] addresses;
 }
 
-fun labas2(int a) {
+unit Empty {}
 
-}
-
-fun labas3(int a, bool b) {
-
-}
-
-
-fun labas4(int a, bool b) => Hello {
-
-}
-
-
-fun labas5(Papis a, bool[] b, kakis[] c) => Hello {
-
-}
-
-fun labas6 => Hello {
-
-}
-
-
-fun labas7 => Hello[] {
-
+unit Composite {
+    Human owner;
+    Empty _;
 }

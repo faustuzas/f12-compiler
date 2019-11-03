@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from models import Token, TokenType, type_tokens, primitive_types, primitive_type_tokens
+from models import Token, TokenType, type_tokens, primitive_type_tokens
 import models.ast_nodes as ast
 
 
@@ -88,7 +88,23 @@ class Parser:
         return ast.DeclVar(type_, name, value, is_constant)
 
     def parse_decl_unit(self) -> ast.DeclUnit:
-        pass
+        self.expect(TokenType.KW_UNIT)
+        name = self.expect(TokenType.IDENTIFIER)
+        self.expect(TokenType.C_CURLY_L)
+
+        fields = []
+        while not self.accept(TokenType.C_CURLY_R):
+            fields.append(self.parse_decl_unit_field())
+
+        return ast.DeclUnit(name, fields)
+
+    def parse_decl_unit_field(self) -> ast.DeclUnitField:
+        type_ = self.expect_type()
+        name = self.expect(TokenType.IDENTIFIER)
+
+        self.expect(TokenType.C_SEMI)
+
+        return ast.DeclUnitField(type_, name)
 
     def parse_helper_incl(self) -> ast.HelperInclude:
         helper_include = self.expect(TokenType.HELPER_INCLUDE)

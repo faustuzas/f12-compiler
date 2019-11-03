@@ -73,8 +73,18 @@ class DeclVar(Decl):
         self.is_constant = is_constant
 
 
+class DeclUnitField(Node):
+
+    def __init__(self, type_: Type, name) -> None:
+        self.type = type_
+        self.name = name
+
+
 class DeclUnit(Decl):
-    pass
+
+    def __init__(self, name, fields: List[DeclUnitField]) -> None:
+        self.name = name
+        self.fields = fields
 
 
 class Helper(Node):
