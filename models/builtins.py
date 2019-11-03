@@ -10,14 +10,16 @@ keywords = {
     'while': TokenType.KW_WHILE,
     'const': TokenType.KW_CONST,
     'continue': TokenType.KW_CONTINUE,
-    'break': TokenType.KW_BEAK
+    'break': TokenType.KW_BEAK,
+    'in': TokenType.KW_IN
 }
 
 primitive_types = {
     'int': TokenType.PRIMITIVE_INT,
     'float': TokenType.PRIMITIVE_FLOAT,
     'string': TokenType.PRIMITIVE_STRING,
-    'bool': TokenType.PRIMITIVE_BOOL
+    'bool': TokenType.PRIMITIVE_BOOL,
+    'void': TokenType.PRIMITIVE_VOID
 }
 
 constants = {

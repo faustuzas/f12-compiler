@@ -418,4 +418,3 @@ class Lexer:
     @staticmethod
     def line_number_prefix(number):
         return f'{number}. '
-

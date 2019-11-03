@@ -266,6 +266,14 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_ACCESS, lexer.tokens[1].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[2].type)
 
+    def test_void_type(self):
+        lexer = Lexer('void')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.PRIMITIVE_VOID, lexer.tokens[0].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
+
     def test_lit_int(self):
         lexer = Lexer('1234567890')
 
@@ -475,3 +483,13 @@ class LexerTokensTests(TestCase):
         lexer = Lexer('55555labas')
 
         self.assertRaises(ValueError, lexer.lex_all)
+
+    def test_for_each(self):
+        lexer = Lexer('each item in array')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.KW_EACH, lexer.tokens[0].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
+        self.assertEqual(TokenType.KW_IN, lexer.tokens[2].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[3].type)

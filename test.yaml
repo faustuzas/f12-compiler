@@ -1,0 +1,90 @@
+root: Program
+  root_elements:
+    [1]: DeclFun
+      name: labas2 (not_main.f12:5)
+      params:
+        [0]: FunParam
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_INT
+          name: a (not_main.f12:5)
+      return_type: TypePrimitive
+        is_array: False
+        kind: PRIMITIVE_VOID
+      statements: StatementBlock
+        statements: []
+    [2]: DeclFun
+      name: labas3 (not_main.f12:9)
+      params:
+        [0]: FunParam
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_INT
+          name: a (not_main.f12:9)
+        [1]: FunParam
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_BOOL
+          name: b (not_main.f12:9)
+      return_type: TypePrimitive
+        is_array: False
+        kind: PRIMITIVE_VOID
+      statements: StatementBlock
+        statements: []
+    [3]: DeclFun
+      name: labas4 (not_main.f12:14)
+      params:
+        [0]: FunParam
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_INT
+          name: a (not_main.f12:14)
+        [1]: FunParam
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_BOOL
+          name: b (not_main.f12:14)
+      return_type: TypeUnit
+        is_array: False
+        unit_name: Hello
+      statements: StatementBlock
+        statements: []
+    [4]: DeclFun
+      name: labas5 (not_main.f12:19)
+      params:
+        [0]: FunParam
+          type: TypeUnit
+            is_array: False
+            unit_name: Papis
+          name: a (not_main.f12:19)
+        [1]: FunParam
+          type: TypePrimitive
+            is_array: True
+            kind: PRIMITIVE_BOOL
+          name: b (not_main.f12:19)
+        [2]: FunParam
+          type: TypeUnit
+            is_array: True
+            unit_name: kakis
+          name: c (not_main.f12:19)
+      return_type: TypeUnit
+        is_array: False
+        unit_name: Hello
+      statements: StatementBlock
+        statements: []
+    [5]: DeclFun
+      name: labas6 (not_main.f12:23)
+      params: []
+      return_type: TypeUnit
+        is_array: False
+        unit_name: Hello
+      statements: StatementBlock
+        statements: []
+    [6]: DeclFun
+      name: labas7 (not_main.f12:28)
+      params: []
+      return_type: TypeUnit
+        is_array: True
+        unit_name: Hello
+      statements: StatementBlock
+        statements: []

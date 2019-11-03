@@ -50,11 +50,13 @@ class TokenType(ExtendedEnum):
     KW_CONST = 'KW_CONST'
     KW_CONTINUE = 'KW_CONTINUE'
     KW_BEAK = 'KW_BEAK'
+    KW_IN = 'KW_IN'
 
     PRIMITIVE_INT = 'PRIMITIVE_INT'
     PRIMITIVE_FLOAT = 'PRIMITIVE_FLOAT'
     PRIMITIVE_STRING = 'PRIMITIVE_STRING'
     PRIMITIVE_BOOL = 'PRIMITIVE_BOOL'
+    PRIMITIVE_VOID = 'PRIMITIVE_VOID'
 
     CONSTANT_NULL = 'CONSTANT_NULL'
     CONSTANT_TRUE = 'CONSTANT_TRUE'
@@ -75,3 +77,17 @@ class Token:
     def __repr__(self):
         value_part = f' | {self.value}' if self.value != '' else ''
         return str(self.type) + value_part
+
+
+primitive_type_tokens = [
+    TokenType.PRIMITIVE_INT,
+    TokenType.PRIMITIVE_VOID,
+    TokenType.PRIMITIVE_BOOL,
+    TokenType.PRIMITIVE_FLOAT,
+    TokenType.PRIMITIVE_STRING,
+]
+
+type_tokens = [
+    *primitive_type_tokens,
+    TokenType.IDENTIFIER
+]
