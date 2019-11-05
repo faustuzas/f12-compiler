@@ -16,7 +16,7 @@ with open(file_to_compile) as f:
         lexer = Lexer(content, file_to_compile)
         lexer.lex_all()
 
-        parser = Parser(lexer.tokens)
+        parser = Parser(lexer.tokens, content)
         ast_root = parser.parse()
 
         with FileOutput('parser-output.yaml') as output:

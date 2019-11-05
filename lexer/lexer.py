@@ -2,7 +2,7 @@ from typing import List
 from models import LexingState, Token, TokenType, LexingError
 from models.builtins import keywords, primitive_types, constants, helpers
 from utils import FasterSwitcher as Switcher, throw, ranges, printer
-
+from utils.error_printer import print_error
 
 class Lexer:
     state: LexingState
@@ -363,7 +363,7 @@ class Lexer:
     def add_token(self, token_type: TokenType, line_number=None, rollback=False,
                   keep_state=False, with_value=True, keep_buffer=False):
         self.tokens.append(Token(token_type, line_number if line_number else self.line_number, self.file_name,
-                                 self.token_buffer if with_value else ''))
+                                self.offset_in_line, self.token_buffer if with_value else ''))
         if not keep_buffer:
             self.token_buffer = ''
         if not keep_state:
@@ -401,20 +401,4 @@ class Lexer:
         printer.success(body, header)
 
     def print_error(self, cause):
-        all_lines = self.text.split('\n')
-        lines_to_show = []
-        line_in_array = self.line_number - 1
-        if self.line_number - 1 >= 1 and len(all_lines[line_in_array - 1].strip()) > 0:
-            lines_to_show.append(f'{self.line_number_prefix(self.line_number - 1)}{all_lines[line_in_array - 1]}')
-
-        lines_to_show.append(f'{self.line_number_prefix(self.line_number)}{all_lines[line_in_array]}')
-        lines_to_show.append(' ' * (self.offset_in_line + len(self.line_number_prefix(self.line_number)) - 1) + '^')
-
-        if self.line_number + 1 <= len(all_lines) and len(all_lines[line_in_array + 1].strip()) > 0:
-            lines_to_show.append(f'{self.line_number_prefix(self.line_number + 1)}{all_lines[line_in_array + 1]}')
-
-        printer.error('\n'.join(lines_to_show), f'Lexing error [{self.file_name}:{self.line_number}:{self.offset_in_line}] : {cause}')
-
-    @staticmethod
-    def line_number_prefix(number):
-        return f'{number}. '
+        print_error(self, 'Lexing', cause, self.text, self.line_number, self.offset_in_line, self.file_name)

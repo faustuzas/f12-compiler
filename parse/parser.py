@@ -2,17 +2,18 @@ from typing import List, Union
 
 from models import Token, TokenType, type_tokens, primitive_type_tokens, ParsingError
 import models.ast_nodes as ast
-from utils import printer
-
+from utils.error_printer import print_error as p_error
 
 class Parser:
 
+    text: str
     tokens: List[Token]
     offset: int
 
-    def __init__(self, tokens: List[Token]) -> None:
+    def __init__(self, tokens: List[Token], text) -> None:
         self.tokens = tokens
         self.offset = 0
+        self.text = text
 
     def parse(self) -> ast.Program:
         root_elements = []
@@ -454,7 +455,8 @@ class Parser:
 
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]
-        printer.error('', f'Parsing error [{token.file_name}:{token.line_number}] {str(token.type)}: {error.message}')
+        # TODO: change error message into more specific
+        p_error(self, 'Parsing', 'Unexpected symbol', self.text, token.line_number, token.offset_in_line, token.file_name)
 
     @staticmethod
     def is_type_token(token_type: TokenType):
