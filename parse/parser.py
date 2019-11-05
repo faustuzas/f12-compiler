@@ -36,7 +36,7 @@ class Parser:
             return self.parse_decl_fun()
 
         if self.is_next_token_var_dec():
-            return self.parse_decl_var()
+            return ast.DeclVar(*self.parse_decl_var())
 
         if self.next_token_type() == TokenType.KW_UNIT:
             return self.parse_decl_unit()
@@ -82,7 +82,7 @@ class Parser:
         name = self.expect(TokenType.IDENTIFIER, 'identifier')
         return ast.FunParam(type_, name)
 
-    def parse_decl_var(self) -> ast.DeclVar:
+    def parse_decl_var(self) -> (ast.Type, Token, ast.Expr, bool):
         is_constant = self.accept(TokenType.KW_CONST) is not None
         type_ = self.expect_type()
         name = self.expect(TokenType.IDENTIFIER, 'identifier')
@@ -94,7 +94,7 @@ class Parser:
 
         self.expect(TokenType.C_SEMI, f'";"')
 
-        return ast.DeclVar(type_, name, value, is_constant)
+        return type_, name, value, is_constant
 
     def parse_decl_unit(self) -> ast.DeclUnit:
         self.expect(TokenType.KW_UNIT, 'unit keyword')
@@ -130,11 +130,9 @@ class Parser:
 
         return ast.StmntBlock(statements)
 
-    # TODO: Is statement derivative of Decl? Or how we should treat variable declarations if we parsing them as
-    #  statements
-    def parse_statement(self):
+    def parse_statement(self) -> ast.Stmnt:
         if self.is_next_token_var_dec():
-            return self.parse_decl_var()
+            return ast.StmntDeclVar(*self.parse_decl_var())
 
         if self.accept(TokenType.C_SEMI):
             return ast.StmntEmpty()

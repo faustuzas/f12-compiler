@@ -1,10 +1,11 @@
+const int a = 5;
+int a = 5;
+
+const opa[] c = 5;
+
 fun labas {
+    const int a = 5;
+    int a = 5;
 
-    break;
-
-    continue;
-
-    ret;
-
-    ret a;
+    const opa[] c = 5;
 }

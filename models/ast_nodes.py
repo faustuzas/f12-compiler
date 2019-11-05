@@ -203,6 +203,15 @@ class StmntEmpty(Stmnt):
     pass
 
 
+class StmntDeclVar(Stmnt):
+
+    def __init__(self, type_: Type, name, value=None, is_constant=False) -> None:
+        self.type = type_
+        self.name = name
+        self.value = value
+        self.is_constant = is_constant
+
+
 class StmntIf(Stmnt):
 
     def __init__(self, condition: Expr, stmnt_block, else_clause=None) -> None:

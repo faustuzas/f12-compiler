@@ -1,20 +1,51 @@
 root: Program
   root_elements: 
-    [0]: DeclFun
-      name: IDENTIFIER | labas (not_main.f12:1)
+    [0]: DeclVar
+      type: TypePrimitive
+        kind: PRIMITIVE_INT (not_main.f12:1)
+      name: IDENTIFIER | a (not_main.f12:1)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:1)
+      is_constant: True
+    [1]: DeclVar
+      type: TypePrimitive
+        kind: PRIMITIVE_INT (not_main.f12:2)
+      name: IDENTIFIER | a (not_main.f12:2)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:2)
+      is_constant: False
+    [2]: DeclVar
+      type: TypeArrayUnit
+        unit_name: IDENTIFIER | opa (not_main.f12:4)
+      name: IDENTIFIER | c (not_main.f12:4)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:4)
+      is_constant: True
+    [3]: DeclFun
+      name: IDENTIFIER | labas (not_main.f12:6)
       params: []
       return_type: TypePrimitive
         kind: PRIMITIVE_VOID
       statements: StmntBlock
         statements: 
-          [0]: StmntBreak
-            token: KW_BREAK (not_main.f12:3)
-          [1]: StmntContinue
-            token: KW_CONTINUE (not_main.f12:5)
-          [2]: StmntReturn
-            token: KW_RETURN (not_main.f12:7)
-            value: None
-          [3]: StmntReturn
-            token: KW_RETURN (not_main.f12:9)
-            value: ExprVar
-              identifier: IDENTIFIER | a (not_main.f12:9)
+          [0]: StmntDeclVar
+            type: TypePrimitive
+              kind: PRIMITIVE_INT (not_main.f12:7)
+            name: IDENTIFIER | a (not_main.f12:7)
+            value: ExprLitInt
+              value: LIT_INT | 5 (not_main.f12:7)
+            is_constant: True
+          [1]: StmntDeclVar
+            type: TypePrimitive
+              kind: PRIMITIVE_INT (not_main.f12:8)
+            name: IDENTIFIER | a (not_main.f12:8)
+            value: ExprLitInt
+              value: LIT_INT | 5 (not_main.f12:8)
+            is_constant: False
+          [2]: StmntDeclVar
+            type: TypeArrayUnit
+              unit_name: IDENTIFIER | opa (not_main.f12:10)
+            name: IDENTIFIER | c (not_main.f12:10)
+            value: ExprLitInt
+              value: LIT_INT | 5 (not_main.f12:10)
+            is_constant: True
