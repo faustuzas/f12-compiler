@@ -1,12 +1,58 @@
 root: Program
   root_elements: 
-    [0]: DeclFun
-      name: labas (not_main.f12:1)
-      params: []
-      return_type: TypePrimitive
-        is_array: False
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
-        statements: 
-          [0]: StmntReturn
-            value: None
+    [0]: DeclVar
+      type: TypePrimitive
+        kind: PRIMITIVE_INT (not_main.f12:3)
+      name: IDENTIFIER | a (not_main.f12:3)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:3)
+      is_constant: False
+    [1]: DeclVar
+      type: TypePrimitive
+        kind: PRIMITIVE_INT (not_main.f12:4)
+      name: IDENTIFIER | a (not_main.f12:4)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:4)
+      is_constant: True
+    [2]: DeclVar
+      type: TypeArrayPrimitive
+        kind: PRIMITIVE_INT (not_main.f12:5)
+      name: IDENTIFIER | a (not_main.f12:5)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:5)
+      is_constant: False
+    [3]: DeclVar
+      type: TypeArrayPrimitive
+        kind: PRIMITIVE_INT (not_main.f12:6)
+      name: IDENTIFIER | a (not_main.f12:6)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:6)
+      is_constant: True
+    [4]: DeclVar
+      type: TypeUnit
+        unit_name: IDENTIFIER | labas (not_main.f12:8)
+      name: IDENTIFIER | a (not_main.f12:8)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:8)
+      is_constant: False
+    [5]: DeclVar
+      type: TypeUnit
+        unit_name: IDENTIFIER | labas (not_main.f12:9)
+      name: IDENTIFIER | a (not_main.f12:9)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:9)
+      is_constant: True
+    [6]: DeclVar
+      type: TypeArrayUnit
+        unit_name: IDENTIFIER | labas (not_main.f12:10)
+      name: IDENTIFIER | a (not_main.f12:10)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:10)
+      is_constant: False
+    [7]: DeclVar
+      type: TypeArrayUnit
+        unit_name: IDENTIFIER | labas (not_main.f12:11)
+      name: IDENTIFIER | a (not_main.f12:11)
+      value: ExprLitInt
+        value: LIT_INT | 5 (not_main.f12:11)
+      is_constant: True

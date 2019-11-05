@@ -11,23 +11,27 @@ class Node(ABC):
 
 
 class Type(Node):
-
-    def __init__(self, is_array):
-        self.is_array = is_array
+    pass
 
 
 class TypePrimitive(Type):
 
-    def __init__(self, kind, is_array=False):
-        super().__init__(is_array)
+    def __init__(self, kind):
         self.kind = kind
+
+
+class TypeArrayPrimitive(TypePrimitive):
+    pass
 
 
 class TypeUnit(Type):
 
-    def __init__(self, unit_name, is_array=False):
-        super().__init__(is_array)
+    def __init__(self, unit_name):
         self.unit_name = unit_name
+
+
+class TypeArrayUnit(TypeUnit):
+    pass
 
 
 class Expr(Node):

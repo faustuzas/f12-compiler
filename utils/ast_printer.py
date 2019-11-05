@@ -74,7 +74,7 @@ class AstPrinter:
         self.indent_level -= self.indent_magnifier
 
     def print_token(self, title, token: Token):
-        self.print_text(title, f'{token.value} ({token.file_name}:{token.line_number})')
+        self.print_text(title, f'{str(token)} ({token.file_name}:{token.line_number})')
 
     @staticmethod
     def is_primitive(obj):

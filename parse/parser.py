@@ -453,9 +453,15 @@ class Parser:
             is_array = False
 
         if type_token.type in primitive_type_tokens:
-            return ast.TypePrimitive(type_token.type, is_array)
+            if is_array:
+                return ast.TypeArrayPrimitive(type_token)
+
+            return ast.TypePrimitive(type_token)
         else:
-            return ast.TypeUnit(type_token.value, is_array)
+            if is_array:
+                return ast.TypeArrayUnit(type_token)
+
+            return ast.TypeUnit(type_token)
 
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]

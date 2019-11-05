@@ -4,6 +4,7 @@ from models.builtins import keywords, primitive_types, constants, helpers
 from utils import FasterSwitcher as Switcher, throw, ranges, printer
 from utils.error_printer import print_error
 
+
 class Lexer:
     state: LexingState
     token_buffer: str
