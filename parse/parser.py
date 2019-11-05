@@ -139,21 +139,22 @@ class Parser:
         if self.accept(TokenType.C_SEMI):
             return ast.StmntEmpty()
 
-        if self.accept(TokenType.KW_BREAK):
-            result = ast.StmntBreak()
+        if self.next_token_type() == TokenType.KW_BREAK:
+            result = ast.StmntBreak(self.expect(TokenType.KW_BREAK, 'keyword break'))
             self.expect(TokenType.C_SEMI, '";"')
             return result
 
-        if self.accept(TokenType.KW_RETURN):
+        if self.next_token_type() == TokenType.KW_RETURN:
+            ret_token = self.expect(TokenType.KW_RETURN, 'keyword ret')
             if self.accept(TokenType.C_SEMI):
-                return ast.StmntReturn(None)
+                return ast.StmntReturn(ret_token)
 
-            result = ast.StmntReturn(self.parse_expr())
+            result = ast.StmntReturn(ret_token, self.parse_expr())
             self.expect(TokenType.C_SEMI, '";"')
             return result
 
-        if self.accept(TokenType.KW_CONTINUE):
-            result = ast.StmntContinue()
+        if self.next_token_type() == TokenType.KW_CONTINUE:
+            result = ast.StmntContinue(self.expect(TokenType.KW_CONTINUE, 'keyword continue'))
             self.expect(TokenType.C_SEMI, '";"')
             return result
 

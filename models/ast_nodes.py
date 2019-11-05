@@ -211,17 +211,24 @@ class StmntIf(Stmnt):
         self.else_clause = else_clause
 
 
-class StmntBreak(Stmnt):
+class StmntControl(Stmnt):
+
+    def __init__(self, token) -> None:
+        self.token = token
+
+
+class StmntBreak(StmntControl):
     pass
 
 
-class StmntContinue(Stmnt):
+class StmntContinue(StmntControl):
     pass
 
 
-class StmntReturn(Stmnt):
+class StmntReturn(StmntControl):
 
-    def __init__(self, value: Expr = None) -> None:
+    def __init__(self, token, value: Expr = None) -> None:
+        super().__init__(token)
         self.value = value
 
 

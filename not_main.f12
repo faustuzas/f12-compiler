@@ -1,12 +1,10 @@
-// fun labas {
+fun labas {
 
-    int a = 5;
-    const int a = 5;
-    int[] a = 5;
-    const int[] a = 5;
+    break;
 
-    labas a = 5;
-    const labas a = 5;
-    labas[] a = 5;
-    const labas[] a = 5;
-// }
+    continue;
+
+    ret;
+
+    ret a;
+}
