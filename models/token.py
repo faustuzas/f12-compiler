@@ -52,7 +52,6 @@ class TokenType(ExtendedEnum):
     KW_CONTINUE = 'KW_CONTINUE'
     KW_BREAK = 'KW_BREAK'
     KW_IN = 'KW_IN'
-    KW_DO = 'KW_DO'
 
     PRIMITIVE_INT = 'PRIMITIVE_INT'
     PRIMITIVE_FLOAT = 'PRIMITIVE_FLOAT'

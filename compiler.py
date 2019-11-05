@@ -23,5 +23,4 @@ with open(file_to_compile) as f:
             ast_printer = AstPrinter(output)
             ast_printer.print('root', ast_root)
     except ValueError as e:
-        print("Exception occurred")
         pass

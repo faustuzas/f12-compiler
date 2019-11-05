@@ -136,7 +136,7 @@ root: Program
                   value: 3 (main.f12:26)
                 [3]: ExprLitInt
                   value: 4 (main.f12:26)
-            is_constant: False
+            is_constant: True
           [6]: DeclVar
             type: TypePrimitive
               is_array: True
@@ -151,70 +151,56 @@ root: Program
                   identifier: array (main.f12:29)
                 index_expr: ExprLitInt
                   value: 2 (main.f12:29)
-          [8]: DeclVar
-            type: TypePrimitive
-              is_array: True
-              kind: PRIMITIVE_INT
-            name: array3 (main.f12:31)
-            value: ExprLitArray
-              value: 
-                [0]: ExprLitInt
-                  value: 1 (main.f12:31)
-                [1]: ExprLitInt
-                  value: 2 (main.f12:31)
-                [2]: ExprLitInt
-                  value: 3 (main.f12:31)
-            is_constant: True
-          [9]: StmntEach
+          [8]: StmntEach
             element: DeclTmpVar
-              name: o (main.f12:34)
+              name: o (main.f12:32)
             array: ExprVar
-              identifier: array (main.f12:34)
+              identifier: array (main.f12:32)
             stmnt_block: StmntBlock
               statements: 
                 [0]: StmntToStdout
                   values: 
                     [0]: ExprVar
-                      identifier: x (main.f12:35)
-          [10]: StmntIf
+                      identifier: x (main.f12:33)
+          [9]: StmntIf
             condition: ExprGt
               left: ExprVar
-                identifier: y (main.f12:38)
+                identifier: y (main.f12:36)
               right: ExprLitInt
-                value: 5 (main.f12:38)
+                value: 5 (main.f12:36)
             stmnt_block: StmntBlock
               statements: []
             else_clause: StmntIf
               condition: ExprEq
                 left: ExprVar
-                  identifier: y (main.f12:40)
+                  identifier: y (main.f12:38)
                 right: ExprLitInt
-                  value: 0 (main.f12:40)
+                  value: 0 (main.f12:38)
               stmnt_block: StmntBlock
                 statements: []
               else_clause: StmntBlock
                 statements: []
-          [11]: StmntIf
+          [10]: StmntIf
             condition: ExprVar
-              identifier: a (main.f12:46)
+              identifier: a (main.f12:44)
             stmnt_block: StmntBlock
               statements: 
                 [0]: StmntEmpty
             else_clause: None
-          [12]: StmntWhile
+          [11]: StmntWhile
             condition: ExprNe
               left: ExprVar
-                identifier: y (main.f12:48)
+                identifier: y (main.f12:46)
               right: ExprLitInt
-                value: 0 (main.f12:48)
+                value: 0 (main.f12:46)
             stmnt_block: StmntBlock
               statements: 
                 [0]: StmntIf
                   condition: ExprEq
                     left: ExprVar
-                      identifier: y (main.f12:51)
+                      identifier: y (main.f12:49)
                     right: ExprLitInt
-                      value: 1000 (main.f12:51)
+                      value: 1000 (main.f12:49)
                   stmnt_block: StmntBlock
                     statements: 
                       [0]: StmntBreak
@@ -222,27 +208,26 @@ root: Program
                 [1]: StmntIf
                   condition: ExprEq
                     left: ExprVar
-                      identifier: y (main.f12:55)
+                      identifier: y (main.f12:53)
                     right: ExprLitInt
-                      value: 59 (main.f12:55)
+                      value: 59 (main.f12:53)
                   stmnt_block: StmntBlock
                     statements: 
                       [0]: StmntContinue
                   else_clause: None
-          [13]: DeclVar
+          [12]: DeclVar
             type: TypePrimitive
               is_array: False
               kind: PRIMITIVE_STRING
-            name: name (main.f12:60)
+            name: name (main.f12:58)
             value: ExprFromStdin
             is_constant: False
-          [14]: StmntToStdout
+          [13]: StmntToStdout
             values: 
-              [0]: ExprAdd
-                left: ExprLitStr
-                  value: Hello,  (main.f12:61)
-                right: ExprVar
-                  identifier: name (main.f12:61)
-          [15]: StmntReturn
+              [0]: ExprLitStr
+                value: Hello,  (main.f12:59)
+              [1]: ExprVar
+                identifier: name (main.f12:59)
+          [14]: StmntReturn
             value: ExprLitInt
-              value: 0 (main.f12:63)
+              value: 0 (main.f12:61)

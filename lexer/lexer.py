@@ -413,7 +413,7 @@ class Lexer:
         if self.line_number + 1 <= len(all_lines) and len(all_lines[line_in_array + 1].strip()) > 0:
             lines_to_show.append(f'{self.line_number_prefix(self.line_number + 1)}{all_lines[line_in_array + 1]}')
 
-        printer.error('\n'.join(lines_to_show), f'Lexing error [{self.line_number}:{self.offset_in_line}] : {cause}')
+        printer.error('\n'.join(lines_to_show), f'Lexing error [{self.file_name}:{self.line_number}:{self.offset_in_line}] : {cause}')
 
     @staticmethod
     def line_number_prefix(number):

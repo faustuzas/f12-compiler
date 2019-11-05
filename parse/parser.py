@@ -178,7 +178,6 @@ class Parser:
         item = self.expect(TokenType.IDENTIFIER)
         self.expect(TokenType.KW_IN)
         array = self.parse_expr()
-        self.expect(TokenType.KW_DO)
         stmnt_block = self.parse_block()
         return ast.StmntEach(ast.DeclTmpVar(item), array, stmnt_block)
 
@@ -407,7 +406,7 @@ class Parser:
             self.offset += 1
             return curr_token
 
-        raise ParsingError(f'Expected {token_type}. Got: {curr_token.type}', curr_token)
+        raise ParsingError(f'Expected {token_type}', curr_token)
 
     def get_next_token(self):
         token = self.tokens[self.offset]
@@ -455,7 +454,7 @@ class Parser:
 
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]
-        printer.error('', f'Parsing error [{token}:{token.file_name}:{token.line_number}] : {error.message}')
+        printer.error('', f'Parsing error [{token.file_name}:{token.line_number}] {str(token.type)}: {error.message}')
 
     @staticmethod
     def is_type_token(token_type: TokenType):

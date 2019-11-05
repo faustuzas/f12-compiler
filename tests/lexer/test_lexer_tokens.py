@@ -481,7 +481,7 @@ class LexerTokensTests(TestCase):
         self.assertRaises(ValueError, lexer.lex_all)
 
     def test_for_each(self):
-        lexer = Lexer('foreach item in array do')
+        lexer = Lexer('foreach item in array')
 
         lexer.lex_all()
 
@@ -489,7 +489,6 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
         self.assertEqual(TokenType.KW_IN, lexer.tokens[2].type)
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[3].type)
-        self.assertEqual(TokenType.KW_DO, lexer.tokens[4].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[5].type)
 
     def test_u_minuses(self):
