@@ -6,11 +6,12 @@ keywords = {
     'ret': TokenType.KW_RETURN,
     'unit': TokenType.KW_UNIT,
     'else': TokenType.KW_ELSE,
-    'foreach': TokenType.KW_EACH,
+    'each': TokenType.KW_EACH,
     'while': TokenType.KW_WHILE,
     'const': TokenType.KW_CONST,
     'continue': TokenType.KW_CONTINUE,
-    'break': TokenType.KW_BREAK
+    'break': TokenType.KW_BREAK,
+    'in': TokenType.KW_IN
 }
 
 primitive_types = {
