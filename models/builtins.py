@@ -10,8 +10,7 @@ keywords = {
     'while': TokenType.KW_WHILE,
     'const': TokenType.KW_CONST,
     'continue': TokenType.KW_CONTINUE,
-    'break': TokenType.KW_BREAK,
-    'in': TokenType.KW_IN
+    'break': TokenType.KW_BREAK
 }
 
 primitive_types = {
