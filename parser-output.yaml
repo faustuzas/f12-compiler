@@ -1,0 +1,45 @@
+root: Program
+  root_elements: 
+    [0]: DeclVar
+      type: TypePrimitive
+        is_array: False
+        kind: PRIMITIVE_INT
+      name: a (not_main.f12:1)
+      value: ExprAssign
+        object: ExprVar
+          identifier: b (not_main.f12:1)
+        value: ExprAssign
+          object: ExprAccess
+            object: ExprVar
+              identifier: c (not_main.f12:1)
+            field: hello (not_main.f12:1)
+          value: ExprAssign
+            object: ExprArrayAccess
+              array: ExprVar
+                identifier: yeep (not_main.f12:1)
+              index_expr: ExprAdd
+                left: ExprAdd
+                  left: ExprLitInt
+                    value: 1 (not_main.f12:1)
+                  right: ExprLitInt
+                    value: 5 (not_main.f12:1)
+                right: ExprLitInt
+                  value: 6 (not_main.f12:1)
+            value: ExprAssign
+              object: ExprAccess
+                object: ExprArrayAccess
+                  array: ExprVar
+                    identifier: ups (not_main.f12:1)
+                  index_expr: ExprLitInt
+                    value: 3 (not_main.f12:1)
+                field: f (not_main.f12:1)
+              value: ExprUMinus
+                expr: ExprUMinus
+                  expr: ExprUMinus
+                    expr: ExprAccess
+                      object: ExprAccess
+                        object: ExprVar
+                          identifier: ka_tu (not_main.f12:1)
+                        field: nieko (not_main.f12:1)
+                      field: tu (not_main.f12:1)
+      is_constant: True

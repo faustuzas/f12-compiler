@@ -493,3 +493,19 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
         self.assertEqual(TokenType.KW_IN, lexer.tokens[2].type)
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[3].type)
+
+    def test_u_minuses(self):
+        lexer = Lexer('int a = ----5;')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.PRIMITIVE_INT, lexer.tokens[0].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
+        self.assertEqual(TokenType.OP_ASSIGN, lexer.tokens[2].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[3].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[4].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[5].type)
+        self.assertEqual(TokenType.OP_MINUS, lexer.tokens[6].type)
+        self.assertEqual(TokenType.LIT_INT, lexer.tokens[7].type)
+        self.assertEqual(TokenType.C_SEMI, lexer.tokens[8].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[9].type)

@@ -2,13 +2,39 @@ from models import Token, TokenType
 from models.ast_nodes import Node
 
 
+class ConsoleOutput:
+
+    @staticmethod
+    def out(*args):
+        print(*args)
+
+
+class FileOutput:
+
+    def __init__(self, file_name) -> None:
+        self.fd = open(file_name, 'w')
+
+    def out(self, *args):
+        for arg in args:
+            self.fd.write(arg)
+        self.fd.write('\n')
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.fd.close()
+        return True
+
+
 class AstPrinter:
     indent_level: int
     indent_magnifier: int
 
-    def __init__(self) -> None:
+    def __init__(self, output=ConsoleOutput()) -> None:
         self.indent_level = 0
         self.indent_magnifier = 2
+        self.output = output
 
     def print(self, title, obj):
         if obj is None:
@@ -28,7 +54,7 @@ class AstPrinter:
 
     def print_text(self, title, text: str):
         prefix = ' ' * self.indent_level
-        print(f'{prefix}{title}: {text}')
+        self.output.out(f'{prefix}{title}: {text}')
 
     def print_list(self, title, array: list):
         if not array:

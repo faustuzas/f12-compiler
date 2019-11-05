@@ -140,7 +140,7 @@ class Lexer:
             '>': lambda ctx: ctx.add_token(TokenType.KW_TO_STDOUT),
             '-': lambda ctx: ctx.add_token(TokenType.OP_MINUS, keep_state=True)
         }).default(lambda ctx: (ctx.add_token(TokenType.OP_MINUS),
-                                ctx.add_token(TokenType.OP_MINUS)))
+                                ctx.add_token(TokenType.OP_MINUS, rollback=True)))
 
     def lex_op_minus_2(self):
         Lexer._s_op_minus_2.exec(self, self.current_char)

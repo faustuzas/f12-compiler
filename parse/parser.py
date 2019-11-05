@@ -28,7 +28,7 @@ class Parser:
         if self.next_token_type() == TokenType.KW_FUN:
             return self.parse_decl_fun()
 
-        if Parser.is_type_token(self.next_token_type()):
+        if Parser.is_type_token(self.next_token_type()) or self.next_token_type() == TokenType.KW_CONST:
             return self.parse_decl_var()
 
         if self.next_token_type() == TokenType.KW_UNIT:
@@ -85,6 +85,8 @@ class Parser:
         else:
             value = None
 
+        self.expect(TokenType.C_SEMI)
+
         return ast.DeclVar(type_, name, value, is_constant)
 
     def parse_decl_unit(self) -> ast.DeclUnit:
@@ -123,7 +125,175 @@ class Parser:
         pass
 
     def parse_expr(self) -> ast.Expr:
-        pass
+        return self.parse_expr_10()
+
+    def parse_expr_10(self) -> ast.Expr:
+        result = self.parse_expr_9()
+
+        if self.accept(TokenType.OP_ASSIGN):
+            if Parser.is_assignable(result):
+                return ast.ExprAssign(result, self.parse_expr_10())
+            raise ValueError(f'You cannot assign to {type(result).__name__}')
+
+        return result
+
+    def parse_expr_9(self) -> ast.Expr:
+        result = self.parse_expr_8()
+
+        while True:
+            if self.accept(TokenType.OP_OR):
+                result = ast.ExprOr(result, self.parse_expr_8())
+            else:
+                break
+
+        return result
+
+    def parse_expr_8(self) -> ast.Expr:
+        result = self.parse_expr_7()
+
+        while True:
+            if self.accept(TokenType.OP_AND):
+                result = ast.ExprAnd(result, self.parse_expr_7())
+            else:
+                break
+
+        return result
+
+    def parse_expr_7(self) -> ast.Expr:
+        result = self.parse_expr_6()
+
+        while True:
+            if self.accept(TokenType.OP_EQ):
+                result = ast.ExprEq(result, self.parse_expr_6())
+            elif self.accept(TokenType.OP_NE):
+                result = ast.ExprNe(result, self.parse_expr_6())
+            else:
+                break
+
+        return result
+
+    def parse_expr_6(self) -> ast.Expr:
+        left = self.parse_expr_5()
+
+        if self.accept(TokenType.OP_GT):
+            return ast.ExprGt(left, self.parse_expr_5())
+
+        if self.accept(TokenType.OP_GE):
+            return ast.ExprGe(left, self.parse_expr_5())
+
+        if self.accept(TokenType.OP_LT):
+            return ast.ExprLt(left, self.parse_expr_5())
+
+        if self.accept(TokenType.OP_LE):
+            return ast.ExprLe(left, self.parse_expr_5())
+
+        return left
+
+    def parse_expr_5(self) -> ast.Expr:
+        result = self.parse_expr_4()
+
+        while True:
+            if self.accept(TokenType.OP_PLUS):
+                result = ast.ExprAdd(result, self.parse_expr_4())
+            elif self.accept(TokenType.OP_MINUS):
+                result = ast.ExprSub(result, self.parse_expr_4())
+            else:
+                break
+
+        return result
+
+    def parse_expr_4(self) -> ast.Expr:
+        result = self.parse_expr_3()
+
+        while True:
+            if self.accept(TokenType.OP_MUL):
+                result = ast.ExprMul(result, self.parse_expr_3())
+            elif self.accept(TokenType.OP_DIV):
+                result = ast.ExprDiv(result, self.parse_expr_3())
+            elif self.accept(TokenType.OP_MOD):
+                result = ast.ExprMod(result, self.parse_expr_3())
+            else:
+                break
+
+        return result
+
+    def parse_expr_3(self) -> ast.Expr:
+        if self.accept(TokenType.OP_PLUS):
+            return ast.ExprUPlus(self.parse_expr_3())
+
+        elif self.accept(TokenType.OP_MINUS):
+            return ast.ExprUMinus(self.parse_expr_3())
+
+        return self.parse_expr_2()
+
+    def parse_expr_2(self) -> ast.Expr:
+        result = self.parse_expr_1()
+
+        while True:
+            if self.accept(TokenType.OP_POV):
+                result = ast.ExprPow(self.parse_expr_1(), result)
+            else:
+                break
+
+        return result
+
+    def parse_expr_1(self) -> ast.Expr:
+        result = self.parse_expr_0()
+
+        while True:
+            if self.accept(TokenType.C_SQUARE_L):
+                index = self.parse_expr()
+                self.expect(TokenType.C_SQUARE_R)
+                result = ast.ExprArrayAccess(result, index)
+            elif self.accept(TokenType.OP_ACCESS):
+                result = ast.ExprAccess(result, self.expect(TokenType.IDENTIFIER))
+            else:
+                break
+
+        return result
+
+    def parse_expr_0(self):
+        curr_token = self.get_next_token()
+
+        if curr_token.type == TokenType.LIT_STR:
+            return ast.ExprLitStr(curr_token)
+
+        if curr_token.type == TokenType.LIT_FLOAT:
+            return ast.ExprLitFloat(curr_token)
+
+        if curr_token.type == TokenType.LIT_INT:
+            return ast.ExprLitInt(curr_token)
+
+        if curr_token.type == TokenType.CONSTANT_TRUE or curr_token.type == TokenType.CONSTANT_FALSE:
+            return ast.ExprLitBool(curr_token)
+
+        if curr_token.type == TokenType.CONSTANT_NULL:
+            return ast.ExprLitNull(curr_token)
+
+        if curr_token.type == TokenType.C_SQUARE_L:
+            items = []
+            while not self.accept(TokenType.C_SQUARE_R):
+                items.append(self.parse_expr())
+                self.accept(TokenType.C_COMMA)
+            return ast.ExprLitArray(items)
+
+        if curr_token.type == TokenType.C_ROUND_L:
+            result = self.parse_expr()
+            self.expect(TokenType.C_ROUND_R)
+            return result
+
+        if curr_token.type == TokenType.KW_FROM_STDIN:
+            return ast.ExprFromStdin()
+
+        if curr_token.type == TokenType.IDENTIFIER:
+            if self.accept(TokenType.C_ROUND_L):
+                params = []
+                while not self.accept(TokenType.C_ROUND_R):
+                    params.append(self.parse_expr())
+                    self.accept(TokenType.C_COMMA)
+                return ast.ExprFnCall(curr_token, params)
+
+            return ast.ExprVar(curr_token)
 
     """
     Helper methods
@@ -172,3 +342,8 @@ class Parser:
     @staticmethod
     def is_type_token(token_type: TokenType):
         return token_type in type_tokens
+
+    @staticmethod
+    def is_assignable(expr: ast.Expr) -> bool:
+        return type(expr) in (ast.ExprAccess, ast.ExprArrayAccess, ast.ExprVar)
+

@@ -34,6 +34,189 @@ class Expr(Node):
     pass
 
 
+class ExprOr(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprAnd(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprEq(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprNe(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprGt(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprGe(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprLt(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprLe(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprAdd(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprSub(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprMul(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprDiv(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprMod(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprUPlus(Expr):
+
+    def __init__(self, expr) -> None:
+        self.expr = expr
+
+
+class ExprUMinus(Expr):
+
+    def __init__(self, expr) -> None:
+        self.expr = expr
+
+
+class ExprPow(Expr):
+
+    def __init__(self, left, right) -> None:
+        self.left = left
+        self.right = right
+
+
+class ExprFnCall(Expr):
+
+    def __init__(self, function_name, params) -> None:
+        self.function_name = function_name
+        self.params = params
+
+
+class ExprAccess(Expr):
+
+    def __init__(self, obj, field) -> None:
+        self.object = obj
+        self.field = field
+
+
+class ExprAssign(Expr):
+
+    def __init__(self, obj, value) -> None:
+        self.object = obj
+        self.value = value
+
+
+class ExprLit(Expr):
+
+    def __init__(self, value):
+        self.value = value
+
+
+class ExprLitStr(ExprLit):
+    pass
+
+
+class ExprLitFloat(ExprLit):
+    pass
+
+
+class ExprLitInt(ExprLit):
+    pass
+
+
+class ExprLitBool(ExprLit):
+    pass
+
+
+class ExprLitArray(ExprLit):
+    pass
+
+
+class ExprLitNull(ExprLit):
+    pass
+
+
+class ExprVar(Expr):
+
+    def __init__(self, identifier):
+        self.identifier = identifier
+
+
+class ExprFromStdin(Expr):
+    pass
+
+
+class ExprArrayAccess(Expr):
+    def __init__(self, array, index_expr):
+        self.array = array
+        self.index_expr = index_expr
+
+
+class ExprCreateUnit(Expr):
+    def __init__(self, unit_name, args):
+        self.unit_name = unit_name
+        self.args = args
+
+
 class Statement(Node):
     pass
 
