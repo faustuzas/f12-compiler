@@ -226,10 +226,6 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.OP_OR, lexer.tokens[0].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
-    def test_op_or_error(self):
-        lexer = Lexer('|')
-        self.assertRaises(ValueError, lexer.lex_all)
-
     def test_op_lt(self):
         lexer = Lexer('<')
 
@@ -485,7 +481,7 @@ class LexerTokensTests(TestCase):
         self.assertRaises(ValueError, lexer.lex_all)
 
     def test_for_each(self):
-        lexer = Lexer('each item in array')
+        lexer = Lexer('foreach item in array do')
 
         lexer.lex_all()
 
@@ -493,6 +489,8 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
         self.assertEqual(TokenType.KW_IN, lexer.tokens[2].type)
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[3].type)
+        self.assertEqual(TokenType.KW_DO, lexer.tokens[4].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[5].type)
 
     def test_u_minuses(self):
         lexer = Lexer('int a = ----5;')
@@ -509,3 +507,13 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.LIT_INT, lexer.tokens[7].type)
         self.assertEqual(TokenType.C_SEMI, lexer.tokens[8].type)
         self.assertEqual(TokenType.EOF, lexer.tokens[9].type)
+
+    def test_unit_create_op(self):
+        lexer = Lexer('|a|')
+
+        lexer.lex_all()
+
+        self.assertEqual(TokenType.C_PIPE, lexer.tokens[0].type)
+        self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
+        self.assertEqual(TokenType.C_PIPE, lexer.tokens[2].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[3].type)

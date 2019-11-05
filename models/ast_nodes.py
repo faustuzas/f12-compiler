@@ -144,13 +144,6 @@ class ExprPow(Expr):
         self.right = right
 
 
-class ExprFnCall(Expr):
-
-    def __init__(self, function_name, params) -> None:
-        self.function_name = function_name
-        self.params = params
-
-
 class ExprAccess(Expr):
 
     def __init__(self, obj, field) -> None:
@@ -197,7 +190,7 @@ class ExprLitNull(ExprLit):
 
 class ExprVar(Expr):
 
-    def __init__(self, identifier):
+    def __init__(self, identifier) -> None:
         self.identifier = identifier
 
 
@@ -206,24 +199,98 @@ class ExprFromStdin(Expr):
 
 
 class ExprArrayAccess(Expr):
-    def __init__(self, array, index_expr):
+    def __init__(self, array, index_expr) -> None:
         self.array = array
         self.index_expr = index_expr
 
 
-class ExprCreateUnit(Expr):
-    def __init__(self, unit_name, args):
-        self.unit_name = unit_name
+class ExprCallable(Expr):
+
+    def __init__(self, name) -> None:
+        self.name = name
+
+
+class ExprFnCall(ExprCallable):
+
+    def __init__(self, function_name, args) -> None:
+        super().__init__(function_name)
         self.args = args
 
 
-class Statement(Node):
+class ExprCreateUnit(ExprCallable):
+
+    def __init__(self, unit_name, fields) -> None:
+        super().__init__(unit_name)
+        self.fields = fields
+
+
+class CreateUnitArg(Node):
+
+    def __init__(self, field, value) -> None:
+        self.field = field
+        self.value = value
+
+
+class Stmnt(Node):
     pass
 
 
-class StatementBlock(Node):
+class StmntEmpty(Stmnt):
+    pass
 
-    def __init__(self, statements: List[Statement]) -> None:
+
+class StmntIf(Stmnt):
+
+    def __init__(self, condition: Expr, stmnt_block, else_clause=None) -> None:
+        self.condition = condition
+        self.stmnt_block = stmnt_block
+        self.else_clause = else_clause
+
+
+class StmntBreak(Stmnt):
+    pass
+
+
+class StmntContinue(Stmnt):
+    pass
+
+
+class StmntReturn(Stmnt):
+
+    def __init__(self, value: Expr = None) -> None:
+        self.value = value
+
+
+class StmntExpr(Stmnt):
+
+    def __init__(self, expr: Expr) -> None:
+        self.expr = expr
+
+
+class StmntToStdout(Stmnt):
+
+    def __init__(self, values: List[Expr]) -> None:
+        self.values = values
+
+
+class StmntEach(Stmnt):
+
+    def __init__(self, element, array, stmnt_block) -> None:
+        self.element = element
+        self.array = array
+        self.stmnt_block = stmnt_block
+
+
+class StmntWhile(Stmnt):
+
+    def __init__(self, condition, stmnt_block) -> None:
+        self.condition = condition
+        self.stmnt_block = stmnt_block
+
+
+class StmntBlock(Node):
+
+    def __init__(self, statements: List[Stmnt]) -> None:
         self.statements = statements
 
 
@@ -240,7 +307,7 @@ class Decl(Node):
 
 class DeclFun(Decl):
 
-    def __init__(self, name, params: List[FunParam], return_type: Type, statements: StatementBlock) -> None:
+    def __init__(self, name, params: List[FunParam], return_type: Type, statements: StmntBlock) -> None:
         self.name = name
         self.params = params
         self.return_type = return_type
@@ -254,6 +321,12 @@ class DeclVar(Decl):
         self.name = name
         self.value = value
         self.is_constant = is_constant
+
+
+class DeclTmpVar(Decl):
+
+    def __init__(self, name):
+        self.name = name
 
 
 class DeclUnitField(Node):

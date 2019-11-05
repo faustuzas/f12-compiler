@@ -1,5 +1,5 @@
 from typing import List
-from models import LexingState, Token, TokenType, TokenError
+from models import LexingState, Token, TokenType, LexingError
 from models.builtins import keywords, primitive_types, constants, helpers
 from utils import FasterSwitcher as Switcher, throw, ranges, printer
 
@@ -36,13 +36,13 @@ class Lexer:
     _s_fallback = Switcher.from_dict({
                 (LexingState.START, LexingState.SL_COMMENT): lambda ctx: ctx.add_token(TokenType.EOF),
                 (LexingState.ML_COMMENT, LexingState.ML_COMMENT_END): lambda ctx: ctx.ml_error(),
-                LexingState.LIT_STR: lambda ctx: throw(TokenError('Unterminated string'))
+                LexingState.LIT_STR: lambda ctx: throw(LexingError('Unterminated string'))
             })
 
     def ml_error(self):
         self.line_number = self.multiline_comment_start
         self.offset_in_line = self.multiline_comment_start_offset
-        throw(TokenError('Unterminated multiline comment'))
+        throw(LexingError('Unterminated multiline comment'))
     
     def lex_all(self):
         try:
@@ -56,7 +56,7 @@ class Lexer:
             self.lex()
 
             Lexer._s_fallback.exec(self, self.state)
-        except TokenError as e:
+        except LexingError as e:
             self.print_error(str(e))
             raise ValueError()
 
@@ -124,7 +124,7 @@ class Lexer:
             ranges.letters: lambda ctx: ctx.begin_tokenizing(LexingState.IDENTIFIER, to_buffer=True),
             '\n': lambda ctx: ctx.inc_new_line(),
             ' ': lambda ctx: ()  # ignore
-        }).default(lambda ctx: throw(TokenError('Unrecognized token')))
+        }).default(lambda ctx: throw(LexingError('Unrecognized token')))
 
     def lex_start(self):
         Lexer._s_start.exec(self, self.current_char)
@@ -193,14 +193,14 @@ class Lexer:
 
     _s_op_and = Switcher.from_dict({
             '&': lambda ctx: ctx.add_token(TokenType.OP_AND)
-        }).default(lambda ctx: throw(TokenError('Missing &')))
+        }).default(lambda ctx: throw(LexingError('Missing &')))
 
     def lex_op_and(self):
         Lexer._s_op_and.exec(self, self.current_char)
 
     _s_op_or = Switcher.from_dict({
             '|': lambda ctx: ctx.add_token(TokenType.OP_OR)
-        }).default(lambda ctx: throw(TokenError('Missing |')))
+        }).default(lambda ctx: ctx.add_token(TokenType.C_PIPE, rollback=True))
 
     def lex_op_or(self):
         Lexer._s_op_or.exec(self, self.current_char)
@@ -230,7 +230,7 @@ class Lexer:
 
     _s_lit_int_first_zero = Switcher.from_dict({
             '.': lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_START)),
-            ranges.digits: lambda ctx: throw(TokenError('Multi digit integer cannot start with 0'))
+            ranges.digits: lambda ctx: throw(LexingError('Multi digit integer cannot start with 0'))
         }).default(lambda ctx: ctx.add_token(TokenType.LIT_INT, rollback=True))
 
     def lex_lit_int_first_zero(self):
@@ -239,8 +239,8 @@ class Lexer:
     _s_lit_int = Switcher.from_dict({
             ranges.digits: lambda ctx: ctx.add_to_buff(),
             '.': lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_START)),
-            '_': lambda ctx: throw(TokenError('Integer with invalid prefix')),
-            ranges.letters: lambda ctx: throw(TokenError('Integer with invalid prefix'))
+            '_': lambda ctx: throw(LexingError('Integer with invalid prefix')),
+            ranges.letters: lambda ctx: throw(LexingError('Integer with invalid prefix'))
         }).default(lambda ctx: ctx.add_token(TokenType.LIT_INT, rollback=True))
 
     def lex_lit_int(self):
@@ -264,14 +264,14 @@ class Lexer:
     _s_lit_float_exp = Switcher.from_dict({
             ('+', '-'): lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_PRE_END)),
             ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_END))
-        }).default(lambda ctx: throw(TokenError('After exponent has to follow number or sign'))) \
+        }).default(lambda ctx: throw(LexingError('After exponent has to follow number or sign')))
 
     def lex_lit_float_exp(self):
         Lexer._s_lit_float_exp.exec(self, self.current_char)
 
     _s_lit_float_pre_end = Switcher.from_dict({
             ranges.digits: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_FLOAT_END))
-        }).default(lambda ctx: throw(TokenError('Exponent power is missing')))
+        }).default(lambda ctx: throw(LexingError('Exponent power is missing')))
 
     def lex_lit_float_pre_end(self):
         Lexer._s_lit_float_pre_end.exec(self, self.current_char)
@@ -311,7 +311,7 @@ class Lexer:
             '"': lambda ctx: ctx.add_to_buff('\"'),
             't': lambda ctx: ctx.add_to_buff('\t'),
             'n': lambda ctx: ctx.add_to_buff('\n')
-        }).default(lambda ctx: throw(TokenError('Unrecognized escaped character')))
+        }).default(lambda ctx: throw(LexingError('Unrecognized escaped character')))
 
     def lex_lit_str_escape(self):
         Lexer._s_lit_str_escape.exec(self, self.current_char)

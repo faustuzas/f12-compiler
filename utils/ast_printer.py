@@ -39,7 +39,7 @@ class AstPrinter:
     def print(self, title, obj):
         if obj is None:
             self.print_text(title, 'None')
-        if AstPrinter.is_primitive(obj):
+        elif AstPrinter.is_primitive(obj):
             self.print_text(title, obj)
         elif isinstance(obj, list):
             self.print_list(title, obj)

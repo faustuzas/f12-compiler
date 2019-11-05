@@ -1,53 +1,35 @@
->include "include.f12" // will copy the file content into this file
+>include "include.f12"; // will copy the file content into this file
 
-fun add(int x[], int y) => int {
+fun add(int[] x, int y) => int {
     ret x[0] + y;
 }
 
 unit Human {
     string name;
     int age;
-    string addresses[];
+    string[] addresses;
+}
+
+fun inner { /* parameterless function */
+    --> "Hello";
 }
 
 fun main => int {
-
-    fun inner { /* parameterless function */
-        --> "Hello"
-    }
-
-    /*
-        Multi line comment
-    ***/
-
-
-    
-    inner();
-
-
-    unit HumanInner {
-        string name;
-        int age;
-    }
-
     const int age = 22;
     // const int x = age + 6.5E;
     int y = add(x, 5);
 
-    Human human = Human(name: "Faustas");
-    human.age = 22
-    --> "A human named " + human.name;
+    Human human = Human|name: "Faustas", age: 22|;
+    human.age = 22;
+    --> "A human named ", human.name;
 
-    int array[] = [1, 2, 3, 4];
-    int array2[6];
+    const int[] array = [1, 2, 3, 4];
+    int[] array2;
 
-    --> array[2] // default value
-
-    const int array3[] = [1, 2, 3];
-    array3[2] = 5; // error
+    --> array[2]; // default value
 
     // will interfere the type from the array
-    each o in array {
+    foreach o in array do {
         --> x;
     }
 
@@ -58,6 +40,8 @@ fun main => int {
     } else {
         // statements
     }
+
+    if a { ; }
 
     while y != 0 {
         // statements
@@ -72,7 +56,7 @@ fun main => int {
     }
 
     string name = <--;
-    --> "Hello, " + name;
+    --> "Hello, ", name;
 
     ret 0;
 }

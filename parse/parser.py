@@ -1,7 +1,8 @@
 from typing import List, Union
 
-from models import Token, TokenType, type_tokens, primitive_type_tokens
+from models import Token, TokenType, type_tokens, primitive_type_tokens, ParsingError
 import models.ast_nodes as ast
+from utils import printer
 
 
 class Parser:
@@ -16,8 +17,12 @@ class Parser:
     def parse(self) -> ast.Program:
         root_elements = []
 
-        while not self.accept(TokenType.EOF):
-            root_elements.append(self.parse_root_elem())
+        try:
+            while not self.accept(TokenType.EOF):
+                root_elements.append(self.parse_root_elem())
+        except ParsingError as e:
+            self.print_error(e)
+            raise ValueError()
 
         return ast.Program(root_elements)
 
@@ -28,13 +33,13 @@ class Parser:
         if self.next_token_type() == TokenType.KW_FUN:
             return self.parse_decl_fun()
 
-        if Parser.is_type_token(self.next_token_type()) or self.next_token_type() == TokenType.KW_CONST:
+        if self.is_next_token_var_dec():
             return self.parse_decl_var()
 
         if self.next_token_type() == TokenType.KW_UNIT:
             return self.parse_decl_unit()
 
-        raise ValueError(f'Not root elem: {self.next_token_type()}')
+        raise ParsingError(f'Not root element.', self.get_next_token())
 
     def parse_decl_fun(self) -> ast.DeclFun:
         self.expect(TokenType.KW_FUN)
@@ -109,20 +114,87 @@ class Parser:
         return ast.DeclUnitField(type_, name)
 
     def parse_helper_incl(self) -> ast.HelperInclude:
-        helper_include = self.expect(TokenType.HELPER_INCLUDE)
-        return ast.HelperInclude(helper_include)
+        self.expect(TokenType.HELPER_INCLUDE)
+        file_name = self.expect(TokenType.LIT_STR)
+        self.expect(TokenType.C_SEMI)
+        return ast.HelperInclude(file_name)
 
-    def parse_block(self) -> ast.StatementBlock:
+    def parse_block(self) -> ast.StmntBlock:
         statements = []
 
         self.expect(TokenType.C_CURLY_L)
         while not self.accept(TokenType.C_CURLY_R):
             statements.append(self.parse_statement())
 
-        return ast.StatementBlock(statements)
+        return ast.StmntBlock(statements)
 
-    def parse_statement(self) -> ast.Statement:
-        pass
+    # TODO: Is statement derivative of Decl? Or how we should treat variable declarations if we parsing them as
+    #  statements
+    def parse_statement(self):
+        if self.is_next_token_var_dec():
+            return self.parse_decl_var()
+
+        if self.accept(TokenType.C_SEMI):
+            return ast.StmntEmpty()
+
+        if self.accept(TokenType.KW_BREAK):
+            result = ast.StmntBreak()
+            self.expect(TokenType.C_SEMI)
+            return result
+
+        if self.accept(TokenType.KW_RETURN):
+            result = ast.StmntReturn(self.parse_expr())
+            self.expect(TokenType.C_SEMI)
+            return result
+
+        if self.accept(TokenType.KW_CONTINUE):
+            result = ast.StmntContinue()
+            self.expect(TokenType.C_SEMI)
+            return result
+
+        if self.accept(TokenType.KW_TO_STDOUT):
+            values = []
+            while not self.accept(TokenType.C_SEMI):
+                values.append(self.parse_expr())
+                self.accept(TokenType.C_COMMA)
+
+            return ast.StmntToStdout(values)
+
+        if self.next_token_type() == TokenType.KW_EACH:
+            return self.parse_stmnt_each()
+
+        if self.accept(TokenType.KW_WHILE):
+            return ast.StmntWhile(self.parse_expr(), self.parse_block())
+
+        if self.next_token_type() == TokenType.KW_IF:
+            return self.parse_stmnt_if()
+
+        expr = self.parse_expr()
+        self.expect(TokenType.C_SEMI)
+        return ast.StmntExpr(expr)
+
+    def parse_stmnt_each(self) -> ast.StmntEach:
+        self.expect(TokenType.KW_EACH)
+        item = self.expect(TokenType.IDENTIFIER)
+        self.expect(TokenType.KW_IN)
+        array = self.parse_expr()
+        self.expect(TokenType.KW_DO)
+        stmnt_block = self.parse_block()
+        return ast.StmntEach(ast.DeclTmpVar(item), array, stmnt_block)
+
+    def parse_stmnt_if(self) -> ast.StmntIf:
+        self.expect(TokenType.KW_IF)
+        condition = self.parse_expr()
+        stmnt_block = self.parse_block()
+
+        else_clause = None
+        if self.accept(TokenType.KW_ELSE):
+            if self.next_token_type() == TokenType.KW_IF:
+                else_clause = self.parse_stmnt_if()
+            else:
+                else_clause = self.parse_block()
+
+        return ast.StmntIf(condition, stmnt_block, else_clause)
 
     def parse_expr(self) -> ast.Expr:
         return self.parse_expr_10()
@@ -133,7 +205,7 @@ class Parser:
         if self.accept(TokenType.OP_ASSIGN):
             if Parser.is_assignable(result):
                 return ast.ExprAssign(result, self.parse_expr_10())
-            raise ValueError(f'You cannot assign to {type(result).__name__}')
+            raise ParsingError(f'You cannot assign to {type(result).__name__}', None)
 
         return result
 
@@ -286,14 +358,37 @@ class Parser:
             return ast.ExprFromStdin()
 
         if curr_token.type == TokenType.IDENTIFIER:
-            if self.accept(TokenType.C_ROUND_L):
-                params = []
-                while not self.accept(TokenType.C_ROUND_R):
-                    params.append(self.parse_expr())
-                    self.accept(TokenType.C_COMMA)
-                return ast.ExprFnCall(curr_token, params)
+            if self.next_token_type() == TokenType.C_ROUND_L:
+                return self.parse_fun_call(curr_token)
+
+            if self.next_token_type() == TokenType.C_PIPE:
+                return self.parse_unit_call(curr_token)
 
             return ast.ExprVar(curr_token)
+
+        raise ParsingError(f'Unrecognized token', curr_token)
+
+    def parse_fun_call(self, name) -> ast.ExprFnCall:
+        self.expect(TokenType.C_ROUND_L)
+        args = []
+        while not self.accept(TokenType.C_ROUND_R):
+            args.append(self.parse_expr())
+            self.accept(TokenType.C_COMMA)
+        return ast.ExprFnCall(name, args)
+
+    def parse_unit_call(self, name) -> ast.ExprCreateUnit:
+        self.expect(TokenType.C_PIPE)
+        fields = []
+        while not self.accept(TokenType.C_PIPE):
+            fields.append(self.parse_unit_arg())
+            self.accept(TokenType.C_COMMA)
+        return ast.ExprCreateUnit(name, fields)
+
+    def parse_unit_arg(self) -> ast.CreateUnitArg:
+        name = self.expect(TokenType.IDENTIFIER)
+        self.expect(TokenType.C_COLON)
+        value = self.parse_expr()
+        return ast.CreateUnitArg(name, value)
 
     """
     Helper methods
@@ -312,19 +407,38 @@ class Parser:
             self.offset += 1
             return curr_token
 
-        raise ValueError(f'Expected {token_type}. Got: {curr_token.type}')
+        raise ParsingError(f'Expected {token_type}. Got: {curr_token.type}', curr_token)
 
     def get_next_token(self):
         token = self.tokens[self.offset]
         self.offset += 1
         return token
 
-    def next_token_type(self) -> TokenType:
-        return self.tokens[self.offset].type
+    def next_token_type(self, offset=0) -> TokenType:
+        return self.tokens[self.offset + offset].type
+
+    def is_next_token_var_dec(self) -> bool:
+        # const ...
+        if self.next_token_type() == TokenType.KW_CONST:
+            return True
+
+        # [int, string, ...] hello ...
+        if Parser.is_type_token(self.next_token_type()) and \
+                self.next_token_type(1) == TokenType.IDENTIFIER:
+            return True
+
+        # [int, string, ...][] hello ...
+        if Parser.is_type_token(self.next_token_type()) and \
+                self.next_token_type(1) == TokenType.C_SQUARE_L and \
+                self.next_token_type(2) == TokenType.C_SQUARE_R and \
+                self.next_token_type(3) == TokenType.IDENTIFIER:
+            return True
+
+        return False
 
     def expect_type(self) -> ast.Type:
         if self.next_token_type() not in type_tokens:
-            raise ValueError("Type token expected")
+            raise ParsingError("Type token expected", self.get_next_token())
 
         type_token = self.get_next_token()
 
@@ -339,6 +453,10 @@ class Parser:
         else:
             return ast.TypeUnit(type_token.value, is_array)
 
+    def print_error(self, error: ParsingError):
+        token = error.token if error.token else self.tokens[self.offset]
+        printer.error('', f'Parsing error [{token}:{token.file_name}:{token.line_number}] : {error.message}')
+
     @staticmethod
     def is_type_token(token_type: TokenType):
         return token_type in type_tokens
@@ -346,4 +464,3 @@ class Parser:
     @staticmethod
     def is_assignable(expr: ast.Expr) -> bool:
         return type(expr) in (ast.ExprAccess, ast.ExprArrayAccess, ast.ExprVar)
-

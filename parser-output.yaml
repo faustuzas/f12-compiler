@@ -1,45 +1,248 @@
 root: Program
   root_elements: 
-    [0]: DeclVar
-      type: TypePrimitive
+    [0]: HelperInclude
+      file_name: include.f12 (main.f12:1)
+    [1]: DeclFun
+      name: add (main.f12:3)
+      params: 
+        [0]: FunParam
+          type: TypePrimitive
+            is_array: True
+            kind: PRIMITIVE_INT
+          name: x (main.f12:3)
+        [1]: FunParam
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_INT
+          name: y (main.f12:3)
+      return_type: TypePrimitive
         is_array: False
         kind: PRIMITIVE_INT
-      name: a (not_main.f12:1)
-      value: ExprAssign
-        object: ExprVar
-          identifier: b (not_main.f12:1)
-        value: ExprAssign
-          object: ExprAccess
-            object: ExprVar
-              identifier: c (not_main.f12:1)
-            field: hello (not_main.f12:1)
-          value: ExprAssign
-            object: ExprArrayAccess
-              array: ExprVar
-                identifier: yeep (not_main.f12:1)
-              index_expr: ExprAdd
-                left: ExprAdd
-                  left: ExprLitInt
-                    value: 1 (not_main.f12:1)
-                  right: ExprLitInt
-                    value: 5 (not_main.f12:1)
-                right: ExprLitInt
-                  value: 6 (not_main.f12:1)
-            value: ExprAssign
+      statements: StmntBlock
+        statements: 
+          [0]: StmntReturn
+            value: ExprAdd
+              left: ExprArrayAccess
+                array: ExprVar
+                  identifier: x (main.f12:4)
+                index_expr: ExprLitInt
+                  value: 0 (main.f12:4)
+              right: ExprVar
+                identifier: y (main.f12:4)
+    [2]: DeclUnit
+      name: Human (main.f12:7)
+      fields: 
+        [0]: DeclUnitField
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_STRING
+          name: name (main.f12:8)
+        [1]: DeclUnitField
+          type: TypePrimitive
+            is_array: False
+            kind: PRIMITIVE_INT
+          name: age (main.f12:9)
+        [2]: DeclUnitField
+          type: TypePrimitive
+            is_array: True
+            kind: PRIMITIVE_STRING
+          name: addresses (main.f12:10)
+    [3]: DeclFun
+      name: inner (main.f12:13)
+      params: []
+      return_type: TypePrimitive
+        is_array: False
+        kind: PRIMITIVE_VOID
+      statements: StmntBlock
+        statements: 
+          [0]: StmntToStdout
+            values: 
+              [0]: ExprLitStr
+                value: Hello (main.f12:14)
+    [4]: DeclFun
+      name: main (main.f12:17)
+      params: []
+      return_type: TypePrimitive
+        is_array: False
+        kind: PRIMITIVE_INT
+      statements: StmntBlock
+        statements: 
+          [0]: DeclVar
+            type: TypePrimitive
+              is_array: False
+              kind: PRIMITIVE_INT
+            name: age (main.f12:18)
+            value: ExprLitInt
+              value: 22 (main.f12:18)
+            is_constant: True
+          [1]: DeclVar
+            type: TypePrimitive
+              is_array: False
+              kind: PRIMITIVE_INT
+            name: y (main.f12:20)
+            value: ExprFnCall
+              name: add (main.f12:20)
+              args: 
+                [0]: ExprVar
+                  identifier: x (main.f12:20)
+                [1]: ExprLitInt
+                  value: 5 (main.f12:20)
+            is_constant: False
+          [2]: DeclVar
+            type: TypeUnit
+              is_array: False
+              unit_name: Human
+            name: human (main.f12:22)
+            value: ExprCreateUnit
+              name: Human (main.f12:22)
+              fields: 
+                [0]: CreateUnitArg
+                  field: name (main.f12:22)
+                  value: ExprLitStr
+                    value: Faustas (main.f12:22)
+                [1]: CreateUnitArg
+                  field: age (main.f12:22)
+                  value: ExprLitInt
+                    value: 22 (main.f12:22)
+            is_constant: False
+          [3]: StmntExpr
+            expr: ExprAssign
               object: ExprAccess
-                object: ExprArrayAccess
-                  array: ExprVar
-                    identifier: ups (not_main.f12:1)
-                  index_expr: ExprLitInt
-                    value: 3 (not_main.f12:1)
-                field: f (not_main.f12:1)
-              value: ExprUMinus
-                expr: ExprUMinus
-                  expr: ExprUMinus
-                    expr: ExprAccess
-                      object: ExprAccess
-                        object: ExprVar
-                          identifier: ka_tu (not_main.f12:1)
-                        field: nieko (not_main.f12:1)
-                      field: tu (not_main.f12:1)
-      is_constant: True
+                object: ExprVar
+                  identifier: human (main.f12:23)
+                field: age (main.f12:23)
+              value: ExprLitInt
+                value: 22 (main.f12:23)
+          [4]: StmntToStdout
+            values: 
+              [0]: ExprLitStr
+                value: A human named  (main.f12:24)
+              [1]: ExprAccess
+                object: ExprVar
+                  identifier: human (main.f12:24)
+                field: name (main.f12:24)
+          [5]: DeclVar
+            type: TypePrimitive
+              is_array: True
+              kind: PRIMITIVE_INT
+            name: array (main.f12:26)
+            value: ExprLitArray
+              value: 
+                [0]: ExprLitInt
+                  value: 1 (main.f12:26)
+                [1]: ExprLitInt
+                  value: 2 (main.f12:26)
+                [2]: ExprLitInt
+                  value: 3 (main.f12:26)
+                [3]: ExprLitInt
+                  value: 4 (main.f12:26)
+            is_constant: False
+          [6]: DeclVar
+            type: TypePrimitive
+              is_array: True
+              kind: PRIMITIVE_INT
+            name: array2 (main.f12:27)
+            value: None
+            is_constant: False
+          [7]: StmntToStdout
+            values: 
+              [0]: ExprArrayAccess
+                array: ExprVar
+                  identifier: array (main.f12:29)
+                index_expr: ExprLitInt
+                  value: 2 (main.f12:29)
+          [8]: DeclVar
+            type: TypePrimitive
+              is_array: True
+              kind: PRIMITIVE_INT
+            name: array3 (main.f12:31)
+            value: ExprLitArray
+              value: 
+                [0]: ExprLitInt
+                  value: 1 (main.f12:31)
+                [1]: ExprLitInt
+                  value: 2 (main.f12:31)
+                [2]: ExprLitInt
+                  value: 3 (main.f12:31)
+            is_constant: True
+          [9]: StmntEach
+            element: DeclTmpVar
+              name: o (main.f12:34)
+            array: ExprVar
+              identifier: array (main.f12:34)
+            stmnt_block: StmntBlock
+              statements: 
+                [0]: StmntToStdout
+                  values: 
+                    [0]: ExprVar
+                      identifier: x (main.f12:35)
+          [10]: StmntIf
+            condition: ExprGt
+              left: ExprVar
+                identifier: y (main.f12:38)
+              right: ExprLitInt
+                value: 5 (main.f12:38)
+            stmnt_block: StmntBlock
+              statements: []
+            else_clause: StmntIf
+              condition: ExprEq
+                left: ExprVar
+                  identifier: y (main.f12:40)
+                right: ExprLitInt
+                  value: 0 (main.f12:40)
+              stmnt_block: StmntBlock
+                statements: []
+              else_clause: StmntBlock
+                statements: []
+          [11]: StmntIf
+            condition: ExprVar
+              identifier: a (main.f12:46)
+            stmnt_block: StmntBlock
+              statements: 
+                [0]: StmntEmpty
+            else_clause: None
+          [12]: StmntWhile
+            condition: ExprNe
+              left: ExprVar
+                identifier: y (main.f12:48)
+              right: ExprLitInt
+                value: 0 (main.f12:48)
+            stmnt_block: StmntBlock
+              statements: 
+                [0]: StmntIf
+                  condition: ExprEq
+                    left: ExprVar
+                      identifier: y (main.f12:51)
+                    right: ExprLitInt
+                      value: 1000 (main.f12:51)
+                  stmnt_block: StmntBlock
+                    statements: 
+                      [0]: StmntBreak
+                  else_clause: None
+                [1]: StmntIf
+                  condition: ExprEq
+                    left: ExprVar
+                      identifier: y (main.f12:55)
+                    right: ExprLitInt
+                      value: 59 (main.f12:55)
+                  stmnt_block: StmntBlock
+                    statements: 
+                      [0]: StmntContinue
+                  else_clause: None
+          [13]: DeclVar
+            type: TypePrimitive
+              is_array: False
+              kind: PRIMITIVE_STRING
+            name: name (main.f12:60)
+            value: ExprFromStdin
+            is_constant: False
+          [14]: StmntToStdout
+            values: 
+              [0]: ExprAdd
+                left: ExprLitStr
+                  value: Hello,  (main.f12:61)
+                right: ExprVar
+                  identifier: name (main.f12:61)
+          [15]: StmntReturn
+            value: ExprLitInt
+              value: 0 (main.f12:63)

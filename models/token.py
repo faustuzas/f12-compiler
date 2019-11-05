@@ -36,6 +36,7 @@ class TokenType(ExtendedEnum):
     C_CURLY_R = 'C_CURLY_R'
     C_SQUARE_L = 'C_SQUARE_L'
     C_SQUARE_R = 'C_SQUARE_R'
+    C_PIPE = 'C_PIPE'
 
     KW_FAT_ARROW = 'KW_FAT_ARROW'
     KW_TO_STDOUT = 'KW_TO_STDOUT'
@@ -49,8 +50,9 @@ class TokenType(ExtendedEnum):
     KW_WHILE = 'KW_WHILE'
     KW_CONST = 'KW_CONST'
     KW_CONTINUE = 'KW_CONTINUE'
-    KW_BEAK = 'KW_BEAK'
+    KW_BREAK = 'KW_BREAK'
     KW_IN = 'KW_IN'
+    KW_DO = 'KW_DO'
 
     PRIMITIVE_INT = 'PRIMITIVE_INT'
     PRIMITIVE_FLOAT = 'PRIMITIVE_FLOAT'

@@ -1,0 +1,4 @@
+fun main {
+    Human human = Human|name: "Faustas", age: 22|;
+    human = Human| |;
+}
