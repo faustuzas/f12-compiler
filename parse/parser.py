@@ -145,6 +145,9 @@ class Parser:
             return result
 
         if self.accept(TokenType.KW_RETURN):
+            if self.accept(TokenType.C_SEMI):
+                return ast.StmntReturn(None)
+
             result = ast.StmntReturn(self.parse_expr())
             self.expect(TokenType.C_SEMI, '";"')
             return result

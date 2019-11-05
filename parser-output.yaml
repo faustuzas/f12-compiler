@@ -1,2 +1,12 @@
 root: Program
-  root_elements: []
+  root_elements: 
+    [0]: DeclFun
+      name: labas (not_main.f12:1)
+      params: []
+      return_type: TypePrimitive
+        is_array: False
+        kind: PRIMITIVE_VOID
+      statements: StmntBlock
+        statements: 
+          [0]: StmntReturn
+            value: None
