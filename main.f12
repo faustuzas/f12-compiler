@@ -29,7 +29,7 @@ fun main => int {
     --> array[2]; // default value
 
     // will interfere the type from the array
-    each o in array do {
+    each o in array {
         --> x;
     }
 

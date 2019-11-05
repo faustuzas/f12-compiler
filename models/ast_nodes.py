@@ -38,114 +38,80 @@ class Expr(Node):
     pass
 
 
-class ExprOr(Expr):
-
+class ExprBinaryOp(Expr):
     def __init__(self, left, right) -> None:
         self.left = left
         self.right = right
 
 
-class ExprAnd(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprOr(ExprBinaryOp):
+    pass
 
 
-class ExprEq(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprAnd(ExprBinaryOp):
+    pass
 
 
-class ExprNe(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprEq(ExprBinaryOp):
+    pass
 
 
-class ExprGt(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprNe(ExprBinaryOp):
+    pass
 
 
-class ExprGe(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprGt(ExprBinaryOp):
+    pass
 
 
-class ExprLt(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprGe(ExprBinaryOp):
+    pass
 
 
-class ExprLe(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprLt(ExprBinaryOp):
+    pass
 
 
-class ExprAdd(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprLe(ExprBinaryOp):
+    pass
 
 
-class ExprSub(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprAdd(ExprBinaryOp):
+    pass
 
 
-class ExprMul(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprSub(ExprBinaryOp):
+    pass
 
 
-class ExprDiv(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprMul(ExprBinaryOp):
+    pass
 
 
-class ExprMod(Expr):
-
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+class ExprDiv(ExprBinaryOp):
+    pass
 
 
-class ExprUPlus(Expr):
+class ExprMod(ExprBinaryOp):
+    pass
+
+
+class ExprUnaryOp(Expr):
 
     def __init__(self, expr) -> None:
         self.expr = expr
 
 
-class ExprUMinus(Expr):
-
-    def __init__(self, expr) -> None:
-        self.expr = expr
+class ExprUPlus(ExprUnaryOp):
+    pass
 
 
-class ExprPow(Expr):
+class ExprUMinus(ExprUnaryOp):
+    pass
 
-    def __init__(self, left, right) -> None:
-        self.left = left
-        self.right = right
+
+class ExprPow(ExprBinaryOp):
+    pass
 
 
 class ExprAccess(Expr):
