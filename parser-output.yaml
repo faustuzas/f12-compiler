@@ -1,19 +1,2 @@
 root: Program
-  root_elements: 
-    [0]: DeclFun
-      name: a (main.f12:1)
-      params: []
-      return_type: TypePrimitive
-        is_array: False
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
-        statements: 
-          [0]: StmntReturn
-            value: ExprAdd
-              left: ExprVar
-                identifier: a (main.f12:2)
-              right: ExprMul
-                left: ExprLitInt
-                  value: 2 (main.f12:2)
-                right: ExprLitInt
-                  value: 3 (main.f12:2)
+  root_elements: []

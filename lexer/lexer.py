@@ -18,8 +18,6 @@ class Lexer:
     file_name: str
 
     def __init__(self, text: str, file_name: str = '') -> None:
-        assert len(text)
-
         self.state = LexingState.START
         self.token_buffer = ''
         self.line_number = 1
