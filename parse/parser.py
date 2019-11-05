@@ -43,13 +43,13 @@ class Parser:
         raise ParsingError(f'Not root element.', self.get_next_token())
 
     def parse_decl_fun(self) -> ast.DeclFun:
-        self.expect(TokenType.KW_FUN)
-        name = self.expect(TokenType.IDENTIFIER)
+        self.expect(TokenType.KW_FUN, 'fun keyword')
+        name = self.expect(TokenType.IDENTIFIER, 'identifier')
 
         # function with parameters
         if self.accept(TokenType.C_ROUND_L):
             params = self.parse_fun_params()
-            self.expect(TokenType.C_ROUND_R)
+            self.expect(TokenType.C_ROUND_R, f'")"')
         else:
             params = []
 
@@ -78,27 +78,27 @@ class Parser:
 
     def parse_fun_param(self) -> ast.FunParam:
         type_ = self.expect_type()
-        name = self.expect(TokenType.IDENTIFIER)
+        name = self.expect(TokenType.IDENTIFIER, 'identifier')
         return ast.FunParam(type_, name)
 
     def parse_decl_var(self) -> ast.DeclVar:
         is_constant = self.accept(TokenType.KW_CONST) is not None
         type_ = self.expect_type()
-        name = self.expect(TokenType.IDENTIFIER)
+        name = self.expect(TokenType.IDENTIFIER, 'identifier')
 
         if self.accept(TokenType.OP_ASSIGN):
             value = self.parse_expr()
         else:
             value = None
 
-        self.expect(TokenType.C_SEMI)
+        self.expect(TokenType.C_SEMI, f'";"')
 
         return ast.DeclVar(type_, name, value, is_constant)
 
     def parse_decl_unit(self) -> ast.DeclUnit:
-        self.expect(TokenType.KW_UNIT)
-        name = self.expect(TokenType.IDENTIFIER)
-        self.expect(TokenType.C_CURLY_L)
+        self.expect(TokenType.KW_UNIT, 'unit keyword')
+        name = self.expect(TokenType.IDENTIFIER, 'identifier')
+        self.expect(TokenType.C_CURLY_L, '"{"')
 
         fields = []
         while not self.accept(TokenType.C_CURLY_R):
@@ -108,22 +108,22 @@ class Parser:
 
     def parse_decl_unit_field(self) -> ast.DeclUnitField:
         type_ = self.expect_type()
-        name = self.expect(TokenType.IDENTIFIER)
+        name = self.expect(TokenType.IDENTIFIER, 'identifier')
 
-        self.expect(TokenType.C_SEMI)
+        self.expect(TokenType.C_SEMI, '";"')
 
         return ast.DeclUnitField(type_, name)
 
     def parse_helper_incl(self) -> ast.HelperInclude:
         self.expect(TokenType.HELPER_INCLUDE)
-        file_name = self.expect(TokenType.LIT_STR)
-        self.expect(TokenType.C_SEMI)
+        file_name = self.expect(TokenType.LIT_STR, 'string litera')
+        self.expect(TokenType.C_SEMI, '";"')
         return ast.HelperInclude(file_name)
 
     def parse_block(self) -> ast.StmntBlock:
         statements = []
 
-        self.expect(TokenType.C_CURLY_L)
+        self.expect(TokenType.C_CURLY_L, '"{"')
         while not self.accept(TokenType.C_CURLY_R):
             statements.append(self.parse_statement())
 
@@ -140,17 +140,17 @@ class Parser:
 
         if self.accept(TokenType.KW_BREAK):
             result = ast.StmntBreak()
-            self.expect(TokenType.C_SEMI)
+            self.expect(TokenType.C_SEMI, '";"')
             return result
 
         if self.accept(TokenType.KW_RETURN):
             result = ast.StmntReturn(self.parse_expr())
-            self.expect(TokenType.C_SEMI)
+            self.expect(TokenType.C_SEMI, '";"')
             return result
 
         if self.accept(TokenType.KW_CONTINUE):
             result = ast.StmntContinue()
-            self.expect(TokenType.C_SEMI)
+            self.expect(TokenType.C_SEMI, '";"')
             return result
 
         if self.accept(TokenType.KW_TO_STDOUT):
@@ -171,19 +171,19 @@ class Parser:
             return self.parse_stmnt_if()
 
         expr = self.parse_expr()
-        self.expect(TokenType.C_SEMI)
+        self.expect(TokenType.C_SEMI, '";"')
         return ast.StmntExpr(expr)
 
     def parse_stmnt_each(self) -> ast.StmntEach:
-        self.expect(TokenType.KW_EACH)
-        item = self.expect(TokenType.IDENTIFIER)
-        self.expect(TokenType.KW_IN)
+        self.expect(TokenType.KW_EACH, 'each keyword')
+        item = self.expect(TokenType.IDENTIFIER, 'identifier')
+        self.expect(TokenType.KW_IN, 'keyword in')
         array = self.parse_expr()
         stmnt_block = self.parse_block()
         return ast.StmntEach(ast.DeclTmpVar(item), array, stmnt_block)
 
     def parse_stmnt_if(self) -> ast.StmntIf:
-        self.expect(TokenType.KW_IF)
+        self.expect(TokenType.KW_IF, 'keyword if')
         condition = self.parse_expr()
         stmnt_block = self.parse_block()
 
@@ -315,10 +315,10 @@ class Parser:
         while True:
             if self.accept(TokenType.C_SQUARE_L):
                 index = self.parse_expr()
-                self.expect(TokenType.C_SQUARE_R)
+                self.expect(TokenType.C_SQUARE_R, '"]"')
                 result = ast.ExprArrayAccess(result, index)
             elif self.accept(TokenType.OP_ACCESS):
-                result = ast.ExprAccess(result, self.expect(TokenType.IDENTIFIER))
+                result = ast.ExprAccess(result, self.expect(TokenType.IDENTIFIER, 'identifier'))
             else:
                 break
 
@@ -351,7 +351,7 @@ class Parser:
 
         if curr_token.type == TokenType.C_ROUND_L:
             result = self.parse_expr()
-            self.expect(TokenType.C_ROUND_R)
+            self.expect(TokenType.C_ROUND_R, '")"')
             return result
 
         if curr_token.type == TokenType.KW_FROM_STDIN:
@@ -369,7 +369,7 @@ class Parser:
         raise ParsingError(f'Unrecognized token', curr_token)
 
     def parse_fun_call(self, name) -> ast.ExprFnCall:
-        self.expect(TokenType.C_ROUND_L)
+        self.expect(TokenType.C_ROUND_L, '"("')
         args = []
         while not self.accept(TokenType.C_ROUND_R):
             args.append(self.parse_expr())
@@ -377,7 +377,7 @@ class Parser:
         return ast.ExprFnCall(name, args)
 
     def parse_unit_call(self, name) -> ast.ExprCreateUnit:
-        self.expect(TokenType.C_PIPE)
+        self.expect(TokenType.C_PIPE, '"|"')
         fields = []
         while not self.accept(TokenType.C_PIPE):
             fields.append(self.parse_unit_arg())
@@ -385,8 +385,8 @@ class Parser:
         return ast.ExprCreateUnit(name, fields)
 
     def parse_unit_arg(self) -> ast.CreateUnitArg:
-        name = self.expect(TokenType.IDENTIFIER)
-        self.expect(TokenType.C_COLON)
+        name = self.expect(TokenType.IDENTIFIER, 'identifier')
+        self.expect(TokenType.C_COLON, '":"')
         value = self.parse_expr()
         return ast.CreateUnitArg(name, value)
 
@@ -401,13 +401,13 @@ class Parser:
 
         return None
 
-    def expect(self, token_type: TokenType) -> Token:
+    def expect(self, token_type: TokenType, text_representation='') -> Token:
         curr_token = self.tokens[self.offset]
         if curr_token.type == token_type:
             self.offset += 1
             return curr_token
 
-        raise ParsingError(f'Expected {token_type}', curr_token)
+        raise ParsingError(f'{text_representation} expected', curr_token)
 
     def get_next_token(self):
         token = self.tokens[self.offset]
@@ -456,7 +456,7 @@ class Parser:
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]
         # TODO: change error message into more specific
-        p_error(self, 'Parsing', 'Unexpected symbol', self.text, token.line_number, token.offset_in_line, token.file_name)
+        p_error(self, 'Parsing', error.message, self.text, token.line_number, token.offset_in_line, token.file_name)
 
     @staticmethod
     def is_type_token(token_type: TokenType):

@@ -210,14 +210,14 @@ class ExprCallable(Expr):
         self.name = name
 
 
-class ExprFnCall(ExprCallable):
+class ExprFnCall(Expr):
 
     def __init__(self, function_name, args) -> None:
         super().__init__(function_name)
         self.args = args
 
 
-class ExprCreateUnit(ExprCallable):
+class ExprCreateUnit(Expr):
 
     def __init__(self, unit_name, fields) -> None:
         super().__init__(unit_name)
