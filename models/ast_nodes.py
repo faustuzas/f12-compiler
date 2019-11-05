@@ -204,23 +204,17 @@ class ExprArrayAccess(Expr):
         self.index_expr = index_expr
 
 
-class ExprCallable(Expr):
-
-    def __init__(self, name) -> None:
-        self.name = name
-
-
 class ExprFnCall(Expr):
 
     def __init__(self, function_name, args) -> None:
-        super().__init__(function_name)
+        self.function_name = function_name
         self.args = args
 
 
 class ExprCreateUnit(Expr):
 
     def __init__(self, unit_name, fields) -> None:
-        super().__init__(unit_name)
+        self.unit_name = unit_name
         self.fields = fields
 
 

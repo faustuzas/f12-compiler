@@ -4,6 +4,7 @@ from models import Token, TokenType, type_tokens, primitive_type_tokens, Parsing
 import models.ast_nodes as ast
 from utils.error_printer import print_error as p_error
 
+
 class Parser:
 
     text: str
@@ -40,7 +41,7 @@ class Parser:
         if self.next_token_type() == TokenType.KW_UNIT:
             return self.parse_decl_unit()
 
-        raise ParsingError(f'Not root element.', self.get_next_token())
+        raise ParsingError('not root element', self.get_next_token())
 
     def parse_decl_fun(self) -> ast.DeclFun:
         self.expect(TokenType.KW_FUN, 'fun keyword')
@@ -49,7 +50,7 @@ class Parser:
         # function with parameters
         if self.accept(TokenType.C_ROUND_L):
             params = self.parse_fun_params()
-            self.expect(TokenType.C_ROUND_R, f'")"')
+            self.expect(TokenType.C_ROUND_R, '")"')
         else:
             params = []
 
@@ -116,7 +117,7 @@ class Parser:
 
     def parse_helper_incl(self) -> ast.HelperInclude:
         self.expect(TokenType.HELPER_INCLUDE)
-        file_name = self.expect(TokenType.LIT_STR, 'string litera')
+        file_name = self.expect(TokenType.LIT_STR, 'string literal')
         self.expect(TokenType.C_SEMI, '";"')
         return ast.HelperInclude(file_name)
 
@@ -366,7 +367,7 @@ class Parser:
 
             return ast.ExprVar(curr_token)
 
-        raise ParsingError(f'Unrecognized token', curr_token)
+        raise ParsingError('Unrecognized symbol', curr_token)
 
     def parse_fun_call(self, name) -> ast.ExprFnCall:
         self.expect(TokenType.C_ROUND_L, '"("')
@@ -438,7 +439,7 @@ class Parser:
 
     def expect_type(self) -> ast.Type:
         if self.next_token_type() not in type_tokens:
-            raise ParsingError("Type token expected", self.get_next_token())
+            raise ParsingError('type expected', self.get_next_token())
 
         type_token = self.get_next_token()
 
@@ -455,7 +456,6 @@ class Parser:
 
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]
-        # TODO: change error message into more specific
         p_error(self, 'Parsing', error.message, self.text, token.line_number, token.offset_in_line, token.file_name)
 
     @staticmethod
