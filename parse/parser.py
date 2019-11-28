@@ -11,10 +11,9 @@ class Parser:
     tokens: List[Token]
     offset: int
 
-    def __init__(self, tokens: List[Token], text) -> None:
+    def __init__(self, tokens: List[Token]) -> None:
         self.tokens = tokens
         self.offset = 0
-        self.text = text
 
     def parse(self) -> ast.Program:
         root_elements = []
@@ -464,7 +463,7 @@ class Parser:
 
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]
-        p_error(self, 'Parsing', error.message, self.text, token.line_number, token.offset_in_line, token.file_name)
+        p_error('Parsing', error.message, token.line_number, token.offset_in_line, token.file_name)
 
     @staticmethod
     def is_type_token(token_type: TokenType):

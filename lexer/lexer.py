@@ -400,4 +400,4 @@ class Lexer:
         printer.success(body, header)
 
     def print_error(self, cause):
-        print_error(self, 'Lexing', cause, self.text, self.line_number, self.offset_in_line, self.file_name)
+        print_error('Lexing', cause, self.line_number, self.offset_in_line, self.file_name, text=self.text)

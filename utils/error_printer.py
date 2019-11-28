@@ -1,9 +1,15 @@
 from utils import printer
 
+
 def line_number_prefix(number):
     return f'{number}. '
 
-def print_error(self, type, cause, text, line_number, offset_in_line, file_name):
+
+def print_error(type_, cause, line_number, offset_in_line, file_name, text=None):
+    if text is None:
+        with open(file_name) as f:
+            text = ''.join(f.readlines())
+
     all_lines = text.split('\n')
     lines_to_show = []
     line_in_array = line_number - 1
@@ -16,4 +22,4 @@ def print_error(self, type, cause, text, line_number, offset_in_line, file_name)
     if line_number + 1 <= len(all_lines) and len(all_lines[line_in_array + 1].strip()) > 0:
         lines_to_show.append(f'{line_number_prefix(line_number + 1)}{all_lines[line_in_array + 1]}')
 
-    printer.error('\n'.join(lines_to_show), f'{type} error [{file_name}:{line_number}:{offset_in_line}] : {cause}')
+    printer.error('\n'.join(lines_to_show), f'{type_} error [{file_name}:{line_number}:{offset_in_line}] : {cause}')

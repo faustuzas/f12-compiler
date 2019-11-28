@@ -5,19 +5,19 @@ from parse.parser import Parser
 
 from utils.ast_printer import AstPrinter, FileOutput
 
-file_to_compile = 'not_main.f12'
+file_to_compile = 'example_source/not_main.f12'
 if len(argv) == 2:
     file_to_compile = argv[1]
 
 with open(file_to_compile) as f:
-    content = ''.join(f.readlines())
-
     try:
-        lexer = Lexer(content, file_to_compile)
+        lexer = Lexer(''.join(f.readlines()), file_to_compile)
         lexer.lex_all()
 
-        parser = Parser(lexer.tokens, content)
+        parser = Parser(lexer.tokens)
         ast_root = parser.parse()
+
+        ast_root.resolve_includes()
 
         with FileOutput('parser-output.yaml') as output:
             ast_printer = AstPrinter(output)

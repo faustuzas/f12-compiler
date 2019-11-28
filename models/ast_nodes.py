@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import List, Union
+from utils.error_printer import print_error
 
 
 class Node(ABC):
@@ -8,6 +9,9 @@ class Node(ABC):
         for key in self.__dict__:
             val = self.__dict__[key]
             ast_printer.print(key, val)
+
+    def resolve_includes(self):
+        return None
 
 
 class Type(Node):
@@ -329,8 +333,35 @@ class Helper(Node):
 
 class HelperInclude(Helper):
 
-    def __init__(self, file_name) -> None:
-        self.file_name = file_name
+    def __init__(self, file_name_token) -> None:
+        self.file_name_token = file_name_token
+
+    def resolve_includes(self):
+        from lexer.lexer import Lexer
+        from parse.parser import Parser
+
+        file_name = self.file_name_token.value
+
+        try:
+            with open(file_name) as f:
+                content = ''.join(f.readlines())
+
+                lexer = Lexer(content, file_name)
+                lexer.lex_all()
+
+                parser = Parser(lexer.tokens)
+                root = parser.parse()
+
+                root.resolve_includes()
+
+                return root
+        except FileNotFoundError:
+            print_error('Include',
+                        'File not found',
+                        self.file_name_token.line_number,
+                        self.file_name_token.offset_in_line,
+                        self.file_name_token.file_name)
+            raise ValueError
 
 
 class Program(Node):
@@ -339,3 +370,14 @@ class Program(Node):
 
     def __init__(self, root_elements: List[Union[Decl, Helper]]) -> None:
         self.root_elements = root_elements
+
+    def resolve_includes(self):
+        new_root_elements = []
+        for el in self.root_elements:
+            included_root = el.resolve_includes()
+            if included_root is None:
+                new_root_elements.append(el)
+                continue
+
+            new_root_elements.extend(included_root.root_elements)
+        self.root_elements = new_root_elements
