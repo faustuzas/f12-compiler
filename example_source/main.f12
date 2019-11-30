@@ -1,4 +1,4 @@
->include "include.f12"; // will copy the file content into this file
+>include "example_source/includes/include.f12"; // will copy the file content into this file
 
 fun add(int[] x, int y) => int {
     ret x[0] + y;
@@ -16,21 +16,25 @@ fun inner { /* parameterless function */
 
 fun main => int {
     const int age = 22;
-    // const int x = age + 6.5E;
+    const int x = age;
     int y = add(x, 5);
 
     Human human = Human|name: "Faustas", age: 22|;
     human.age = 22;
+    int[] array2;
+    y = 5;
+    array2[3] = 5;
+
+
     --> "A human named ", human.name;
 
     const int[] array = [1, 2, 3, 4];
-    int[] array2;
 
     --> array[2]; // default value
 
     // will interfere the type from the array
-    each o in array {
-        --> x;
+    each iter_el in array {
+        --> iter_el + 5;
     }
 
     if y > 5 {
@@ -41,7 +45,7 @@ fun main => int {
         // statements
     }
 
-    if a { ; }
+    if y { ; }
 
     while y != 0 {
         // statements

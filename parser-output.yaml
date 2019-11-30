@@ -1,137 +1,1104 @@
 root: Program
   root_elements: 
     [0]: DeclFun
-      name: IDENTIFIER | function_from_include_2 (example_source/includes/include_2.f12:1)
+      name: IDENTIFIER | function_from_include (example_source/includes/include.f12:1)
       params: 
         [0]: FunParam
           type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | a (example_source/includes/include_2.f12:1)
+            kind: PRIMITIVE_INT (example_source/includes/include.f12:1)
+          name: IDENTIFIER | a (example_source/includes/include.f12:1)
         [1]: FunParam
           type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | b (example_source/includes/include_2.f12:1)
+            kind: PRIMITIVE_INT (example_source/includes/include.f12:1)
+          name: IDENTIFIER | b (example_source/includes/include.f12:1)
       return_type: TypePrimitive
         kind: PRIMITIVE_VOID
-      statements: StmntBlock
+      body: StmntBlock
         statements: 
           [0]: StmntReturn
-            token: KW_RETURN (example_source/includes/include_2.f12:2)
-            value: ExprLitInt
-              value: LIT_INT | 5 (example_source/includes/include_2.f12:2)
+            token: KW_RETURN (example_source/includes/include.f12:2)
+            value: ExprVar
+              identifier: IDENTIFIER | a (example_source/includes/include.f12:2)
+              decl_node: FunParam
+                type: TypePrimitive
+                  kind: PRIMITIVE_INT (example_source/includes/include.f12:1)
+                name: IDENTIFIER | a (example_source/includes/include.f12:1)
     [1]: DeclFun
-      name: IDENTIFIER | function_from_include (example_source/includes/include.f12:3)
+      name: IDENTIFIER | add (example_source/main.f12:3)
       params: 
         [0]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include.f12:3)
-          name: IDENTIFIER | a (example_source/includes/include.f12:3)
+          type: TypeArrayPrimitive
+            kind: PRIMITIVE_INT (example_source/main.f12:3)
+          name: IDENTIFIER | x (example_source/main.f12:3)
         [1]: FunParam
           type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include.f12:3)
-          name: IDENTIFIER | b (example_source/includes/include.f12:3)
+            kind: PRIMITIVE_INT (example_source/main.f12:3)
+          name: IDENTIFIER | y (example_source/main.f12:3)
       return_type: TypePrimitive
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
+        kind: PRIMITIVE_INT (example_source/main.f12:3)
+      body: StmntBlock
         statements: 
           [0]: StmntReturn
-            token: KW_RETURN (example_source/includes/include.f12:4)
-            value: ExprLitInt
-              value: LIT_INT | 5 (example_source/includes/include.f12:4)
-    [2]: DeclFun
-      name: IDENTIFIER | function_from_include_2 (example_source/includes/include_2.f12:1)
-      params: 
-        [0]: FunParam
+            token: KW_RETURN (example_source/main.f12:4)
+            value: ExprAdd
+              left: ExprArrayAccess
+                array: ExprVar
+                  identifier: IDENTIFIER | x (example_source/main.f12:4)
+                  decl_node: None
+                index_expr: ExprLitInt
+                  value: LIT_INT | 0 (example_source/main.f12:4)
+                array_decl_node: FunParam
+                  type: TypeArrayPrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                  name: IDENTIFIER | x (example_source/main.f12:3)
+              right: ExprVar
+                identifier: IDENTIFIER | y (example_source/main.f12:4)
+                decl_node: FunParam
+                  type: TypePrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                  name: IDENTIFIER | y (example_source/main.f12:3)
+    [2]: DeclUnit
+      name: IDENTIFIER | Human (example_source/main.f12:7)
+      fields: 
+        [0]: DeclUnitField
           type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | a (example_source/includes/include_2.f12:1)
-        [1]: FunParam
+            kind: PRIMITIVE_STRING (example_source/main.f12:8)
+          name: IDENTIFIER | name (example_source/main.f12:8)
+        [1]: DeclUnitField
           type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | b (example_source/includes/include_2.f12:1)
-      return_type: TypePrimitive
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
-        statements: 
-          [0]: StmntReturn
-            token: KW_RETURN (example_source/includes/include_2.f12:2)
-            value: ExprLitInt
-              value: LIT_INT | 5 (example_source/includes/include_2.f12:2)
+            kind: PRIMITIVE_INT (example_source/main.f12:9)
+          name: IDENTIFIER | age (example_source/main.f12:9)
+        [2]: DeclUnitField
+          type: TypeArrayPrimitive
+            kind: PRIMITIVE_STRING (example_source/main.f12:10)
+          name: IDENTIFIER | addresses (example_source/main.f12:10)
     [3]: DeclFun
-      name: IDENTIFIER | a (example_source/not_main.f12:3)
+      name: IDENTIFIER | inner (example_source/main.f12:13)
       params: []
       return_type: TypePrimitive
         kind: PRIMITIVE_VOID
-      statements: StmntBlock
+      body: StmntBlock
+        statements: 
+          [0]: StmntToStdout
+            values: 
+              [0]: ExprLitStr
+                value: LIT_STR | Hello (example_source/main.f12:14)
+    [4]: DeclFun
+      name: IDENTIFIER | main (example_source/main.f12:17)
+      params: []
+      return_type: TypePrimitive
+        kind: PRIMITIVE_INT (example_source/main.f12:17)
+      body: StmntBlock
         statements: 
           [0]: StmntDeclVar
             type: TypePrimitive
-              kind: PRIMITIVE_INT (example_source/not_main.f12:4)
-            name: IDENTIFIER | a (example_source/not_main.f12:4)
-            value: ExprLitFloat
-              value: LIT_FLOAT | 1.3 (example_source/not_main.f12:4)
-            is_constant: False
+              kind: PRIMITIVE_INT (example_source/main.f12:18)
+            name: IDENTIFIER | age (example_source/main.f12:18)
+            value: ExprLitInt
+              value: LIT_INT | 22 (example_source/main.f12:18)
+            is_constant: True
           [1]: StmntDeclVar
             type: TypePrimitive
-              kind: PRIMITIVE_INT (example_source/not_main.f12:5)
-            name: IDENTIFIER | b (example_source/not_main.f12:5)
-            value: ExprLitInt
-              value: LIT_INT | 5 (example_source/not_main.f12:5)
+              kind: PRIMITIVE_INT (example_source/main.f12:19)
+            name: IDENTIFIER | x (example_source/main.f12:19)
+            value: ExprVar
+              identifier: IDENTIFIER | age (example_source/main.f12:19)
+              decl_node: StmntDeclVar
+                type: TypePrimitive
+                  kind: PRIMITIVE_INT (example_source/main.f12:18)
+                name: IDENTIFIER | age (example_source/main.f12:18)
+                value: ExprLitInt
+                  value: LIT_INT | 22 (example_source/main.f12:18)
+                is_constant: True
+            is_constant: True
+          [2]: StmntDeclVar
+            type: TypePrimitive
+              kind: PRIMITIVE_INT (example_source/main.f12:20)
+            name: IDENTIFIER | y (example_source/main.f12:20)
+            value: ExprFnCall
+              function_name: IDENTIFIER | add (example_source/main.f12:20)
+              args: 
+                [0]: ExprVar
+                  identifier: IDENTIFIER | x (example_source/main.f12:20)
+                  decl_node: StmntDeclVar
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:19)
+                    name: IDENTIFIER | x (example_source/main.f12:19)
+                    value: ExprVar
+                      identifier: IDENTIFIER | age (example_source/main.f12:19)
+                      decl_node: StmntDeclVar
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:18)
+                        name: IDENTIFIER | age (example_source/main.f12:18)
+                        value: ExprLitInt
+                          value: LIT_INT | 22 (example_source/main.f12:18)
+                        is_constant: True
+                    is_constant: True
+                [1]: ExprLitInt
+                  value: LIT_INT | 5 (example_source/main.f12:20)
+              function_decl_node: DeclFun
+                name: IDENTIFIER | add (example_source/main.f12:3)
+                params: 
+                  [0]: FunParam
+                    type: TypeArrayPrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:3)
+                    name: IDENTIFIER | x (example_source/main.f12:3)
+                  [1]: FunParam
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:3)
+                    name: IDENTIFIER | y (example_source/main.f12:3)
+                return_type: TypePrimitive
+                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                body: StmntBlock
+                  statements: 
+                    [0]: StmntReturn
+                      token: KW_RETURN (example_source/main.f12:4)
+                      value: ExprAdd
+                        left: ExprArrayAccess
+                          array: ExprVar
+                            identifier: IDENTIFIER | x (example_source/main.f12:4)
+                            decl_node: None
+                          index_expr: ExprLitInt
+                            value: LIT_INT | 0 (example_source/main.f12:4)
+                          array_decl_node: FunParam
+                            type: TypeArrayPrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:3)
+                            name: IDENTIFIER | x (example_source/main.f12:3)
+                        right: ExprVar
+                          identifier: IDENTIFIER | y (example_source/main.f12:4)
+                          decl_node: FunParam
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:3)
+                            name: IDENTIFIER | y (example_source/main.f12:3)
             is_constant: False
-    [4]: DeclFun
-      name: IDENTIFIER | function_from_include_2 (example_source/includes/include_2.f12:1)
-      params: 
-        [0]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | a (example_source/includes/include_2.f12:1)
-        [1]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | b (example_source/includes/include_2.f12:1)
-      return_type: TypePrimitive
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
-        statements: 
-          [0]: StmntReturn
-            token: KW_RETURN (example_source/includes/include_2.f12:2)
+          [3]: StmntDeclVar
+            type: TypeUnit
+              unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+              unit_decl_node: DeclUnit
+                name: IDENTIFIER | Human (example_source/main.f12:7)
+                fields: 
+                  [0]: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                    name: IDENTIFIER | name (example_source/main.f12:8)
+                  [1]: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:9)
+                    name: IDENTIFIER | age (example_source/main.f12:9)
+                  [2]: DeclUnitField
+                    type: TypeArrayPrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                    name: IDENTIFIER | addresses (example_source/main.f12:10)
+            name: IDENTIFIER | human (example_source/main.f12:22)
+            value: ExprCreateUnit
+              unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+              args: 
+                [0]: CreateUnitArg
+                  unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                  field: IDENTIFIER | name (example_source/main.f12:22)
+                  value: ExprLitStr
+                    value: LIT_STR | Faustas (example_source/main.f12:22)
+                  field_decl_node: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                    name: IDENTIFIER | name (example_source/main.f12:8)
+                [1]: CreateUnitArg
+                  unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                  field: IDENTIFIER | age (example_source/main.f12:22)
+                  value: ExprLitInt
+                    value: LIT_INT | 22 (example_source/main.f12:22)
+                  field_decl_node: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:9)
+                    name: IDENTIFIER | age (example_source/main.f12:9)
+              unit_decl_node: DeclUnit
+                name: IDENTIFIER | Human (example_source/main.f12:7)
+                fields: 
+                  [0]: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                    name: IDENTIFIER | name (example_source/main.f12:8)
+                  [1]: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:9)
+                    name: IDENTIFIER | age (example_source/main.f12:9)
+                  [2]: DeclUnitField
+                    type: TypeArrayPrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                    name: IDENTIFIER | addresses (example_source/main.f12:10)
+            is_constant: False
+          [4]: StmntExpr
+            expr: ExprAssign
+              object: ExprAccess
+                object: ExprVar
+                  identifier: IDENTIFIER | human (example_source/main.f12:23)
+                  decl_node: StmntDeclVar
+                    type: TypeUnit
+                      unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                      unit_decl_node: DeclUnit
+                        name: IDENTIFIER | Human (example_source/main.f12:7)
+                        fields: 
+                          [0]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                            name: IDENTIFIER | name (example_source/main.f12:8)
+                          [1]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:9)
+                            name: IDENTIFIER | age (example_source/main.f12:9)
+                          [2]: DeclUnitField
+                            type: TypeArrayPrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                            name: IDENTIFIER | addresses (example_source/main.f12:10)
+                    name: IDENTIFIER | human (example_source/main.f12:22)
+                    value: ExprCreateUnit
+                      unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                      args: 
+                        [0]: CreateUnitArg
+                          unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                          field: IDENTIFIER | name (example_source/main.f12:22)
+                          value: ExprLitStr
+                            value: LIT_STR | Faustas (example_source/main.f12:22)
+                          field_decl_node: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                            name: IDENTIFIER | name (example_source/main.f12:8)
+                        [1]: CreateUnitArg
+                          unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                          field: IDENTIFIER | age (example_source/main.f12:22)
+                          value: ExprLitInt
+                            value: LIT_INT | 22 (example_source/main.f12:22)
+                          field_decl_node: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:9)
+                            name: IDENTIFIER | age (example_source/main.f12:9)
+                      unit_decl_node: DeclUnit
+                        name: IDENTIFIER | Human (example_source/main.f12:7)
+                        fields: 
+                          [0]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                            name: IDENTIFIER | name (example_source/main.f12:8)
+                          [1]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:9)
+                            name: IDENTIFIER | age (example_source/main.f12:9)
+                          [2]: DeclUnitField
+                            type: TypeArrayPrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                            name: IDENTIFIER | addresses (example_source/main.f12:10)
+                    is_constant: False
+                field: IDENTIFIER | age (example_source/main.f12:23)
+                unit_decl_node: DeclUnit
+                  name: IDENTIFIER | Human (example_source/main.f12:7)
+                  fields: 
+                    [0]: DeclUnitField
+                      type: TypePrimitive
+                        kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                      name: IDENTIFIER | name (example_source/main.f12:8)
+                    [1]: DeclUnitField
+                      type: TypePrimitive
+                        kind: PRIMITIVE_INT (example_source/main.f12:9)
+                      name: IDENTIFIER | age (example_source/main.f12:9)
+                    [2]: DeclUnitField
+                      type: TypeArrayPrimitive
+                        kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                      name: IDENTIFIER | addresses (example_source/main.f12:10)
+                field_decl_node: DeclUnitField
+                  type: TypePrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:9)
+                  name: IDENTIFIER | age (example_source/main.f12:9)
+              value: ExprLitInt
+                value: LIT_INT | 22 (example_source/main.f12:23)
+              target_decl_node: DeclUnit
+                name: IDENTIFIER | Human (example_source/main.f12:7)
+                fields: 
+                  [0]: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                    name: IDENTIFIER | name (example_source/main.f12:8)
+                  [1]: DeclUnitField
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:9)
+                    name: IDENTIFIER | age (example_source/main.f12:9)
+                  [2]: DeclUnitField
+                    type: TypeArrayPrimitive
+                      kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                    name: IDENTIFIER | addresses (example_source/main.f12:10)
+          [5]: StmntDeclVar
+            type: TypeArrayPrimitive
+              kind: PRIMITIVE_INT (example_source/main.f12:24)
+            name: IDENTIFIER | array2 (example_source/main.f12:24)
+            value: None
+            is_constant: False
+          [6]: StmntExpr
+            expr: ExprAssign
+              object: ExprVar
+                identifier: IDENTIFIER | y (example_source/main.f12:25)
+                decl_node: StmntDeclVar
+                  type: TypePrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:20)
+                  name: IDENTIFIER | y (example_source/main.f12:20)
+                  value: ExprFnCall
+                    function_name: IDENTIFIER | add (example_source/main.f12:20)
+                    args: 
+                      [0]: ExprVar
+                        identifier: IDENTIFIER | x (example_source/main.f12:20)
+                        decl_node: StmntDeclVar
+                          type: TypePrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:19)
+                          name: IDENTIFIER | x (example_source/main.f12:19)
+                          value: ExprVar
+                            identifier: IDENTIFIER | age (example_source/main.f12:19)
+                            decl_node: StmntDeclVar
+                              type: TypePrimitive
+                                kind: PRIMITIVE_INT (example_source/main.f12:18)
+                              name: IDENTIFIER | age (example_source/main.f12:18)
+                              value: ExprLitInt
+                                value: LIT_INT | 22 (example_source/main.f12:18)
+                              is_constant: True
+                          is_constant: True
+                      [1]: ExprLitInt
+                        value: LIT_INT | 5 (example_source/main.f12:20)
+                    function_decl_node: DeclFun
+                      name: IDENTIFIER | add (example_source/main.f12:3)
+                      params: 
+                        [0]: FunParam
+                          type: TypeArrayPrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:3)
+                          name: IDENTIFIER | x (example_source/main.f12:3)
+                        [1]: FunParam
+                          type: TypePrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:3)
+                          name: IDENTIFIER | y (example_source/main.f12:3)
+                      return_type: TypePrimitive
+                        kind: PRIMITIVE_INT (example_source/main.f12:3)
+                      body: StmntBlock
+                        statements: 
+                          [0]: StmntReturn
+                            token: KW_RETURN (example_source/main.f12:4)
+                            value: ExprAdd
+                              left: ExprArrayAccess
+                                array: ExprVar
+                                  identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                  decl_node: None
+                                index_expr: ExprLitInt
+                                  value: LIT_INT | 0 (example_source/main.f12:4)
+                                array_decl_node: FunParam
+                                  type: TypeArrayPrimitive
+                                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                  name: IDENTIFIER | x (example_source/main.f12:3)
+                              right: ExprVar
+                                identifier: IDENTIFIER | y (example_source/main.f12:4)
+                                decl_node: FunParam
+                                  type: TypePrimitive
+                                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                  name: IDENTIFIER | y (example_source/main.f12:3)
+                  is_constant: False
+              value: ExprLitInt
+                value: LIT_INT | 5 (example_source/main.f12:25)
+              target_decl_node: StmntDeclVar
+                type: TypePrimitive
+                  kind: PRIMITIVE_INT (example_source/main.f12:20)
+                name: IDENTIFIER | y (example_source/main.f12:20)
+                value: ExprFnCall
+                  function_name: IDENTIFIER | add (example_source/main.f12:20)
+                  args: 
+                    [0]: ExprVar
+                      identifier: IDENTIFIER | x (example_source/main.f12:20)
+                      decl_node: StmntDeclVar
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:19)
+                        name: IDENTIFIER | x (example_source/main.f12:19)
+                        value: ExprVar
+                          identifier: IDENTIFIER | age (example_source/main.f12:19)
+                          decl_node: StmntDeclVar
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:18)
+                            name: IDENTIFIER | age (example_source/main.f12:18)
+                            value: ExprLitInt
+                              value: LIT_INT | 22 (example_source/main.f12:18)
+                            is_constant: True
+                        is_constant: True
+                    [1]: ExprLitInt
+                      value: LIT_INT | 5 (example_source/main.f12:20)
+                  function_decl_node: DeclFun
+                    name: IDENTIFIER | add (example_source/main.f12:3)
+                    params: 
+                      [0]: FunParam
+                        type: TypeArrayPrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                        name: IDENTIFIER | x (example_source/main.f12:3)
+                      [1]: FunParam
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                        name: IDENTIFIER | y (example_source/main.f12:3)
+                    return_type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:3)
+                    body: StmntBlock
+                      statements: 
+                        [0]: StmntReturn
+                          token: KW_RETURN (example_source/main.f12:4)
+                          value: ExprAdd
+                            left: ExprArrayAccess
+                              array: ExprVar
+                                identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                decl_node: None
+                              index_expr: ExprLitInt
+                                value: LIT_INT | 0 (example_source/main.f12:4)
+                              array_decl_node: FunParam
+                                type: TypeArrayPrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | x (example_source/main.f12:3)
+                            right: ExprVar
+                              identifier: IDENTIFIER | y (example_source/main.f12:4)
+                              decl_node: FunParam
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | y (example_source/main.f12:3)
+                is_constant: False
+          [7]: StmntExpr
+            expr: ExprAssign
+              object: ExprArrayAccess
+                array: ExprVar
+                  identifier: IDENTIFIER | array2 (example_source/main.f12:26)
+                  decl_node: None
+                index_expr: ExprLitInt
+                  value: LIT_INT | 3 (example_source/main.f12:26)
+                array_decl_node: StmntDeclVar
+                  type: TypeArrayPrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:24)
+                  name: IDENTIFIER | array2 (example_source/main.f12:24)
+                  value: None
+                  is_constant: False
+              value: ExprLitInt
+                value: LIT_INT | 5 (example_source/main.f12:26)
+              target_decl_node: StmntDeclVar
+                type: TypeArrayPrimitive
+                  kind: PRIMITIVE_INT (example_source/main.f12:24)
+                name: IDENTIFIER | array2 (example_source/main.f12:24)
+                value: None
+                is_constant: False
+          [8]: StmntToStdout
+            values: 
+              [0]: ExprLitStr
+                value: LIT_STR | A human named  (example_source/main.f12:29)
+              [1]: ExprAccess
+                object: ExprVar
+                  identifier: IDENTIFIER | human (example_source/main.f12:29)
+                  decl_node: StmntDeclVar
+                    type: TypeUnit
+                      unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                      unit_decl_node: DeclUnit
+                        name: IDENTIFIER | Human (example_source/main.f12:7)
+                        fields: 
+                          [0]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                            name: IDENTIFIER | name (example_source/main.f12:8)
+                          [1]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:9)
+                            name: IDENTIFIER | age (example_source/main.f12:9)
+                          [2]: DeclUnitField
+                            type: TypeArrayPrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                            name: IDENTIFIER | addresses (example_source/main.f12:10)
+                    name: IDENTIFIER | human (example_source/main.f12:22)
+                    value: ExprCreateUnit
+                      unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                      args: 
+                        [0]: CreateUnitArg
+                          unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                          field: IDENTIFIER | name (example_source/main.f12:22)
+                          value: ExprLitStr
+                            value: LIT_STR | Faustas (example_source/main.f12:22)
+                          field_decl_node: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                            name: IDENTIFIER | name (example_source/main.f12:8)
+                        [1]: CreateUnitArg
+                          unit_name: IDENTIFIER | Human (example_source/main.f12:22)
+                          field: IDENTIFIER | age (example_source/main.f12:22)
+                          value: ExprLitInt
+                            value: LIT_INT | 22 (example_source/main.f12:22)
+                          field_decl_node: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:9)
+                            name: IDENTIFIER | age (example_source/main.f12:9)
+                      unit_decl_node: DeclUnit
+                        name: IDENTIFIER | Human (example_source/main.f12:7)
+                        fields: 
+                          [0]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                            name: IDENTIFIER | name (example_source/main.f12:8)
+                          [1]: DeclUnitField
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:9)
+                            name: IDENTIFIER | age (example_source/main.f12:9)
+                          [2]: DeclUnitField
+                            type: TypeArrayPrimitive
+                              kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                            name: IDENTIFIER | addresses (example_source/main.f12:10)
+                    is_constant: False
+                field: IDENTIFIER | name (example_source/main.f12:29)
+                unit_decl_node: DeclUnit
+                  name: IDENTIFIER | Human (example_source/main.f12:7)
+                  fields: 
+                    [0]: DeclUnitField
+                      type: TypePrimitive
+                        kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                      name: IDENTIFIER | name (example_source/main.f12:8)
+                    [1]: DeclUnitField
+                      type: TypePrimitive
+                        kind: PRIMITIVE_INT (example_source/main.f12:9)
+                      name: IDENTIFIER | age (example_source/main.f12:9)
+                    [2]: DeclUnitField
+                      type: TypeArrayPrimitive
+                        kind: PRIMITIVE_STRING (example_source/main.f12:10)
+                      name: IDENTIFIER | addresses (example_source/main.f12:10)
+                field_decl_node: DeclUnitField
+                  type: TypePrimitive
+                    kind: PRIMITIVE_STRING (example_source/main.f12:8)
+                  name: IDENTIFIER | name (example_source/main.f12:8)
+          [9]: StmntDeclVar
+            type: TypeArrayPrimitive
+              kind: PRIMITIVE_INT (example_source/main.f12:31)
+            name: IDENTIFIER | array (example_source/main.f12:31)
+            value: ExprLitArray
+              value: 
+                [0]: ExprLitInt
+                  value: LIT_INT | 1 (example_source/main.f12:31)
+                [1]: ExprLitInt
+                  value: LIT_INT | 2 (example_source/main.f12:31)
+                [2]: ExprLitInt
+                  value: LIT_INT | 3 (example_source/main.f12:31)
+                [3]: ExprLitInt
+                  value: LIT_INT | 4 (example_source/main.f12:31)
+            is_constant: True
+          [10]: StmntToStdout
+            values: 
+              [0]: ExprArrayAccess
+                array: ExprVar
+                  identifier: IDENTIFIER | array (example_source/main.f12:33)
+                  decl_node: None
+                index_expr: ExprLitInt
+                  value: LIT_INT | 2 (example_source/main.f12:33)
+                array_decl_node: StmntDeclVar
+                  type: TypeArrayPrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:31)
+                  name: IDENTIFIER | array (example_source/main.f12:31)
+                  value: ExprLitArray
+                    value: 
+                      [0]: ExprLitInt
+                        value: LIT_INT | 1 (example_source/main.f12:31)
+                      [1]: ExprLitInt
+                        value: LIT_INT | 2 (example_source/main.f12:31)
+                      [2]: ExprLitInt
+                        value: LIT_INT | 3 (example_source/main.f12:31)
+                      [3]: ExprLitInt
+                        value: LIT_INT | 4 (example_source/main.f12:31)
+                  is_constant: True
+          [11]: StmntEach
+            element: DeclArrayElement
+              name: IDENTIFIER | iter_el (example_source/main.f12:36)
+              iterable_node: ExprVar
+                identifier: IDENTIFIER | array (example_source/main.f12:36)
+                decl_node: StmntDeclVar
+                  type: TypeArrayPrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:31)
+                  name: IDENTIFIER | array (example_source/main.f12:31)
+                  value: ExprLitArray
+                    value: 
+                      [0]: ExprLitInt
+                        value: LIT_INT | 1 (example_source/main.f12:31)
+                      [1]: ExprLitInt
+                        value: LIT_INT | 2 (example_source/main.f12:31)
+                      [2]: ExprLitInt
+                        value: LIT_INT | 3 (example_source/main.f12:31)
+                      [3]: ExprLitInt
+                        value: LIT_INT | 4 (example_source/main.f12:31)
+                  is_constant: True
+            array: ExprVar
+              identifier: IDENTIFIER | array (example_source/main.f12:36)
+              decl_node: StmntDeclVar
+                type: TypeArrayPrimitive
+                  kind: PRIMITIVE_INT (example_source/main.f12:31)
+                name: IDENTIFIER | array (example_source/main.f12:31)
+                value: ExprLitArray
+                  value: 
+                    [0]: ExprLitInt
+                      value: LIT_INT | 1 (example_source/main.f12:31)
+                    [1]: ExprLitInt
+                      value: LIT_INT | 2 (example_source/main.f12:31)
+                    [2]: ExprLitInt
+                      value: LIT_INT | 3 (example_source/main.f12:31)
+                    [3]: ExprLitInt
+                      value: LIT_INT | 4 (example_source/main.f12:31)
+                is_constant: True
+            stmnt_block: StmntBlock
+              statements: 
+                [0]: StmntToStdout
+                  values: 
+                    [0]: ExprAdd
+                      left: ExprVar
+                        identifier: IDENTIFIER | iter_el (example_source/main.f12:37)
+                        decl_node: DeclArrayElement
+                          name: IDENTIFIER | iter_el (example_source/main.f12:36)
+                          iterable_node: ExprVar
+                            identifier: IDENTIFIER | array (example_source/main.f12:36)
+                            decl_node: StmntDeclVar
+                              type: TypeArrayPrimitive
+                                kind: PRIMITIVE_INT (example_source/main.f12:31)
+                              name: IDENTIFIER | array (example_source/main.f12:31)
+                              value: ExprLitArray
+                                value: 
+                                  [0]: ExprLitInt
+                                    value: LIT_INT | 1 (example_source/main.f12:31)
+                                  [1]: ExprLitInt
+                                    value: LIT_INT | 2 (example_source/main.f12:31)
+                                  [2]: ExprLitInt
+                                    value: LIT_INT | 3 (example_source/main.f12:31)
+                                  [3]: ExprLitInt
+                                    value: LIT_INT | 4 (example_source/main.f12:31)
+                              is_constant: True
+                      right: ExprLitInt
+                        value: LIT_INT | 5 (example_source/main.f12:37)
+          [12]: StmntIf
+            condition: ExprGt
+              left: ExprVar
+                identifier: IDENTIFIER | y (example_source/main.f12:40)
+                decl_node: StmntDeclVar
+                  type: TypePrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:20)
+                  name: IDENTIFIER | y (example_source/main.f12:20)
+                  value: ExprFnCall
+                    function_name: IDENTIFIER | add (example_source/main.f12:20)
+                    args: 
+                      [0]: ExprVar
+                        identifier: IDENTIFIER | x (example_source/main.f12:20)
+                        decl_node: StmntDeclVar
+                          type: TypePrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:19)
+                          name: IDENTIFIER | x (example_source/main.f12:19)
+                          value: ExprVar
+                            identifier: IDENTIFIER | age (example_source/main.f12:19)
+                            decl_node: StmntDeclVar
+                              type: TypePrimitive
+                                kind: PRIMITIVE_INT (example_source/main.f12:18)
+                              name: IDENTIFIER | age (example_source/main.f12:18)
+                              value: ExprLitInt
+                                value: LIT_INT | 22 (example_source/main.f12:18)
+                              is_constant: True
+                          is_constant: True
+                      [1]: ExprLitInt
+                        value: LIT_INT | 5 (example_source/main.f12:20)
+                    function_decl_node: DeclFun
+                      name: IDENTIFIER | add (example_source/main.f12:3)
+                      params: 
+                        [0]: FunParam
+                          type: TypeArrayPrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:3)
+                          name: IDENTIFIER | x (example_source/main.f12:3)
+                        [1]: FunParam
+                          type: TypePrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:3)
+                          name: IDENTIFIER | y (example_source/main.f12:3)
+                      return_type: TypePrimitive
+                        kind: PRIMITIVE_INT (example_source/main.f12:3)
+                      body: StmntBlock
+                        statements: 
+                          [0]: StmntReturn
+                            token: KW_RETURN (example_source/main.f12:4)
+                            value: ExprAdd
+                              left: ExprArrayAccess
+                                array: ExprVar
+                                  identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                  decl_node: None
+                                index_expr: ExprLitInt
+                                  value: LIT_INT | 0 (example_source/main.f12:4)
+                                array_decl_node: FunParam
+                                  type: TypeArrayPrimitive
+                                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                  name: IDENTIFIER | x (example_source/main.f12:3)
+                              right: ExprVar
+                                identifier: IDENTIFIER | y (example_source/main.f12:4)
+                                decl_node: FunParam
+                                  type: TypePrimitive
+                                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                  name: IDENTIFIER | y (example_source/main.f12:3)
+                  is_constant: False
+              right: ExprLitInt
+                value: LIT_INT | 5 (example_source/main.f12:40)
+            stmnt_block: StmntBlock
+              statements: []
+            else_clause: StmntIf
+              condition: ExprEq
+                left: ExprVar
+                  identifier: IDENTIFIER | y (example_source/main.f12:42)
+                  decl_node: StmntDeclVar
+                    type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:20)
+                    name: IDENTIFIER | y (example_source/main.f12:20)
+                    value: ExprFnCall
+                      function_name: IDENTIFIER | add (example_source/main.f12:20)
+                      args: 
+                        [0]: ExprVar
+                          identifier: IDENTIFIER | x (example_source/main.f12:20)
+                          decl_node: StmntDeclVar
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:19)
+                            name: IDENTIFIER | x (example_source/main.f12:19)
+                            value: ExprVar
+                              identifier: IDENTIFIER | age (example_source/main.f12:19)
+                              decl_node: StmntDeclVar
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:18)
+                                name: IDENTIFIER | age (example_source/main.f12:18)
+                                value: ExprLitInt
+                                  value: LIT_INT | 22 (example_source/main.f12:18)
+                                is_constant: True
+                            is_constant: True
+                        [1]: ExprLitInt
+                          value: LIT_INT | 5 (example_source/main.f12:20)
+                      function_decl_node: DeclFun
+                        name: IDENTIFIER | add (example_source/main.f12:3)
+                        params: 
+                          [0]: FunParam
+                            type: TypeArrayPrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:3)
+                            name: IDENTIFIER | x (example_source/main.f12:3)
+                          [1]: FunParam
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:3)
+                            name: IDENTIFIER | y (example_source/main.f12:3)
+                        return_type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                        body: StmntBlock
+                          statements: 
+                            [0]: StmntReturn
+                              token: KW_RETURN (example_source/main.f12:4)
+                              value: ExprAdd
+                                left: ExprArrayAccess
+                                  array: ExprVar
+                                    identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                    decl_node: None
+                                  index_expr: ExprLitInt
+                                    value: LIT_INT | 0 (example_source/main.f12:4)
+                                  array_decl_node: FunParam
+                                    type: TypeArrayPrimitive
+                                      kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                    name: IDENTIFIER | x (example_source/main.f12:3)
+                                right: ExprVar
+                                  identifier: IDENTIFIER | y (example_source/main.f12:4)
+                                  decl_node: FunParam
+                                    type: TypePrimitive
+                                      kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                    name: IDENTIFIER | y (example_source/main.f12:3)
+                    is_constant: False
+                right: ExprLitInt
+                  value: LIT_INT | 0 (example_source/main.f12:42)
+              stmnt_block: StmntBlock
+                statements: []
+              else_clause: StmntBlock
+                statements: []
+          [13]: StmntIf
+            condition: ExprVar
+              identifier: IDENTIFIER | y (example_source/main.f12:48)
+              decl_node: StmntDeclVar
+                type: TypePrimitive
+                  kind: PRIMITIVE_INT (example_source/main.f12:20)
+                name: IDENTIFIER | y (example_source/main.f12:20)
+                value: ExprFnCall
+                  function_name: IDENTIFIER | add (example_source/main.f12:20)
+                  args: 
+                    [0]: ExprVar
+                      identifier: IDENTIFIER | x (example_source/main.f12:20)
+                      decl_node: StmntDeclVar
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:19)
+                        name: IDENTIFIER | x (example_source/main.f12:19)
+                        value: ExprVar
+                          identifier: IDENTIFIER | age (example_source/main.f12:19)
+                          decl_node: StmntDeclVar
+                            type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:18)
+                            name: IDENTIFIER | age (example_source/main.f12:18)
+                            value: ExprLitInt
+                              value: LIT_INT | 22 (example_source/main.f12:18)
+                            is_constant: True
+                        is_constant: True
+                    [1]: ExprLitInt
+                      value: LIT_INT | 5 (example_source/main.f12:20)
+                  function_decl_node: DeclFun
+                    name: IDENTIFIER | add (example_source/main.f12:3)
+                    params: 
+                      [0]: FunParam
+                        type: TypeArrayPrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                        name: IDENTIFIER | x (example_source/main.f12:3)
+                      [1]: FunParam
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                        name: IDENTIFIER | y (example_source/main.f12:3)
+                    return_type: TypePrimitive
+                      kind: PRIMITIVE_INT (example_source/main.f12:3)
+                    body: StmntBlock
+                      statements: 
+                        [0]: StmntReturn
+                          token: KW_RETURN (example_source/main.f12:4)
+                          value: ExprAdd
+                            left: ExprArrayAccess
+                              array: ExprVar
+                                identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                decl_node: None
+                              index_expr: ExprLitInt
+                                value: LIT_INT | 0 (example_source/main.f12:4)
+                              array_decl_node: FunParam
+                                type: TypeArrayPrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | x (example_source/main.f12:3)
+                            right: ExprVar
+                              identifier: IDENTIFIER | y (example_source/main.f12:4)
+                              decl_node: FunParam
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | y (example_source/main.f12:3)
+                is_constant: False
+            stmnt_block: StmntBlock
+              statements: 
+                [0]: StmntEmpty
+            else_clause: None
+          [14]: StmntWhile
+            condition: ExprNe
+              left: ExprVar
+                identifier: IDENTIFIER | y (example_source/main.f12:50)
+                decl_node: StmntDeclVar
+                  type: TypePrimitive
+                    kind: PRIMITIVE_INT (example_source/main.f12:20)
+                  name: IDENTIFIER | y (example_source/main.f12:20)
+                  value: ExprFnCall
+                    function_name: IDENTIFIER | add (example_source/main.f12:20)
+                    args: 
+                      [0]: ExprVar
+                        identifier: IDENTIFIER | x (example_source/main.f12:20)
+                        decl_node: StmntDeclVar
+                          type: TypePrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:19)
+                          name: IDENTIFIER | x (example_source/main.f12:19)
+                          value: ExprVar
+                            identifier: IDENTIFIER | age (example_source/main.f12:19)
+                            decl_node: StmntDeclVar
+                              type: TypePrimitive
+                                kind: PRIMITIVE_INT (example_source/main.f12:18)
+                              name: IDENTIFIER | age (example_source/main.f12:18)
+                              value: ExprLitInt
+                                value: LIT_INT | 22 (example_source/main.f12:18)
+                              is_constant: True
+                          is_constant: True
+                      [1]: ExprLitInt
+                        value: LIT_INT | 5 (example_source/main.f12:20)
+                    function_decl_node: DeclFun
+                      name: IDENTIFIER | add (example_source/main.f12:3)
+                      params: 
+                        [0]: FunParam
+                          type: TypeArrayPrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:3)
+                          name: IDENTIFIER | x (example_source/main.f12:3)
+                        [1]: FunParam
+                          type: TypePrimitive
+                            kind: PRIMITIVE_INT (example_source/main.f12:3)
+                          name: IDENTIFIER | y (example_source/main.f12:3)
+                      return_type: TypePrimitive
+                        kind: PRIMITIVE_INT (example_source/main.f12:3)
+                      body: StmntBlock
+                        statements: 
+                          [0]: StmntReturn
+                            token: KW_RETURN (example_source/main.f12:4)
+                            value: ExprAdd
+                              left: ExprArrayAccess
+                                array: ExprVar
+                                  identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                  decl_node: None
+                                index_expr: ExprLitInt
+                                  value: LIT_INT | 0 (example_source/main.f12:4)
+                                array_decl_node: FunParam
+                                  type: TypeArrayPrimitive
+                                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                  name: IDENTIFIER | x (example_source/main.f12:3)
+                              right: ExprVar
+                                identifier: IDENTIFIER | y (example_source/main.f12:4)
+                                decl_node: FunParam
+                                  type: TypePrimitive
+                                    kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                  name: IDENTIFIER | y (example_source/main.f12:3)
+                  is_constant: False
+              right: ExprLitInt
+                value: LIT_INT | 0 (example_source/main.f12:50)
+            stmnt_block: StmntBlock
+              statements: 
+                [0]: StmntIf
+                  condition: ExprEq
+                    left: ExprVar
+                      identifier: IDENTIFIER | y (example_source/main.f12:53)
+                      decl_node: StmntDeclVar
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:20)
+                        name: IDENTIFIER | y (example_source/main.f12:20)
+                        value: ExprFnCall
+                          function_name: IDENTIFIER | add (example_source/main.f12:20)
+                          args: 
+                            [0]: ExprVar
+                              identifier: IDENTIFIER | x (example_source/main.f12:20)
+                              decl_node: StmntDeclVar
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:19)
+                                name: IDENTIFIER | x (example_source/main.f12:19)
+                                value: ExprVar
+                                  identifier: IDENTIFIER | age (example_source/main.f12:19)
+                                  decl_node: StmntDeclVar
+                                    type: TypePrimitive
+                                      kind: PRIMITIVE_INT (example_source/main.f12:18)
+                                    name: IDENTIFIER | age (example_source/main.f12:18)
+                                    value: ExprLitInt
+                                      value: LIT_INT | 22 (example_source/main.f12:18)
+                                    is_constant: True
+                                is_constant: True
+                            [1]: ExprLitInt
+                              value: LIT_INT | 5 (example_source/main.f12:20)
+                          function_decl_node: DeclFun
+                            name: IDENTIFIER | add (example_source/main.f12:3)
+                            params: 
+                              [0]: FunParam
+                                type: TypeArrayPrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | x (example_source/main.f12:3)
+                              [1]: FunParam
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | y (example_source/main.f12:3)
+                            return_type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:3)
+                            body: StmntBlock
+                              statements: 
+                                [0]: StmntReturn
+                                  token: KW_RETURN (example_source/main.f12:4)
+                                  value: ExprAdd
+                                    left: ExprArrayAccess
+                                      array: ExprVar
+                                        identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                        decl_node: None
+                                      index_expr: ExprLitInt
+                                        value: LIT_INT | 0 (example_source/main.f12:4)
+                                      array_decl_node: FunParam
+                                        type: TypeArrayPrimitive
+                                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                        name: IDENTIFIER | x (example_source/main.f12:3)
+                                    right: ExprVar
+                                      identifier: IDENTIFIER | y (example_source/main.f12:4)
+                                      decl_node: FunParam
+                                        type: TypePrimitive
+                                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                        name: IDENTIFIER | y (example_source/main.f12:3)
+                        is_constant: False
+                    right: ExprLitInt
+                      value: LIT_INT | 1000 (example_source/main.f12:53)
+                  stmnt_block: StmntBlock
+                    statements: 
+                      [0]: StmntBreak
+                        token: KW_BREAK (example_source/main.f12:54)
+                  else_clause: None
+                [1]: StmntIf
+                  condition: ExprEq
+                    left: ExprVar
+                      identifier: IDENTIFIER | y (example_source/main.f12:57)
+                      decl_node: StmntDeclVar
+                        type: TypePrimitive
+                          kind: PRIMITIVE_INT (example_source/main.f12:20)
+                        name: IDENTIFIER | y (example_source/main.f12:20)
+                        value: ExprFnCall
+                          function_name: IDENTIFIER | add (example_source/main.f12:20)
+                          args: 
+                            [0]: ExprVar
+                              identifier: IDENTIFIER | x (example_source/main.f12:20)
+                              decl_node: StmntDeclVar
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:19)
+                                name: IDENTIFIER | x (example_source/main.f12:19)
+                                value: ExprVar
+                                  identifier: IDENTIFIER | age (example_source/main.f12:19)
+                                  decl_node: StmntDeclVar
+                                    type: TypePrimitive
+                                      kind: PRIMITIVE_INT (example_source/main.f12:18)
+                                    name: IDENTIFIER | age (example_source/main.f12:18)
+                                    value: ExprLitInt
+                                      value: LIT_INT | 22 (example_source/main.f12:18)
+                                    is_constant: True
+                                is_constant: True
+                            [1]: ExprLitInt
+                              value: LIT_INT | 5 (example_source/main.f12:20)
+                          function_decl_node: DeclFun
+                            name: IDENTIFIER | add (example_source/main.f12:3)
+                            params: 
+                              [0]: FunParam
+                                type: TypeArrayPrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | x (example_source/main.f12:3)
+                              [1]: FunParam
+                                type: TypePrimitive
+                                  kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                name: IDENTIFIER | y (example_source/main.f12:3)
+                            return_type: TypePrimitive
+                              kind: PRIMITIVE_INT (example_source/main.f12:3)
+                            body: StmntBlock
+                              statements: 
+                                [0]: StmntReturn
+                                  token: KW_RETURN (example_source/main.f12:4)
+                                  value: ExprAdd
+                                    left: ExprArrayAccess
+                                      array: ExprVar
+                                        identifier: IDENTIFIER | x (example_source/main.f12:4)
+                                        decl_node: None
+                                      index_expr: ExprLitInt
+                                        value: LIT_INT | 0 (example_source/main.f12:4)
+                                      array_decl_node: FunParam
+                                        type: TypeArrayPrimitive
+                                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                        name: IDENTIFIER | x (example_source/main.f12:3)
+                                    right: ExprVar
+                                      identifier: IDENTIFIER | y (example_source/main.f12:4)
+                                      decl_node: FunParam
+                                        type: TypePrimitive
+                                          kind: PRIMITIVE_INT (example_source/main.f12:3)
+                                        name: IDENTIFIER | y (example_source/main.f12:3)
+                        is_constant: False
+                    right: ExprLitInt
+                      value: LIT_INT | 59 (example_source/main.f12:57)
+                  stmnt_block: StmntBlock
+                    statements: 
+                      [0]: StmntContinue
+                        token: KW_CONTINUE (example_source/main.f12:58)
+                  else_clause: None
+          [15]: StmntDeclVar
+            type: TypePrimitive
+              kind: PRIMITIVE_STRING (example_source/main.f12:62)
+            name: IDENTIFIER | name (example_source/main.f12:62)
+            value: ExprFromStdin
+            is_constant: False
+          [16]: StmntToStdout
+            values: 
+              [0]: ExprLitStr
+                value: LIT_STR | Hello,  (example_source/main.f12:63)
+              [1]: ExprVar
+                identifier: IDENTIFIER | name (example_source/main.f12:63)
+                decl_node: StmntDeclVar
+                  type: TypePrimitive
+                    kind: PRIMITIVE_STRING (example_source/main.f12:62)
+                  name: IDENTIFIER | name (example_source/main.f12:62)
+                  value: ExprFromStdin
+                  is_constant: False
+          [17]: StmntReturn
+            token: KW_RETURN (example_source/main.f12:65)
             value: ExprLitInt
-              value: LIT_INT | 5 (example_source/includes/include_2.f12:2)
-    [5]: DeclFun
-      name: IDENTIFIER | function_from_include (example_source/includes/include.f12:3)
-      params: 
-        [0]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include.f12:3)
-          name: IDENTIFIER | a (example_source/includes/include.f12:3)
-        [1]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include.f12:3)
-          name: IDENTIFIER | b (example_source/includes/include.f12:3)
-      return_type: TypePrimitive
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
-        statements: 
-          [0]: StmntReturn
-            token: KW_RETURN (example_source/includes/include.f12:4)
-            value: ExprLitInt
-              value: LIT_INT | 5 (example_source/includes/include.f12:4)
-    [6]: DeclFun
-      name: IDENTIFIER | function_from_include_2 (example_source/includes/include_2.f12:1)
-      params: 
-        [0]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | a (example_source/includes/include_2.f12:1)
-        [1]: FunParam
-          type: TypePrimitive
-            kind: PRIMITIVE_INT (example_source/includes/include_2.f12:1)
-          name: IDENTIFIER | b (example_source/includes/include_2.f12:1)
-      return_type: TypePrimitive
-        kind: PRIMITIVE_VOID
-      statements: StmntBlock
-        statements: 
-          [0]: StmntReturn
-            token: KW_RETURN (example_source/includes/include_2.f12:2)
-            value: ExprLitInt
-              value: LIT_INT | 5 (example_source/includes/include_2.f12:2)
+              value: LIT_INT | 0 (example_source/main.f12:65)

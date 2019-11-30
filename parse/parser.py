@@ -182,7 +182,7 @@ class Parser:
         self.expect(TokenType.KW_IN, 'keyword in')
         array = self.parse_expr()
         stmnt_block = self.parse_block()
-        return ast.StmntEach(ast.DeclTmpVar(item), array, stmnt_block)
+        return ast.StmntEach(ast.DeclArrayElement(item, array), array, stmnt_block)
 
     def parse_stmnt_if(self) -> ast.StmntIf:
         self.expect(TokenType.KW_IF, 'keyword if')
@@ -314,15 +314,16 @@ class Parser:
     def parse_expr_1(self) -> ast.Expr:
         result = self.parse_expr_0()
 
-        while True:
-            if self.accept(TokenType.C_SQUARE_L):
-                index = self.parse_expr()
-                self.expect(TokenType.C_SQUARE_R, '"]"')
-                result = ast.ExprArrayAccess(result, index)
-            elif self.accept(TokenType.OP_ACCESS):
-                result = ast.ExprAccess(result, self.expect(TokenType.IDENTIFIER, 'identifier'))
-            else:
-                break
+        if Parser.is_assignable(result):
+            while True:
+                if self.accept(TokenType.C_SQUARE_L):
+                    index = self.parse_expr()
+                    self.expect(TokenType.C_SQUARE_R, '"]"')
+                    result = ast.ExprArrayAccess(result, index)
+                elif self.accept(TokenType.OP_ACCESS):
+                    result = ast.ExprAccess(result, self.expect(TokenType.IDENTIFIER, 'identifier'))
+                else:
+                    break
 
         return result
 
@@ -382,15 +383,15 @@ class Parser:
         self.expect(TokenType.C_PIPE, '"|"')
         fields = []
         while not self.accept(TokenType.C_PIPE):
-            fields.append(self.parse_unit_arg())
+            fields.append(self.parse_unit_arg(name))
             self.accept(TokenType.C_COMMA)
         return ast.ExprCreateUnit(name, fields)
 
-    def parse_unit_arg(self) -> ast.CreateUnitArg:
-        name = self.expect(TokenType.IDENTIFIER, 'identifier')
+    def parse_unit_arg(self, unit_name) -> ast.CreateUnitArg:
+        arg_name = self.expect(TokenType.IDENTIFIER, 'identifier')
         self.expect(TokenType.C_COLON, '":"')
         value = self.parse_expr()
-        return ast.CreateUnitArg(name, value)
+        return ast.CreateUnitArg(unit_name, arg_name, value)
 
     """
     Helper methods

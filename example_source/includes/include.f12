@@ -1,7 +1,3 @@
->include "example_source/includes/include_2.f12";
-
 fun function_from_include(int a, int b) {
-    ret 5;
+    ret a;
 }
-
->include "example_source/includes/include_2.f12";
