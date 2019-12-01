@@ -10,8 +10,9 @@ unit Human {
     string[] addresses;
 }
 
-fun inner { /* parameterless function */
+fun inner => Human { /* parameterless function */
     --> "Hello";
+    ret Human|name: "Faustas", age: 22, addresses: [] |;
 }
 
 fun main => int {
@@ -19,8 +20,8 @@ fun main => int {
     const int x = age;
     int y = add(x, 5);
 
-    Human human = Human|name: "Faustas", age: 22|;
-    human.age = 22;
+    Human human = Human|name: "Faustas", age: 22, addresses: [] |;
+    human.age = inner();
     human;
     int[] array2;
     y = 5;

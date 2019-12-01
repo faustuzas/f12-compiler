@@ -4,6 +4,7 @@ from typing import List, Union
 from models import TokenType, Token
 from models.scope import Scope
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
+from utils.list_utils import find_in_list
 from utils.type_checking_helpers import unify_types
 
 
@@ -122,10 +123,10 @@ class TypePrimitive(Type):
 
 class TypeUnit(Type):
 
-    def __init__(self, unit_name):
+    def __init__(self, unit_name, unit_decl_node=None):
         super().__init__()
         self.unit_name = unit_name
-        self.unit_decl_node = None
+        self.unit_decl_node = unit_decl_node
 
     def resolve_names(self, scope: Scope):
         self.unit_decl_node = scope.resolve_name(self.unit_name)
@@ -382,7 +383,7 @@ class ExprLitArray(ExprLit):
             first_val_type = self.value[0].resolve_types()
             for i in range(1, len(self.value)):
                 unify_types(self.value[i].reference_token, first_val_type, self.value[i].resolve_types())
-            return TypeArray(first_val_type)
+            return TypeArray(first_val_type) if first_val_type else None
         return None
 
     @property
@@ -573,6 +574,7 @@ class ExprFnCall(Expr):
     def resolve_types(self):
         for arg in self.args:
             arg.resolve_types()
+        return self.function_decl_node.return_type if self.function_decl_node else None
 
     @property
     def reference_token(self):
@@ -596,7 +598,26 @@ class ExprCreateUnit(Expr):
                 arg.resolve_names(scope)
 
     def resolve_types(self):
-        pass
+        if not self.unit_decl_node:
+            return None
+
+        fields = self.unit_decl_node.fields
+
+        # check if args count matches fields count
+        if fields and len(self.unit_decl_node.fields) != len(self.args):
+            handle_typing_error('Wrong number of arguments', self.reference_token)
+            return None
+
+        for field in fields:
+            arg_for_field = find_in_list(self.args, lambda a: field.name.value == a.field.value)
+            if not arg_for_field:
+                handle_typing_error(f'There is no argument for \'{field.name.value}\'', self.reference_token)
+                continue
+
+            value_type = arg_for_field.value.resolve_types()
+            unify_types(arg_for_field.reference_token, field.type, value_type)
+
+        return TypeUnit(self.unit_decl_node.name, self.unit_decl_node)
 
     @property
     def reference_token(self):
@@ -621,7 +642,7 @@ class CreateUnitArg(Node):
         self.value.resolve_names(scope)
 
     def resolve_types(self):
-        self.value.resolve_types()
+        return self.value.resolve_types()
 
     @property
     def reference_token(self):

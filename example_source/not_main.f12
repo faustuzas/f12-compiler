@@ -15,7 +15,6 @@ unit Human {
 }
 
 fun add(float[] x, float y) => A {
-    const Human human = Human|  |;
+    const Human human = Human| name: "Faustas", age: 5, addresses: [ "Sauletekio 6" ], children: [ Child| name: "aaa", toy: Toy | size: 5 | | ]|;
     human.children[0].name = "labas";
-    human = Human|  |;
 }

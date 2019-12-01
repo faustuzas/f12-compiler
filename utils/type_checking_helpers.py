@@ -12,7 +12,7 @@ def unify_types(reference_token: Token, type_1, type_2, error_message=None):
 
     def extract_kind(type_):
         if isinstance(type_, TypeUnit):
-            return type_.unit_name
+            return type_.unit_name.value
         return type_.kind.type if isinstance(type_.kind, Token) else type_.kind
 
     def prepare_for_printing(item):
@@ -34,6 +34,9 @@ def unify_types(reference_token: Token, type_1, type_2, error_message=None):
             p_error(type_1, type_2, error_message)
     elif isinstance(type_1, TypeArray):
         if extract_kind(type_1.inner_type) != extract_kind(type_2.inner_type):
+            p_error(type_1, type_2, error_message)
+    elif isinstance(type_1, TypeUnit):
+        if type_1.unit_name.value != type_2.unit_name.value:
             p_error(type_1, type_2, error_message)
     else:
         raise Exception("Unreachable code")
