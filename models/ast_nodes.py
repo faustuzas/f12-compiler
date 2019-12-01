@@ -426,7 +426,13 @@ class ExprAssign(Expr):
 
     def resolve_names(self, scope: Scope):
         self.value.resolve_names(scope)
-        self.object.resolve_names(scope)
+        obj_decl = self.object.resolve_names(scope)
+        if hasattr(obj_decl, 'is_constant') and obj_decl.is_constant:
+            print_error(
+                'Constant',
+                'Assign to constant variable',
+                self.reference_token
+            )
 
     def resolve_types(self):
         obj_type = self.object.resolve_types()
