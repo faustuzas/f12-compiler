@@ -23,7 +23,6 @@ primitive_types = {
 }
 
 constants = {
-    'null': TokenType.CONSTANT_NULL,
     'false': TokenType.CONSTANT_FALSE,
     'true': TokenType.CONSTANT_TRUE
 }

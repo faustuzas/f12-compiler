@@ -33,7 +33,7 @@ class TerminalPrinter:
         else:
             output += main
 
-        print(output)
+        print(output + '\n')
 
     def header_format(self, header: str, header_len) -> str:
         header_frame = self.header_frame_symbol * header_len + '\n'

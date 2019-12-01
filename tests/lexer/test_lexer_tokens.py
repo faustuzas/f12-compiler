@@ -382,16 +382,15 @@ class LexerTokensTests(TestCase):
         self.assertEqual(TokenType.EOF, lexer.tokens[1].type)
 
     def test_identifier_2(self):
-        lexer = Lexer('int hello null true while')
+        lexer = Lexer('int hello true while')
 
         lexer.lex_all()
 
         self.assertEqual(TokenType.PRIMITIVE_INT, lexer.tokens[0].type)
         self.assertEqual(TokenType.IDENTIFIER, lexer.tokens[1].type)
-        self.assertEqual(TokenType.CONSTANT_NULL, lexer.tokens[2].type)
-        self.assertEqual(TokenType.CONSTANT_TRUE, lexer.tokens[3].type)
-        self.assertEqual(TokenType.KW_WHILE, lexer.tokens[4].type)
-        self.assertEqual(TokenType.EOF, lexer.tokens[5].type)
+        self.assertEqual(TokenType.CONSTANT_TRUE, lexer.tokens[2].type)
+        self.assertEqual(TokenType.KW_WHILE, lexer.tokens[3].type)
+        self.assertEqual(TokenType.EOF, lexer.tokens[4].type)
 
         self.assertEqual('hello', lexer.tokens[1].value)
 

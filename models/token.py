@@ -59,7 +59,6 @@ class TokenType(ExtendedEnum):
     PRIMITIVE_BOOL = 'PRIMITIVE_BOOL'
     PRIMITIVE_VOID = 'PRIMITIVE_VOID'
 
-    CONSTANT_NULL = 'CONSTANT_NULL'
     CONSTANT_TRUE = 'CONSTANT_TRUE'
     CONSTANT_FALSE = 'CONSTANT_FALSE'
 
@@ -79,6 +78,9 @@ class Token:
     def __repr__(self):
         value_part = f' | {self.value}' if self.value != '' else ''
         return str(self.type) + value_part
+
+    def __str__(self):
+        return self.value
 
 
 primitive_type_tokens = [

@@ -1,0 +1,5 @@
+fun main => string {
+    float y = 6.5;
+    const int x = 5;
+    x = 6;
+}

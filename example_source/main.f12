@@ -21,9 +21,14 @@ fun main => int {
 
     Human human = Human|name: "Faustas", age: 22|;
     human.age = 22;
+    human;
     int[] array2;
     y = 5;
     array2[3] = 5;
+
+    // break;
+
+    // continue;
 
 
     --> "A human named ", human.name;
@@ -37,7 +42,7 @@ fun main => int {
         --> iter_el + 5;
     }
 
-    if y > 5 {
+    if y > 5 && 5 + 8 > 10 {
         // statements
     } else if y == 0 {
         // statements
@@ -50,7 +55,7 @@ fun main => int {
     while y != 0 {
         // statements
 
-        if y == 1000 {
+        if y == -1000 {
             break;
         }
 

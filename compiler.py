@@ -6,7 +6,7 @@ from parse.parser import Parser
 
 from utils.ast_printer import AstPrinter, FileOutput
 
-file_to_compile = 'example_source/main.f12'
+file_to_compile = 'example_source/not2_main.f12'
 if len(argv) == 2:
     file_to_compile = argv[1]
 
@@ -20,6 +20,8 @@ with open(file_to_compile) as f:
 
         ast_root.resolve_includes()
         ast_root.resolve_names(Scope(None))
+        ast_root.resolve_types()
+        ast_root.check_for_entry_point()
 
         with FileOutput('parser-output.yaml') as output:
             ast_printer = AstPrinter(output)

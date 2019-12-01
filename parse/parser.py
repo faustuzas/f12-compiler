@@ -342,15 +342,12 @@ class Parser:
         if curr_token.type == TokenType.CONSTANT_TRUE or curr_token.type == TokenType.CONSTANT_FALSE:
             return ast.ExprLitBool(curr_token)
 
-        if curr_token.type == TokenType.CONSTANT_NULL:
-            return ast.ExprLitNull(curr_token)
-
         if curr_token.type == TokenType.C_SQUARE_L:
             items = []
             while not self.accept(TokenType.C_SQUARE_R):
                 items.append(self.parse_expr())
                 self.accept(TokenType.C_COMMA)
-            return ast.ExprLitArray(items)
+            return ast.ExprLitArray(items, curr_token)
 
         if curr_token.type == TokenType.C_ROUND_L:
             result = self.parse_expr()
@@ -445,22 +442,19 @@ class Parser:
 
         type_token = self.get_next_token()
 
+        is_array = False
         if self.accept(TokenType.C_SQUARE_L):
             self.expect(TokenType.C_SQUARE_R)
             is_array = True
-        else:
-            is_array = False
 
         if type_token.type in primitive_type_tokens:
-            if is_array:
-                return ast.TypeArrayPrimitive(type_token)
-
-            return ast.TypePrimitive(type_token)
+            type_ = ast.TypePrimitive(type_token)
         else:
-            if is_array:
-                return ast.TypeArrayUnit(type_token)
+            type_ = ast.TypeUnit(type_token)
 
-            return ast.TypeUnit(type_token)
+        if is_array:
+            return ast.TypeArray(type_)
+        return type_
 
     def print_error(self, error: ParsingError):
         token = error.token if error.token else self.tokens[self.offset]
