@@ -1122,9 +1122,27 @@ class Program(Node):
                     if isinstance(el, DeclFun) and el.name.value == 'main']
 
         if len(main_fns) != 1:
-            print_error_simple(
+            return print_error_simple(
                 'Entry point',
-                'You have to provide single function with a name \'main\' for a program entry point',
+                'You have to provide single function with a name \'main\' for a program entry point'
+            )
+
+        main_fn = main_fns[0]
+
+        ret_type = main_fn.return_type
+        returns_int = isinstance(ret_type, TypePrimitive) and ret_type.kind_type == TokenType.PRIMITIVE_INT
+        if not returns_int:
+            print_error(
+                'Entry point',
+                '\'main\' function has to return int',
+                main_fn.reference_token
+            )
+
+        if len(main_fn.params) != 0:
+            print_error(
+                'Entry point',
+                '\'main\' function must not take any params',
+                main_fn.reference_token
             )
 
     @property
