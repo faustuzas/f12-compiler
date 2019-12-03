@@ -14,7 +14,7 @@ class Scope:
         if name not in self.members:
             self.members[name] = node
         else:
-            print_error('Names resolution', f'Item with identifier "{name}" is already declared', name_token)
+            print_error('Names resolution', f'Item with name "{name}" is already declared', name_token)
 
     def resolve_name(self, name_token: Token):
         name = name_token.value
@@ -26,4 +26,4 @@ class Scope:
         if self.parent_scope:
             return self.parent_scope.resolve_name(name_token)
 
-        print_error('Names resolution', f'Item with identifier "{name}" is not declared', name_token)
+        print_error('Names resolution', f'Item with name "{name}" is not declared', name_token)

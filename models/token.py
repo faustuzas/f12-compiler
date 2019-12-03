@@ -91,6 +91,14 @@ primitive_type_tokens = [
     TokenType.PRIMITIVE_STRING,
 ]
 
+primitive_type_tokens_names = {
+    TokenType.PRIMITIVE_INT: 'int',
+    TokenType.PRIMITIVE_VOID: 'void',
+    TokenType.PRIMITIVE_BOOL: 'bool',
+    TokenType.PRIMITIVE_FLOAT: 'float',
+    TokenType.PRIMITIVE_STRING: 'string'
+}
+
 type_tokens = [
     *primitive_type_tokens,
     TokenType.IDENTIFIER

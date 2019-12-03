@@ -5,7 +5,7 @@ from models import TokenType, Token
 from models.scope import Scope
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
 from utils.list_utils import find_in_list
-from utils.type_checking_helpers import unify_types
+from utils.type_checking_helpers import unify_types, prepare_for_printing
 
 
 def handle_typing_error(cause, token):
@@ -132,7 +132,7 @@ class TypeUnit(Type):
         self.unit_decl_node = scope.resolve_name(self.unit_name)
 
     def resolve_types(self):
-        return self.unit_decl_node.type
+        return self
 
     def is_accessible(self):
         return True
@@ -172,7 +172,7 @@ class ExprBinaryArithmetic(ExprBinary, ABC):
             unify_types(reference_token, left_type, right_type, 'Right operand type does not match left\'s one')
         else:
             handle_typing_error(
-                f'Cannot perform arithmetic operations with {self.left.__class__.__name__}',
+                f'Cannot perform arithmetic operations with type "{prepare_for_printing(left_type)}"',
                 reference_token
             )
         return left_type
@@ -460,7 +460,10 @@ class ExprVar(Expr, Assignable):
 
     def resolve_types(self):
         if self.decl_node:
-            return self.decl_node.type
+            if isinstance(self.decl_node, (DeclVar, StmntDeclVar)):
+                return self.decl_node.type
+            else:
+                handle_typing_error(f'Not a valid type for variable', self.reference_token)
 
     def resolve_identifier(self):
         return self.identifier
@@ -528,12 +531,6 @@ class ExprArrayAccess(Expr, Assignable):
     def resolve_identifier(self):
         return self.array.resolve_identifier()
 
-    def resolve_decl_node(self):
-        raise NotImplementedError(f'resolve_decl_node is not implemented for {self.__class__}')
-
-    def resolve_type_node(self):
-        raise NotImplementedError(f'resolve_type_node is not implemented for {self.__class__}')
-
     def resolve_types(self):
         # check if array variable is Iterable
         array_type = self.array.resolve_types()
@@ -543,10 +540,10 @@ class ExprArrayAccess(Expr, Assignable):
 
         # check if index expr evaluates to int
         unify_types(self.index_expr.reference_token,
-                    self.index_expr.resolve_types(),
-                    TypePrimitive(TokenType.PRIMITIVE_INT))
+                    TypePrimitive(TokenType.PRIMITIVE_INT),
+                    self.index_expr.resolve_types())
 
-        return array_type.inner_type
+        return array_type.inner_type.resolve_types()
 
     def is_accessible(self):
         return self.array.is_accessible()
@@ -572,9 +569,18 @@ class ExprFnCall(Expr):
             arg.resolve_names(scope)
 
     def resolve_types(self):
-        for arg in self.args:
-            arg.resolve_types()
-        return self.function_decl_node.return_type if self.function_decl_node else None
+        if not self.function_decl_node:
+            return
+        if not isinstance(self.function_decl_node, DeclFun):
+            handle_typing_error(f'Item "{self.function_name}" is not a function', self.reference_token)
+            return
+        params = self.function_decl_node.params
+        if len(params) != len(self.args):
+            handle_typing_error(f'Wrong number of arguments. Expected: {len(params)}, got: {len(self.args)}', self.reference_token)
+        else:
+            for arg in self.args:
+                arg.resolve_types()
+        return self.function_decl_node.return_type
 
     @property
     def reference_token(self):
@@ -599,6 +605,10 @@ class ExprCreateUnit(Expr):
 
     def resolve_types(self):
         if not self.unit_decl_node:
+            return None
+
+        if not isinstance(self.unit_decl_node, DeclUnit):
+            handle_typing_error(f'Item "{self.unit_name}" is not a unit', self.reference_token)
             return None
 
         fields = self.unit_decl_node.fields
@@ -709,7 +719,8 @@ class StmntIf(Stmnt):
             self.else_clause.resolve_names(scope)
 
     def resolve_types(self):
-        self.condition.resolve_types()
+        condition_type = self.condition.resolve_types()
+        unify_types(self.condition.reference_token, TypePrimitive(TokenType.PRIMITIVE_BOOL), condition_type)
         self.stmnt_block.resolve_types()
         if self.else_clause:
             self.else_clause.resolve_types()
@@ -775,7 +786,10 @@ class StmntReturn(StmntControl):
 
     def resolve_types(self):
         ret_type = self.find_parent(DeclFun).return_type
-        val_type = self.value.resolve_types()
+        if self.value:
+            val_type = self.value.resolve_types()
+        else:
+            val_type = TypePrimitive(TokenType.PRIMITIVE_VOID)
         unify_types(self.token, ret_type, val_type)
 
 
@@ -854,7 +868,9 @@ class StmntWhile(Stmnt):
         self.stmnt_block.resolve_names(scope)
 
     def resolve_types(self):
-        self.condition.resolve_types()
+        condition_type = self.condition.resolve_types()
+        unify_types(self.condition.reference_token, TypePrimitive(TokenType.PRIMITIVE_BOOL), condition_type)
+
         self.stmnt_block.resolve_types()
 
     @property
@@ -1032,7 +1048,7 @@ class DeclUnit(Decl):
         return self._fields_scope
 
     def resolve_types(self):
-        pass
+        return None
 
     @property
     def reference_token(self):

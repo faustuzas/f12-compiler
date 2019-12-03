@@ -27,9 +27,9 @@ fun main => int {
     y = 5;
     array2[3] = 5;
 
-    // break;
+    break;
 
-    // continue;
+    continue;
 
 
     --> "A human named ", human.name;

@@ -6,7 +6,7 @@ from parse.parser import Parser
 
 from utils.ast_printer import AstPrinter, FileOutput
 
-file_to_compile = 'example_source/main.f12'
+file_to_compile = 'example_source/not2_main.f12'
 if len(argv) == 2:
     file_to_compile = argv[1]
 

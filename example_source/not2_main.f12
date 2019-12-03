@@ -1,6 +1,22 @@
-fun main => string {
-    float y = 6.5;
-    const int x = 5;
-    x = 6;
-    y = 5.5;
+unit A {
+
+}
+
+fun aa {
+
+}
+
+fun main => int {
+    if 5 {
+
+    }
+
+    aa(1);
+
+    aa + aa;
+
+    int[] b;
+    // b[bool]; ???
+
+    ret;
 }
