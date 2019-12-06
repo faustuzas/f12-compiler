@@ -1,4 +1,5 @@
 from utils import printer
+from models import error_counter
 
 
 def line_number_prefix(number):
@@ -14,6 +15,7 @@ def print_error_from_token(type_, cause, token):
 
 
 def print_error(type_, cause, line_number, offset_in_line, file_name, text=None):
+    error_counter.inc()
     if text is None:
         with open(file_name) as f:
             text = ''.join(f.readlines())
@@ -34,4 +36,5 @@ def print_error(type_, cause, line_number, offset_in_line, file_name, text=None)
 
 
 def print_error_simple(type_, cause):
+    error_counter.inc()
     printer.error('', f'{type_} error: {cause}')

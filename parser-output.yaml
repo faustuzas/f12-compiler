@@ -1,68 +1,544 @@
 root: Program
   root_elements: 
     [0]: DeclUnit
-      name: A (example_source/not2_main.f12:1)
-      fields: []
-    [1]: DeclFun
-      name: aa (example_source/not2_main.f12:5)
-      params: []
-      return_type: TypePrimitive
-        kind: PRIMITIVE_VOID
-      body: StmntBlock
-        statements: []
-    [2]: DeclFun
-      name: main (example_source/not2_main.f12:9)
-      params: []
-      return_type: TypePrimitive
-        kind:  (example_source/not2_main.f12:9)
+      name: Toy (example_source/not_main.f12:1)
+      fields: 
+        [0]: DeclUnitField
+          type: TypePrimitive
+            kind:  (example_source/not_main.f12:2)
+          name: size (example_source/not_main.f12:2)
+    [1]: DeclUnit
+      name: Child (example_source/not_main.f12:5)
+      fields: 
+        [0]: DeclUnitField
+          type: TypePrimitive
+            kind:  (example_source/not_main.f12:6)
+          name: name (example_source/not_main.f12:6)
+        [1]: DeclUnitField
+          type: TypeUnit
+            unit_name: Toy (example_source/not_main.f12:7)
+            unit_decl_node: DeclUnit
+              name: Toy (example_source/not_main.f12:1)
+              fields: 
+                [0]: DeclUnitField
+                  type: TypePrimitive
+                    kind:  (example_source/not_main.f12:2)
+                  name: size (example_source/not_main.f12:2)
+          name: toy (example_source/not_main.f12:7)
+    [2]: DeclUnit
+      name: Human (example_source/not_main.f12:10)
+      fields: 
+        [0]: DeclUnitField
+          type: TypePrimitive
+            kind:  (example_source/not_main.f12:11)
+          name: name (example_source/not_main.f12:11)
+        [1]: DeclUnitField
+          type: TypePrimitive
+            kind:  (example_source/not_main.f12:12)
+          name: age (example_source/not_main.f12:12)
+        [2]: DeclUnitField
+          type: TypeArray
+            inner_type: TypePrimitive
+              kind:  (example_source/not_main.f12:13)
+          name: addresses (example_source/not_main.f12:13)
+        [3]: DeclUnitField
+          type: TypeArray
+            inner_type: TypeUnit
+              unit_name: Child (example_source/not_main.f12:14)
+              unit_decl_node: DeclUnit
+                name: Child (example_source/not_main.f12:5)
+                fields: 
+                  [0]: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:6)
+                    name: name (example_source/not_main.f12:6)
+                  [1]: DeclUnitField
+                    type: TypeUnit
+                      unit_name: Toy (example_source/not_main.f12:7)
+                      unit_decl_node: DeclUnit
+                        name: Toy (example_source/not_main.f12:1)
+                        fields: 
+                          [0]: DeclUnitField
+                            type: TypePrimitive
+                              kind:  (example_source/not_main.f12:2)
+                            name: size (example_source/not_main.f12:2)
+                    name: toy (example_source/not_main.f12:7)
+          name: children (example_source/not_main.f12:14)
+    [3]: DeclFun
+      name: add (example_source/not_main.f12:17)
+      params: 
+        [0]: FunParam
+          type: TypeArray
+            inner_type: TypePrimitive
+              kind:  (example_source/not_main.f12:17)
+          name: x (example_source/not_main.f12:17)
+        [1]: FunParam
+          type: TypePrimitive
+            kind:  (example_source/not_main.f12:17)
+          name: y (example_source/not_main.f12:17)
+      return_type: TypeUnit
+        unit_name: A (example_source/not_main.f12:17)
+        unit_decl_node: None
       body: StmntBlock
         statements: 
-          [0]: StmntIf
-            condition: ExprLitInt
-              value: 5 (example_source/not2_main.f12:10)
-            stmnt_block: StmntBlock
-              statements: []
-            else_clause: None
-          [1]: StmntExpr
-            expr: ExprFnCall
-              function_name: aa (example_source/not2_main.f12:14)
+          [0]: StmntDeclVar
+            type: TypeUnit
+              unit_name: Human (example_source/not_main.f12:18)
+              unit_decl_node: DeclUnit
+                name: Human (example_source/not_main.f12:10)
+                fields: 
+                  [0]: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:11)
+                    name: name (example_source/not_main.f12:11)
+                  [1]: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:12)
+                    name: age (example_source/not_main.f12:12)
+                  [2]: DeclUnitField
+                    type: TypeArray
+                      inner_type: TypePrimitive
+                        kind:  (example_source/not_main.f12:13)
+                    name: addresses (example_source/not_main.f12:13)
+                  [3]: DeclUnitField
+                    type: TypeArray
+                      inner_type: TypeUnit
+                        unit_name: Child (example_source/not_main.f12:14)
+                        unit_decl_node: DeclUnit
+                          name: Child (example_source/not_main.f12:5)
+                          fields: 
+                            [0]: DeclUnitField
+                              type: TypePrimitive
+                                kind:  (example_source/not_main.f12:6)
+                              name: name (example_source/not_main.f12:6)
+                            [1]: DeclUnitField
+                              type: TypeUnit
+                                unit_name: Toy (example_source/not_main.f12:7)
+                                unit_decl_node: DeclUnit
+                                  name: Toy (example_source/not_main.f12:1)
+                                  fields: 
+                                    [0]: DeclUnitField
+                                      type: TypePrimitive
+                                        kind:  (example_source/not_main.f12:2)
+                                      name: size (example_source/not_main.f12:2)
+                              name: toy (example_source/not_main.f12:7)
+                    name: children (example_source/not_main.f12:14)
+            name: human (example_source/not_main.f12:18)
+            value: ExprCreateUnit
+              unit_name: Human (example_source/not_main.f12:18)
               args: 
-                [0]: ExprLitInt
-                  value: 1 (example_source/not2_main.f12:14)
-              function_decl_node: DeclFun
-                name: aa (example_source/not2_main.f12:5)
-                params: []
-                return_type: TypePrimitive
-                  kind: PRIMITIVE_VOID
-                body: StmntBlock
-                  statements: []
-          [2]: StmntExpr
-            expr: ExprAdd
-              left: ExprVar
-                identifier: aa (example_source/not2_main.f12:16)
-                decl_node: DeclFun
-                  name: aa (example_source/not2_main.f12:5)
-                  params: []
-                  return_type: TypePrimitive
-                    kind: PRIMITIVE_VOID
-                  body: StmntBlock
-                    statements: []
-              right: ExprVar
-                identifier: aa (example_source/not2_main.f12:16)
-                decl_node: DeclFun
-                  name: aa (example_source/not2_main.f12:5)
-                  params: []
-                  return_type: TypePrimitive
-                    kind: PRIMITIVE_VOID
-                  body: StmntBlock
-                    statements: []
-          [3]: StmntDeclVar
-            type: TypeArray
-              inner_type: TypePrimitive
-                kind:  (example_source/not2_main.f12:18)
-            name: b (example_source/not2_main.f12:18)
-            value: None
-            is_constant: False
-          [4]: StmntReturn
-            token:  (example_source/not2_main.f12:21)
-            value: None
+                [0]: CreateUnitArg
+                  unit_name: Human (example_source/not_main.f12:18)
+                  field: name (example_source/not_main.f12:18)
+                  value: ExprLitStr
+                    value: Faustas (example_source/not_main.f12:18)
+                  field_decl_node: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:11)
+                    name: name (example_source/not_main.f12:11)
+                [1]: CreateUnitArg
+                  unit_name: Human (example_source/not_main.f12:18)
+                  field: age (example_source/not_main.f12:18)
+                  value: ExprLitInt
+                    value: 5 (example_source/not_main.f12:18)
+                  field_decl_node: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:12)
+                    name: age (example_source/not_main.f12:12)
+                [2]: CreateUnitArg
+                  unit_name: Human (example_source/not_main.f12:18)
+                  field: addresses (example_source/not_main.f12:18)
+                  value: ExprLitArray
+                    value: 
+                      [0]: ExprLitStr
+                        value: Sauletekio 6 (example_source/not_main.f12:18)
+                  field_decl_node: DeclUnitField
+                    type: TypeArray
+                      inner_type: TypePrimitive
+                        kind:  (example_source/not_main.f12:13)
+                    name: addresses (example_source/not_main.f12:13)
+                [3]: CreateUnitArg
+                  unit_name: Human (example_source/not_main.f12:18)
+                  field: children (example_source/not_main.f12:18)
+                  value: ExprLitArray
+                    value: 
+                      [0]: ExprCreateUnit
+                        unit_name: Child (example_source/not_main.f12:18)
+                        args: 
+                          [0]: CreateUnitArg
+                            unit_name: Child (example_source/not_main.f12:18)
+                            field: name (example_source/not_main.f12:18)
+                            value: ExprLitStr
+                              value: aaa (example_source/not_main.f12:18)
+                            field_decl_node: DeclUnitField
+                              type: TypePrimitive
+                                kind:  (example_source/not_main.f12:6)
+                              name: name (example_source/not_main.f12:6)
+                          [1]: CreateUnitArg
+                            unit_name: Child (example_source/not_main.f12:18)
+                            field: toy (example_source/not_main.f12:18)
+                            value: ExprCreateUnit
+                              unit_name: Toy (example_source/not_main.f12:18)
+                              args: 
+                                [0]: CreateUnitArg
+                                  unit_name: Toy (example_source/not_main.f12:18)
+                                  field: size (example_source/not_main.f12:18)
+                                  value: ExprLitInt
+                                    value: 5 (example_source/not_main.f12:18)
+                                  field_decl_node: DeclUnitField
+                                    type: TypePrimitive
+                                      kind:  (example_source/not_main.f12:2)
+                                    name: size (example_source/not_main.f12:2)
+                              unit_decl_node: DeclUnit
+                                name: Toy (example_source/not_main.f12:1)
+                                fields: 
+                                  [0]: DeclUnitField
+                                    type: TypePrimitive
+                                      kind:  (example_source/not_main.f12:2)
+                                    name: size (example_source/not_main.f12:2)
+                            field_decl_node: DeclUnitField
+                              type: TypeUnit
+                                unit_name: Toy (example_source/not_main.f12:7)
+                                unit_decl_node: DeclUnit
+                                  name: Toy (example_source/not_main.f12:1)
+                                  fields: 
+                                    [0]: DeclUnitField
+                                      type: TypePrimitive
+                                        kind:  (example_source/not_main.f12:2)
+                                      name: size (example_source/not_main.f12:2)
+                              name: toy (example_source/not_main.f12:7)
+                        unit_decl_node: DeclUnit
+                          name: Child (example_source/not_main.f12:5)
+                          fields: 
+                            [0]: DeclUnitField
+                              type: TypePrimitive
+                                kind:  (example_source/not_main.f12:6)
+                              name: name (example_source/not_main.f12:6)
+                            [1]: DeclUnitField
+                              type: TypeUnit
+                                unit_name: Toy (example_source/not_main.f12:7)
+                                unit_decl_node: DeclUnit
+                                  name: Toy (example_source/not_main.f12:1)
+                                  fields: 
+                                    [0]: DeclUnitField
+                                      type: TypePrimitive
+                                        kind:  (example_source/not_main.f12:2)
+                                      name: size (example_source/not_main.f12:2)
+                              name: toy (example_source/not_main.f12:7)
+                  field_decl_node: DeclUnitField
+                    type: TypeArray
+                      inner_type: TypeUnit
+                        unit_name: Child (example_source/not_main.f12:14)
+                        unit_decl_node: DeclUnit
+                          name: Child (example_source/not_main.f12:5)
+                          fields: 
+                            [0]: DeclUnitField
+                              type: TypePrimitive
+                                kind:  (example_source/not_main.f12:6)
+                              name: name (example_source/not_main.f12:6)
+                            [1]: DeclUnitField
+                              type: TypeUnit
+                                unit_name: Toy (example_source/not_main.f12:7)
+                                unit_decl_node: DeclUnit
+                                  name: Toy (example_source/not_main.f12:1)
+                                  fields: 
+                                    [0]: DeclUnitField
+                                      type: TypePrimitive
+                                        kind:  (example_source/not_main.f12:2)
+                                      name: size (example_source/not_main.f12:2)
+                              name: toy (example_source/not_main.f12:7)
+                    name: children (example_source/not_main.f12:14)
+              unit_decl_node: DeclUnit
+                name: Human (example_source/not_main.f12:10)
+                fields: 
+                  [0]: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:11)
+                    name: name (example_source/not_main.f12:11)
+                  [1]: DeclUnitField
+                    type: TypePrimitive
+                      kind:  (example_source/not_main.f12:12)
+                    name: age (example_source/not_main.f12:12)
+                  [2]: DeclUnitField
+                    type: TypeArray
+                      inner_type: TypePrimitive
+                        kind:  (example_source/not_main.f12:13)
+                    name: addresses (example_source/not_main.f12:13)
+                  [3]: DeclUnitField
+                    type: TypeArray
+                      inner_type: TypeUnit
+                        unit_name: Child (example_source/not_main.f12:14)
+                        unit_decl_node: DeclUnit
+                          name: Child (example_source/not_main.f12:5)
+                          fields: 
+                            [0]: DeclUnitField
+                              type: TypePrimitive
+                                kind:  (example_source/not_main.f12:6)
+                              name: name (example_source/not_main.f12:6)
+                            [1]: DeclUnitField
+                              type: TypeUnit
+                                unit_name: Toy (example_source/not_main.f12:7)
+                                unit_decl_node: DeclUnit
+                                  name: Toy (example_source/not_main.f12:1)
+                                  fields: 
+                                    [0]: DeclUnitField
+                                      type: TypePrimitive
+                                        kind:  (example_source/not_main.f12:2)
+                                      name: size (example_source/not_main.f12:2)
+                              name: toy (example_source/not_main.f12:7)
+                    name: children (example_source/not_main.f12:14)
+            is_constant: True
+          [1]: StmntExpr
+            expr: ExprAssign
+              object: ExprAccess
+                object: ExprArrayAccess
+                  array: ExprAccess
+                    object: ExprVar
+                      identifier: human (example_source/not_main.f12:19)
+                      decl_node: StmntDeclVar
+                        type: TypeUnit
+                          unit_name: Human (example_source/not_main.f12:18)
+                          unit_decl_node: DeclUnit
+                            name: Human (example_source/not_main.f12:10)
+                            fields: 
+                              [0]: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:11)
+                                name: name (example_source/not_main.f12:11)
+                              [1]: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:12)
+                                name: age (example_source/not_main.f12:12)
+                              [2]: DeclUnitField
+                                type: TypeArray
+                                  inner_type: TypePrimitive
+                                    kind:  (example_source/not_main.f12:13)
+                                name: addresses (example_source/not_main.f12:13)
+                              [3]: DeclUnitField
+                                type: TypeArray
+                                  inner_type: TypeUnit
+                                    unit_name: Child (example_source/not_main.f12:14)
+                                    unit_decl_node: DeclUnit
+                                      name: Child (example_source/not_main.f12:5)
+                                      fields: 
+                                        [0]: DeclUnitField
+                                          type: TypePrimitive
+                                            kind:  (example_source/not_main.f12:6)
+                                          name: name (example_source/not_main.f12:6)
+                                        [1]: DeclUnitField
+                                          type: TypeUnit
+                                            unit_name: Toy (example_source/not_main.f12:7)
+                                            unit_decl_node: DeclUnit
+                                              name: Toy (example_source/not_main.f12:1)
+                                              fields: 
+                                                [0]: DeclUnitField
+                                                  type: TypePrimitive
+                                                    kind:  (example_source/not_main.f12:2)
+                                                  name: size (example_source/not_main.f12:2)
+                                          name: toy (example_source/not_main.f12:7)
+                                name: children (example_source/not_main.f12:14)
+                        name: human (example_source/not_main.f12:18)
+                        value: ExprCreateUnit
+                          unit_name: Human (example_source/not_main.f12:18)
+                          args: 
+                            [0]: CreateUnitArg
+                              unit_name: Human (example_source/not_main.f12:18)
+                              field: name (example_source/not_main.f12:18)
+                              value: ExprLitStr
+                                value: Faustas (example_source/not_main.f12:18)
+                              field_decl_node: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:11)
+                                name: name (example_source/not_main.f12:11)
+                            [1]: CreateUnitArg
+                              unit_name: Human (example_source/not_main.f12:18)
+                              field: age (example_source/not_main.f12:18)
+                              value: ExprLitInt
+                                value: 5 (example_source/not_main.f12:18)
+                              field_decl_node: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:12)
+                                name: age (example_source/not_main.f12:12)
+                            [2]: CreateUnitArg
+                              unit_name: Human (example_source/not_main.f12:18)
+                              field: addresses (example_source/not_main.f12:18)
+                              value: ExprLitArray
+                                value: 
+                                  [0]: ExprLitStr
+                                    value: Sauletekio 6 (example_source/not_main.f12:18)
+                              field_decl_node: DeclUnitField
+                                type: TypeArray
+                                  inner_type: TypePrimitive
+                                    kind:  (example_source/not_main.f12:13)
+                                name: addresses (example_source/not_main.f12:13)
+                            [3]: CreateUnitArg
+                              unit_name: Human (example_source/not_main.f12:18)
+                              field: children (example_source/not_main.f12:18)
+                              value: ExprLitArray
+                                value: 
+                                  [0]: ExprCreateUnit
+                                    unit_name: Child (example_source/not_main.f12:18)
+                                    args: 
+                                      [0]: CreateUnitArg
+                                        unit_name: Child (example_source/not_main.f12:18)
+                                        field: name (example_source/not_main.f12:18)
+                                        value: ExprLitStr
+                                          value: aaa (example_source/not_main.f12:18)
+                                        field_decl_node: DeclUnitField
+                                          type: TypePrimitive
+                                            kind:  (example_source/not_main.f12:6)
+                                          name: name (example_source/not_main.f12:6)
+                                      [1]: CreateUnitArg
+                                        unit_name: Child (example_source/not_main.f12:18)
+                                        field: toy (example_source/not_main.f12:18)
+                                        value: ExprCreateUnit
+                                          unit_name: Toy (example_source/not_main.f12:18)
+                                          args: 
+                                            [0]: CreateUnitArg
+                                              unit_name: Toy (example_source/not_main.f12:18)
+                                              field: size (example_source/not_main.f12:18)
+                                              value: ExprLitInt
+                                                value: 5 (example_source/not_main.f12:18)
+                                              field_decl_node: DeclUnitField
+                                                type: TypePrimitive
+                                                  kind:  (example_source/not_main.f12:2)
+                                                name: size (example_source/not_main.f12:2)
+                                          unit_decl_node: DeclUnit
+                                            name: Toy (example_source/not_main.f12:1)
+                                            fields: 
+                                              [0]: DeclUnitField
+                                                type: TypePrimitive
+                                                  kind:  (example_source/not_main.f12:2)
+                                                name: size (example_source/not_main.f12:2)
+                                        field_decl_node: DeclUnitField
+                                          type: TypeUnit
+                                            unit_name: Toy (example_source/not_main.f12:7)
+                                            unit_decl_node: DeclUnit
+                                              name: Toy (example_source/not_main.f12:1)
+                                              fields: 
+                                                [0]: DeclUnitField
+                                                  type: TypePrimitive
+                                                    kind:  (example_source/not_main.f12:2)
+                                                  name: size (example_source/not_main.f12:2)
+                                          name: toy (example_source/not_main.f12:7)
+                                    unit_decl_node: DeclUnit
+                                      name: Child (example_source/not_main.f12:5)
+                                      fields: 
+                                        [0]: DeclUnitField
+                                          type: TypePrimitive
+                                            kind:  (example_source/not_main.f12:6)
+                                          name: name (example_source/not_main.f12:6)
+                                        [1]: DeclUnitField
+                                          type: TypeUnit
+                                            unit_name: Toy (example_source/not_main.f12:7)
+                                            unit_decl_node: DeclUnit
+                                              name: Toy (example_source/not_main.f12:1)
+                                              fields: 
+                                                [0]: DeclUnitField
+                                                  type: TypePrimitive
+                                                    kind:  (example_source/not_main.f12:2)
+                                                  name: size (example_source/not_main.f12:2)
+                                          name: toy (example_source/not_main.f12:7)
+                              field_decl_node: DeclUnitField
+                                type: TypeArray
+                                  inner_type: TypeUnit
+                                    unit_name: Child (example_source/not_main.f12:14)
+                                    unit_decl_node: DeclUnit
+                                      name: Child (example_source/not_main.f12:5)
+                                      fields: 
+                                        [0]: DeclUnitField
+                                          type: TypePrimitive
+                                            kind:  (example_source/not_main.f12:6)
+                                          name: name (example_source/not_main.f12:6)
+                                        [1]: DeclUnitField
+                                          type: TypeUnit
+                                            unit_name: Toy (example_source/not_main.f12:7)
+                                            unit_decl_node: DeclUnit
+                                              name: Toy (example_source/not_main.f12:1)
+                                              fields: 
+                                                [0]: DeclUnitField
+                                                  type: TypePrimitive
+                                                    kind:  (example_source/not_main.f12:2)
+                                                  name: size (example_source/not_main.f12:2)
+                                          name: toy (example_source/not_main.f12:7)
+                                name: children (example_source/not_main.f12:14)
+                          unit_decl_node: DeclUnit
+                            name: Human (example_source/not_main.f12:10)
+                            fields: 
+                              [0]: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:11)
+                                name: name (example_source/not_main.f12:11)
+                              [1]: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:12)
+                                name: age (example_source/not_main.f12:12)
+                              [2]: DeclUnitField
+                                type: TypeArray
+                                  inner_type: TypePrimitive
+                                    kind:  (example_source/not_main.f12:13)
+                                name: addresses (example_source/not_main.f12:13)
+                              [3]: DeclUnitField
+                                type: TypeArray
+                                  inner_type: TypeUnit
+                                    unit_name: Child (example_source/not_main.f12:14)
+                                    unit_decl_node: DeclUnit
+                                      name: Child (example_source/not_main.f12:5)
+                                      fields: 
+                                        [0]: DeclUnitField
+                                          type: TypePrimitive
+                                            kind:  (example_source/not_main.f12:6)
+                                          name: name (example_source/not_main.f12:6)
+                                        [1]: DeclUnitField
+                                          type: TypeUnit
+                                            unit_name: Toy (example_source/not_main.f12:7)
+                                            unit_decl_node: DeclUnit
+                                              name: Toy (example_source/not_main.f12:1)
+                                              fields: 
+                                                [0]: DeclUnitField
+                                                  type: TypePrimitive
+                                                    kind:  (example_source/not_main.f12:2)
+                                                  name: size (example_source/not_main.f12:2)
+                                          name: toy (example_source/not_main.f12:7)
+                                name: children (example_source/not_main.f12:14)
+                        is_constant: True
+                    field: children (example_source/not_main.f12:19)
+                    field_decl_node: DeclUnitField
+                      type: TypeArray
+                        inner_type: TypeUnit
+                          unit_name: Child (example_source/not_main.f12:14)
+                          unit_decl_node: DeclUnit
+                            name: Child (example_source/not_main.f12:5)
+                            fields: 
+                              [0]: DeclUnitField
+                                type: TypePrimitive
+                                  kind:  (example_source/not_main.f12:6)
+                                name: name (example_source/not_main.f12:6)
+                              [1]: DeclUnitField
+                                type: TypeUnit
+                                  unit_name: Toy (example_source/not_main.f12:7)
+                                  unit_decl_node: DeclUnit
+                                    name: Toy (example_source/not_main.f12:1)
+                                    fields: 
+                                      [0]: DeclUnitField
+                                        type: TypePrimitive
+                                          kind:  (example_source/not_main.f12:2)
+                                        name: size (example_source/not_main.f12:2)
+                                name: toy (example_source/not_main.f12:7)
+                      name: children (example_source/not_main.f12:14)
+                  index_expr: ExprLitInt
+                    value: 0 (example_source/not_main.f12:19)
+                field: name (example_source/not_main.f12:19)
+                field_decl_node: DeclUnitField
+                  type: TypePrimitive
+                    kind:  (example_source/not_main.f12:6)
+                  name: name (example_source/not_main.f12:6)
+              value: ExprLitStr
+                value: labas (example_source/not_main.f12:19)
+    [4]: DeclFun
+      name: main (example_source/not_main.f12:22)
+      params: []
+      return_type: TypePrimitive
+        kind:  (example_source/not_main.f12:22)
+      body: StmntBlock
+        statements: []

@@ -16,7 +16,7 @@ fun main => int {
     aa + aa;
 
     int[] b;
-    // b[bool]; ???
+    b[true]; // ???
 
     ret;
 }
