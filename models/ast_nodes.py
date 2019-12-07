@@ -74,6 +74,9 @@ class Type(Node, ABC):
     def has_value(self):
         return False
 
+    def is_valid_var_type(self):
+        return True
+
     @property
     def reference_token(self):
         return None
@@ -110,6 +113,9 @@ class TypePrimitive(Type):
             self.kind_type == TokenType.PRIMITIVE_FLOAT
 
     def has_value(self):
+        return self.kind_type != TokenType.PRIMITIVE_VOID
+
+    def is_valid_var_type(self):
         return self.kind_type != TokenType.PRIMITIVE_VOID
 
     @property
@@ -619,6 +625,9 @@ class ExprCreateUnit(Expr):
             return None
 
         for field in fields:
+            if not field.type.is_valid_var_type():
+                continue
+
             arg_for_field = find_in_list(self.args, lambda a: field.name.value == a.field.value)
             if not arg_for_field:
                 handle_typing_error(f'There is no argument for \'{field.name.value}\'', self.reference_token)
@@ -694,6 +703,10 @@ class StmntDeclVar(Stmnt):
             self.value.resolve_names(scope)
 
     def resolve_types(self):
+        if not self.type.is_valid_var_type():
+            handle_typing_error('Cannot create a variable of the given type', self.reference_token)
+            return None
+
         if self.value:
             value_type = self.value.resolve_types()
             unify_types(self.reference_token, self.type, value_type)
@@ -912,7 +925,8 @@ class FunParam(Node):
         scope.add(self.name, self)
 
     def resolve_types(self):
-        pass
+        if not self.type.is_valid_var_type():
+            handle_typing_error('Cannot create a parameter of the given type', self.reference_token)
 
     @property
     def reference_token(self):
@@ -942,6 +956,8 @@ class DeclFun(Decl):
         self.body.resolve_names(fn_scope)
 
     def resolve_types(self):
+        for param in self.params:
+            param.resolve_types()
         self.body.resolve_types()
 
     @property
@@ -965,6 +981,10 @@ class DeclVar(Decl):
         scope.add(self.name, self)
 
     def resolve_types(self):
+        if not self.type.is_valid_var_type():
+            handle_typing_error('Cannot create a variable of the given type', self.reference_token)
+            return None
+
         if self.value:
             return self.value.resolve_types()
 
@@ -1021,7 +1041,8 @@ class DeclUnitField(Node):
         return self.type.is_accessible()
 
     def resolve_types(self):
-        pass
+        if not self.type.is_valid_var_type():
+            handle_typing_error('Cannot create a field of the given type', self.reference_token)
 
     @property
     def reference_token(self):
@@ -1048,7 +1069,8 @@ class DeclUnit(Decl):
         return self._fields_scope
 
     def resolve_types(self):
-        return None
+        for field in self.fields:
+            field.resolve_types()
 
     @property
     def reference_token(self):
