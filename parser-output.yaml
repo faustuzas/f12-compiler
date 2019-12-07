@@ -7,6 +7,7 @@ root: Program
           type: TypePrimitive
             kind:  (example_source/not_main.f12:2)
           name: size (example_source/not_main.f12:2)
+          field_slot: 0
     [1]: DeclUnit
       name: Child (example_source/not_main.f12:5)
       fields: 
@@ -14,6 +15,7 @@ root: Program
           type: TypePrimitive
             kind:  (example_source/not_main.f12:6)
           name: name (example_source/not_main.f12:6)
+          field_slot: 0
         [1]: DeclUnitField
           type: TypeUnit
             unit_name: Toy (example_source/not_main.f12:7)
@@ -24,7 +26,9 @@ root: Program
                   type: TypePrimitive
                     kind:  (example_source/not_main.f12:2)
                   name: size (example_source/not_main.f12:2)
+                  field_slot: 0
           name: toy (example_source/not_main.f12:7)
+          field_slot: 1
     [2]: DeclUnit
       name: Human (example_source/not_main.f12:10)
       fields: 
@@ -32,15 +36,18 @@ root: Program
           type: TypePrimitive
             kind:  (example_source/not_main.f12:11)
           name: name (example_source/not_main.f12:11)
+          field_slot: 0
         [1]: DeclUnitField
           type: TypePrimitive
             kind:  (example_source/not_main.f12:12)
           name: age (example_source/not_main.f12:12)
+          field_slot: 1
         [2]: DeclUnitField
           type: TypeArray
             inner_type: TypePrimitive
               kind:  (example_source/not_main.f12:13)
           name: addresses (example_source/not_main.f12:13)
+          field_slot: 2
         [3]: DeclUnitField
           type: TypeArray
             inner_type: TypeUnit
@@ -52,6 +59,7 @@ root: Program
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:6)
                     name: name (example_source/not_main.f12:6)
+                    field_slot: 0
                   [1]: DeclUnitField
                     type: TypeUnit
                       unit_name: Toy (example_source/not_main.f12:7)
@@ -62,8 +70,11 @@ root: Program
                             type: TypePrimitive
                               kind:  (example_source/not_main.f12:2)
                             name: size (example_source/not_main.f12:2)
+                            field_slot: 0
                     name: toy (example_source/not_main.f12:7)
+                    field_slot: 1
           name: children (example_source/not_main.f12:14)
+          field_slot: 3
     [3]: DeclFun
       name: add (example_source/not_main.f12:17)
       params: 
@@ -72,10 +83,12 @@ root: Program
             inner_type: TypePrimitive
               kind:  (example_source/not_main.f12:17)
           name: x (example_source/not_main.f12:17)
+          stack_slot: 0
         [1]: FunParam
           type: TypePrimitive
             kind:  (example_source/not_main.f12:17)
           name: y (example_source/not_main.f12:17)
+          stack_slot: 1
       return_type: TypeUnit
         unit_name: A (example_source/not_main.f12:17)
         unit_decl_node: None
@@ -91,15 +104,18 @@ root: Program
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:11)
                     name: name (example_source/not_main.f12:11)
+                    field_slot: 0
                   [1]: DeclUnitField
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:12)
                     name: age (example_source/not_main.f12:12)
+                    field_slot: 1
                   [2]: DeclUnitField
                     type: TypeArray
                       inner_type: TypePrimitive
                         kind:  (example_source/not_main.f12:13)
                     name: addresses (example_source/not_main.f12:13)
+                    field_slot: 2
                   [3]: DeclUnitField
                     type: TypeArray
                       inner_type: TypeUnit
@@ -111,6 +127,7 @@ root: Program
                               type: TypePrimitive
                                 kind:  (example_source/not_main.f12:6)
                               name: name (example_source/not_main.f12:6)
+                              field_slot: 0
                             [1]: DeclUnitField
                               type: TypeUnit
                                 unit_name: Toy (example_source/not_main.f12:7)
@@ -121,8 +138,11 @@ root: Program
                                       type: TypePrimitive
                                         kind:  (example_source/not_main.f12:2)
                                       name: size (example_source/not_main.f12:2)
+                                      field_slot: 0
                               name: toy (example_source/not_main.f12:7)
+                              field_slot: 1
                     name: children (example_source/not_main.f12:14)
+                    field_slot: 3
             name: human (example_source/not_main.f12:18)
             value: ExprCreateUnit
               unit_name: Human (example_source/not_main.f12:18)
@@ -136,6 +156,7 @@ root: Program
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:11)
                     name: name (example_source/not_main.f12:11)
+                    field_slot: 0
                 [1]: CreateUnitArg
                   unit_name: Human (example_source/not_main.f12:18)
                   field: age (example_source/not_main.f12:18)
@@ -145,6 +166,7 @@ root: Program
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:12)
                     name: age (example_source/not_main.f12:12)
+                    field_slot: 1
                 [2]: CreateUnitArg
                   unit_name: Human (example_source/not_main.f12:18)
                   field: addresses (example_source/not_main.f12:18)
@@ -157,6 +179,7 @@ root: Program
                       inner_type: TypePrimitive
                         kind:  (example_source/not_main.f12:13)
                     name: addresses (example_source/not_main.f12:13)
+                    field_slot: 2
                 [3]: CreateUnitArg
                   unit_name: Human (example_source/not_main.f12:18)
                   field: children (example_source/not_main.f12:18)
@@ -174,6 +197,7 @@ root: Program
                               type: TypePrimitive
                                 kind:  (example_source/not_main.f12:6)
                               name: name (example_source/not_main.f12:6)
+                              field_slot: 0
                           [1]: CreateUnitArg
                             unit_name: Child (example_source/not_main.f12:18)
                             field: toy (example_source/not_main.f12:18)
@@ -189,6 +213,7 @@ root: Program
                                     type: TypePrimitive
                                       kind:  (example_source/not_main.f12:2)
                                     name: size (example_source/not_main.f12:2)
+                                    field_slot: 0
                               unit_decl_node: DeclUnit
                                 name: Toy (example_source/not_main.f12:1)
                                 fields: 
@@ -196,6 +221,7 @@ root: Program
                                     type: TypePrimitive
                                       kind:  (example_source/not_main.f12:2)
                                     name: size (example_source/not_main.f12:2)
+                                    field_slot: 0
                             field_decl_node: DeclUnitField
                               type: TypeUnit
                                 unit_name: Toy (example_source/not_main.f12:7)
@@ -206,7 +232,9 @@ root: Program
                                       type: TypePrimitive
                                         kind:  (example_source/not_main.f12:2)
                                       name: size (example_source/not_main.f12:2)
+                                      field_slot: 0
                               name: toy (example_source/not_main.f12:7)
+                              field_slot: 1
                         unit_decl_node: DeclUnit
                           name: Child (example_source/not_main.f12:5)
                           fields: 
@@ -214,6 +242,7 @@ root: Program
                               type: TypePrimitive
                                 kind:  (example_source/not_main.f12:6)
                               name: name (example_source/not_main.f12:6)
+                              field_slot: 0
                             [1]: DeclUnitField
                               type: TypeUnit
                                 unit_name: Toy (example_source/not_main.f12:7)
@@ -224,7 +253,9 @@ root: Program
                                       type: TypePrimitive
                                         kind:  (example_source/not_main.f12:2)
                                       name: size (example_source/not_main.f12:2)
+                                      field_slot: 0
                               name: toy (example_source/not_main.f12:7)
+                              field_slot: 1
                   field_decl_node: DeclUnitField
                     type: TypeArray
                       inner_type: TypeUnit
@@ -236,6 +267,7 @@ root: Program
                               type: TypePrimitive
                                 kind:  (example_source/not_main.f12:6)
                               name: name (example_source/not_main.f12:6)
+                              field_slot: 0
                             [1]: DeclUnitField
                               type: TypeUnit
                                 unit_name: Toy (example_source/not_main.f12:7)
@@ -246,8 +278,11 @@ root: Program
                                       type: TypePrimitive
                                         kind:  (example_source/not_main.f12:2)
                                       name: size (example_source/not_main.f12:2)
+                                      field_slot: 0
                               name: toy (example_source/not_main.f12:7)
+                              field_slot: 1
                     name: children (example_source/not_main.f12:14)
+                    field_slot: 3
               unit_decl_node: DeclUnit
                 name: Human (example_source/not_main.f12:10)
                 fields: 
@@ -255,15 +290,18 @@ root: Program
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:11)
                     name: name (example_source/not_main.f12:11)
+                    field_slot: 0
                   [1]: DeclUnitField
                     type: TypePrimitive
                       kind:  (example_source/not_main.f12:12)
                     name: age (example_source/not_main.f12:12)
+                    field_slot: 1
                   [2]: DeclUnitField
                     type: TypeArray
                       inner_type: TypePrimitive
                         kind:  (example_source/not_main.f12:13)
                     name: addresses (example_source/not_main.f12:13)
+                    field_slot: 2
                   [3]: DeclUnitField
                     type: TypeArray
                       inner_type: TypeUnit
@@ -275,6 +313,7 @@ root: Program
                               type: TypePrimitive
                                 kind:  (example_source/not_main.f12:6)
                               name: name (example_source/not_main.f12:6)
+                              field_slot: 0
                             [1]: DeclUnitField
                               type: TypeUnit
                                 unit_name: Toy (example_source/not_main.f12:7)
@@ -285,9 +324,13 @@ root: Program
                                       type: TypePrimitive
                                         kind:  (example_source/not_main.f12:2)
                                       name: size (example_source/not_main.f12:2)
+                                      field_slot: 0
                               name: toy (example_source/not_main.f12:7)
+                              field_slot: 1
                     name: children (example_source/not_main.f12:14)
+                    field_slot: 3
             is_constant: True
+            stack_slot: 2
           [1]: StmntExpr
             expr: ExprAssign
               object: ExprAccess
@@ -305,15 +348,18 @@ root: Program
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:11)
                                 name: name (example_source/not_main.f12:11)
+                                field_slot: 0
                               [1]: DeclUnitField
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:12)
                                 name: age (example_source/not_main.f12:12)
+                                field_slot: 1
                               [2]: DeclUnitField
                                 type: TypeArray
                                   inner_type: TypePrimitive
                                     kind:  (example_source/not_main.f12:13)
                                 name: addresses (example_source/not_main.f12:13)
+                                field_slot: 2
                               [3]: DeclUnitField
                                 type: TypeArray
                                   inner_type: TypeUnit
@@ -325,6 +371,7 @@ root: Program
                                           type: TypePrimitive
                                             kind:  (example_source/not_main.f12:6)
                                           name: name (example_source/not_main.f12:6)
+                                          field_slot: 0
                                         [1]: DeclUnitField
                                           type: TypeUnit
                                             unit_name: Toy (example_source/not_main.f12:7)
@@ -335,8 +382,11 @@ root: Program
                                                   type: TypePrimitive
                                                     kind:  (example_source/not_main.f12:2)
                                                   name: size (example_source/not_main.f12:2)
+                                                  field_slot: 0
                                           name: toy (example_source/not_main.f12:7)
+                                          field_slot: 1
                                 name: children (example_source/not_main.f12:14)
+                                field_slot: 3
                         name: human (example_source/not_main.f12:18)
                         value: ExprCreateUnit
                           unit_name: Human (example_source/not_main.f12:18)
@@ -350,6 +400,7 @@ root: Program
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:11)
                                 name: name (example_source/not_main.f12:11)
+                                field_slot: 0
                             [1]: CreateUnitArg
                               unit_name: Human (example_source/not_main.f12:18)
                               field: age (example_source/not_main.f12:18)
@@ -359,6 +410,7 @@ root: Program
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:12)
                                 name: age (example_source/not_main.f12:12)
+                                field_slot: 1
                             [2]: CreateUnitArg
                               unit_name: Human (example_source/not_main.f12:18)
                               field: addresses (example_source/not_main.f12:18)
@@ -371,6 +423,7 @@ root: Program
                                   inner_type: TypePrimitive
                                     kind:  (example_source/not_main.f12:13)
                                 name: addresses (example_source/not_main.f12:13)
+                                field_slot: 2
                             [3]: CreateUnitArg
                               unit_name: Human (example_source/not_main.f12:18)
                               field: children (example_source/not_main.f12:18)
@@ -388,6 +441,7 @@ root: Program
                                           type: TypePrimitive
                                             kind:  (example_source/not_main.f12:6)
                                           name: name (example_source/not_main.f12:6)
+                                          field_slot: 0
                                       [1]: CreateUnitArg
                                         unit_name: Child (example_source/not_main.f12:18)
                                         field: toy (example_source/not_main.f12:18)
@@ -403,6 +457,7 @@ root: Program
                                                 type: TypePrimitive
                                                   kind:  (example_source/not_main.f12:2)
                                                 name: size (example_source/not_main.f12:2)
+                                                field_slot: 0
                                           unit_decl_node: DeclUnit
                                             name: Toy (example_source/not_main.f12:1)
                                             fields: 
@@ -410,6 +465,7 @@ root: Program
                                                 type: TypePrimitive
                                                   kind:  (example_source/not_main.f12:2)
                                                 name: size (example_source/not_main.f12:2)
+                                                field_slot: 0
                                         field_decl_node: DeclUnitField
                                           type: TypeUnit
                                             unit_name: Toy (example_source/not_main.f12:7)
@@ -420,7 +476,9 @@ root: Program
                                                   type: TypePrimitive
                                                     kind:  (example_source/not_main.f12:2)
                                                   name: size (example_source/not_main.f12:2)
+                                                  field_slot: 0
                                           name: toy (example_source/not_main.f12:7)
+                                          field_slot: 1
                                     unit_decl_node: DeclUnit
                                       name: Child (example_source/not_main.f12:5)
                                       fields: 
@@ -428,6 +486,7 @@ root: Program
                                           type: TypePrimitive
                                             kind:  (example_source/not_main.f12:6)
                                           name: name (example_source/not_main.f12:6)
+                                          field_slot: 0
                                         [1]: DeclUnitField
                                           type: TypeUnit
                                             unit_name: Toy (example_source/not_main.f12:7)
@@ -438,7 +497,9 @@ root: Program
                                                   type: TypePrimitive
                                                     kind:  (example_source/not_main.f12:2)
                                                   name: size (example_source/not_main.f12:2)
+                                                  field_slot: 0
                                           name: toy (example_source/not_main.f12:7)
+                                          field_slot: 1
                               field_decl_node: DeclUnitField
                                 type: TypeArray
                                   inner_type: TypeUnit
@@ -450,6 +511,7 @@ root: Program
                                           type: TypePrimitive
                                             kind:  (example_source/not_main.f12:6)
                                           name: name (example_source/not_main.f12:6)
+                                          field_slot: 0
                                         [1]: DeclUnitField
                                           type: TypeUnit
                                             unit_name: Toy (example_source/not_main.f12:7)
@@ -460,8 +522,11 @@ root: Program
                                                   type: TypePrimitive
                                                     kind:  (example_source/not_main.f12:2)
                                                   name: size (example_source/not_main.f12:2)
+                                                  field_slot: 0
                                           name: toy (example_source/not_main.f12:7)
+                                          field_slot: 1
                                 name: children (example_source/not_main.f12:14)
+                                field_slot: 3
                           unit_decl_node: DeclUnit
                             name: Human (example_source/not_main.f12:10)
                             fields: 
@@ -469,15 +534,18 @@ root: Program
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:11)
                                 name: name (example_source/not_main.f12:11)
+                                field_slot: 0
                               [1]: DeclUnitField
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:12)
                                 name: age (example_source/not_main.f12:12)
+                                field_slot: 1
                               [2]: DeclUnitField
                                 type: TypeArray
                                   inner_type: TypePrimitive
                                     kind:  (example_source/not_main.f12:13)
                                 name: addresses (example_source/not_main.f12:13)
+                                field_slot: 2
                               [3]: DeclUnitField
                                 type: TypeArray
                                   inner_type: TypeUnit
@@ -489,6 +557,7 @@ root: Program
                                           type: TypePrimitive
                                             kind:  (example_source/not_main.f12:6)
                                           name: name (example_source/not_main.f12:6)
+                                          field_slot: 0
                                         [1]: DeclUnitField
                                           type: TypeUnit
                                             unit_name: Toy (example_source/not_main.f12:7)
@@ -499,9 +568,13 @@ root: Program
                                                   type: TypePrimitive
                                                     kind:  (example_source/not_main.f12:2)
                                                   name: size (example_source/not_main.f12:2)
+                                                  field_slot: 0
                                           name: toy (example_source/not_main.f12:7)
+                                          field_slot: 1
                                 name: children (example_source/not_main.f12:14)
+                                field_slot: 3
                         is_constant: True
+                        stack_slot: 2
                     field: children (example_source/not_main.f12:19)
                     field_decl_node: DeclUnitField
                       type: TypeArray
@@ -514,6 +587,7 @@ root: Program
                                 type: TypePrimitive
                                   kind:  (example_source/not_main.f12:6)
                                 name: name (example_source/not_main.f12:6)
+                                field_slot: 0
                               [1]: DeclUnitField
                                 type: TypeUnit
                                   unit_name: Toy (example_source/not_main.f12:7)
@@ -524,8 +598,11 @@ root: Program
                                         type: TypePrimitive
                                           kind:  (example_source/not_main.f12:2)
                                         name: size (example_source/not_main.f12:2)
+                                        field_slot: 0
                                 name: toy (example_source/not_main.f12:7)
+                                field_slot: 1
                       name: children (example_source/not_main.f12:14)
+                      field_slot: 3
                   index_expr: ExprLitInt
                     value: 0 (example_source/not_main.f12:19)
                 field: name (example_source/not_main.f12:19)
@@ -533,12 +610,43 @@ root: Program
                   type: TypePrimitive
                     kind:  (example_source/not_main.f12:6)
                   name: name (example_source/not_main.f12:6)
+                  field_slot: 0
               value: ExprLitStr
                 value: labas (example_source/not_main.f12:19)
-    [4]: DeclFun
-      name: main (example_source/not_main.f12:22)
+    [4]: DeclVar
+      type: TypePrimitive
+        kind:  (example_source/not_main.f12:22)
+      name: c (example_source/not_main.f12:22)
+      value: None
+      is_constant: False
+      global_slot: 0
+    [5]: DeclFun
+      name: main (example_source/not_main.f12:23)
       params: []
       return_type: TypePrimitive
-        kind:  (example_source/not_main.f12:22)
+        kind:  (example_source/not_main.f12:23)
       body: StmntBlock
-        statements: []
+        statements: 
+          [0]: StmntDeclVar
+            type: TypePrimitive
+              kind:  (example_source/not_main.f12:24)
+            name: b (example_source/not_main.f12:24)
+            value: None
+            is_constant: False
+            stack_slot: 0
+          [1]: StmntDeclVar
+            type: TypeArray
+              inner_type: TypeUnit
+                unit_name: Toy (example_source/not_main.f12:25)
+                unit_decl_node: DeclUnit
+                  name: Toy (example_source/not_main.f12:1)
+                  fields: 
+                    [0]: DeclUnitField
+                      type: TypePrimitive
+                        kind:  (example_source/not_main.f12:2)
+                      name: size (example_source/not_main.f12:2)
+                      field_slot: 0
+            name: t (example_source/not_main.f12:25)
+            value: None
+            is_constant: False
+            stack_slot: 1

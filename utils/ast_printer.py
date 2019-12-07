@@ -23,6 +23,8 @@ class FileOutput:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_val:
+            print(exc_val)
         self.fd.close()
         return True
 

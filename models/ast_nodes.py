@@ -1,7 +1,9 @@
 from abc import ABC
 from typing import List, Union
 
+from codegen.code_writer import CodeWriter, Label
 from models import TokenType, Token
+from models.instructions import InstructionType
 from models.scope import Scope
 from models.slot_dispenser import SlotDispenser
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
@@ -59,6 +61,9 @@ class Node(ABC):
 
     def resolve_types(self):
         raise NotImplementedError(f'Resolve types not implemented for {self.__class__}')
+
+    def write_code(self, code_writer: CodeWriter):
+        raise NotImplementedError(f'Write code not implemented for {self.__class__}')
 
     def is_accessible(self):
         return False
@@ -356,6 +361,9 @@ class ExprLitStr(ExprLit):
     def kind(self):
         return TokenType.PRIMITIVE_STRING
 
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.PUSH_STRING, self.value.value)
+
 
 class ExprLitFloat(ExprLit):
 
@@ -370,12 +378,19 @@ class ExprLitInt(ExprLit):
     def kind(self):
         return TokenType.PRIMITIVE_INT
 
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.PUSH_INT, int(self.value.value))
+
 
 class ExprLitBool(ExprLit):
 
     @property
     def kind(self):
         return TokenType.PRIMITIVE_BOOL
+
+    def write_code(self, code_writer: CodeWriter):
+        value = self.value.type == TokenType.CONSTANT_TRUE
+        code_writer.write(InstructionType.PUSH_BOOL, value)
 
 
 class ExprLitArray(ExprLit):
@@ -474,6 +489,9 @@ class ExprVar(Expr, Assignable):
                 return self.decl_node.type
             else:
                 handle_typing_error(f'Not a valid type for variable', self.reference_token)
+
+    # def write_code(self, code_writer: CodeWriter):
+    #     code_writer
 
     def resolve_identifier(self):
         return self.identifier
@@ -720,6 +738,11 @@ class StmntDeclVar(Stmnt):
             value_type = self.value.resolve_types()
             unify_types(self.reference_token, self.type, value_type)
 
+    def write_code(self, code_writer: CodeWriter):
+        if self.value:
+            self.value.write_code(code_writer)
+            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot)
+
     @property
     def reference_token(self):
         return self.name
@@ -746,6 +769,18 @@ class StmntIf(Stmnt):
         self.stmnt_block.resolve_types()
         if self.else_clause:
             self.else_clause.resolve_types()
+
+    def write_code(self, code_writer: CodeWriter):
+        else_label = Label()
+        end_label = Label()
+        self.condition.write_code(code_writer)
+        code_writer.write(InstructionType.JZ, else_label)
+        self.stmnt_block.write_code(code_writer)
+        code_writer.write(InstructionType.JMP, end_label)
+        code_writer.place_label(else_label)
+        if self.else_clause:
+            self.else_clause.write_code(code_writer)
+        code_writer.place_label(end_label)
 
     @property
     def reference_token(self):
@@ -783,6 +818,10 @@ class StmntBreak(StmntControl):
                 self.reference_token
             )
 
+    def write_code(self, code_writer: CodeWriter):
+        _, end_label = code_writer.current_loop()
+        code_writer.write(InstructionType.JMP, end_label)
+
 
 class StmntContinue(StmntControl):
 
@@ -793,6 +832,10 @@ class StmntContinue(StmntControl):
                 '\'continue\' keyword has to be in a loop',
                 self.reference_token
             )
+
+    def write_code(self, code_writer: CodeWriter):
+        start_label, _ = code_writer.current_loop()
+        code_writer.write(InstructionType.JMP, start_label)
 
 
 class StmntReturn(StmntControl):
@@ -895,6 +938,19 @@ class StmntWhile(Stmnt):
 
         self.stmnt_block.resolve_types()
 
+    def write_code(self, code_writer: CodeWriter):
+        start_label = Label()
+        end_label = Label()
+
+        code_writer.start_loop(start_label, end_label)
+        code_writer.place_label(start_label)
+        self.condition.write_code(code_writer)
+        code_writer.write(InstructionType.JZ, end_label)
+        self.stmnt_block.write_code(code_writer)
+        code_writer.write(InstructionType.JMP, start_label)
+        code_writer.place_label(end_label)
+        code_writer.end_loop()
+
     @property
     def reference_token(self):
         return self.condition.reference_token
@@ -916,6 +972,10 @@ class StmntBlock(Node):
     def resolve_types(self):
         for stmnt in self.statements:
             stmnt.resolve_types()
+
+    def write_code(self, code_writer: CodeWriter):
+        for stmnt in self.statements:
+            stmnt.write_code(code_writer)
 
     @property
     def reference_token(self):
@@ -956,6 +1016,7 @@ class DeclFun(Decl):
         self.params = params
         self.return_type = return_type
         self.body = body
+        self._label = Label()
 
     def resolve_names(self, scope: Scope):
         fn_scope = Scope(scope)
@@ -971,6 +1032,11 @@ class DeclFun(Decl):
         for param in self.params:
             param.resolve_types()
         self.body.resolve_types()
+
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.place_label(self._label)
+        self.body.write_code(code_writer)
+        code_writer.write(InstructionType.RET)
 
     @property
     def reference_token(self):
@@ -1003,6 +1069,11 @@ class DeclVar(Decl):
 
         if self.value:
             return self.value.resolve_types()
+
+    def write_code(self, code_writer: CodeWriter):
+        if self.value:
+            self.value.write_code(code_writer)
+            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
 
     @property
     def reference_token(self):
@@ -1095,6 +1166,10 @@ class DeclUnit(Decl):
     @property
     def reference_token(self):
         return self.name
+
+    # TODO: ???
+    def write_code(self, code_writer: CodeWriter):
+        pass
 
 
 class Helper(Node, ABC):
@@ -1202,6 +1277,10 @@ class Program(Node):
                 '\'main\' function must not take any params',
                 main_fn.reference_token
             )
+
+    def write_code(self, code_writer: CodeWriter):
+        for element in self.root_elements:
+            element.write_code(code_writer)
 
     @property
     def reference_token(self):

@@ -1,22 +1,11 @@
-unit A {
-
-}
-
-fun aa {
-
-}
-
 fun main => int {
-    if 5 {
-
+    while true {
+        break;
+        while true {
+            continue;
+            break;
+        }
+        continue;
     }
-
-    aa(1);
-
-    aa + aa;
-
-    int[] b;
-    b[true]; // ???
-
-    ret;
+    int a = 6;
 }
