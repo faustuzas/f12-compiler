@@ -3,9 +3,13 @@ from typing import List, Union
 
 from models import TokenType, Token
 from models.scope import Scope
+from models.slot_dispenser import SlotDispenser
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
 from utils.list_utils import find_in_list
 from utils.type_checking_helpers import unify_types, prepare_for_printing
+
+global_slot_dispenser = SlotDispenser()
+stack_slot_dispenser = SlotDispenser()
 
 
 def handle_typing_error(cause, token):
@@ -582,7 +586,10 @@ class ExprFnCall(Expr):
             return
         params = self.function_decl_node.params
         if len(params) != len(self.args):
-            handle_typing_error(f'Wrong number of arguments. Expected: {len(params)}, got: {len(self.args)}', self.reference_token)
+            handle_typing_error(
+                f'Wrong number of arguments. Expected: {len(params)}, got: {len(self.args)}',
+                self.reference_token
+            )
         else:
             for arg in self.args:
                 arg.resolve_types()
@@ -694,13 +701,15 @@ class StmntDeclVar(Stmnt):
         self.name = name
         self.value = value
         self.is_constant = is_constant
+        self.stack_slot = 0
 
     def resolve_names(self, scope: Scope):
-        scope.add(self.name, self)
         self.type.resolve_names(scope)
-
         if self.value:
             self.value.resolve_names(scope)
+
+        scope.add(self.name, self)
+        self.stack_slot = stack_slot_dispenser.get_slot()
 
     def resolve_types(self):
         if not self.type.is_valid_var_type():
@@ -920,6 +929,7 @@ class FunParam(Node):
         self.add_children(type_)
         self.type = type_
         self.name = name
+        self.stack_slot = 0
 
     def resolve_names(self, scope: Scope):
         scope.add(self.name, self)
@@ -950,8 +960,10 @@ class DeclFun(Decl):
     def resolve_names(self, scope: Scope):
         fn_scope = Scope(scope)
 
+        stack_slot_dispenser.reset()
         for param in self.params:
             param.resolve_names(fn_scope)
+            param.stack_slot = stack_slot_dispenser.get_slot()
 
         self.body.resolve_names(fn_scope)
 
@@ -974,11 +986,15 @@ class DeclVar(Decl):
         self.name = name
         self.value = value
         self.is_constant = is_constant
+        self.global_slot = 0
 
     def resolve_names(self, scope: Scope):
+        self.type.resolve_names(scope)
         if self.value:
             self.value.resolve_names(scope)
+
         scope.add(self.name, self)
+        self.global_slot = global_slot_dispenser.get_slot()
 
     def resolve_types(self):
         if not self.type.is_valid_var_type():
@@ -1032,6 +1048,7 @@ class DeclUnitField(Node):
         self.add_children(type_)
         self.type = type_
         self.name = name
+        self.field_slot = 0
 
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
@@ -1061,8 +1078,11 @@ class DeclUnit(Decl):
     def resolve_names(self, scope: Scope):
         self._fields_scope = Scope(scope)
         scope.add(self.name, self)
+
+        field_slot_dispenser = SlotDispenser()
         for field in self.fields:
             field.resolve_names(self._fields_scope)
+            field.field_slot = field_slot_dispenser.get_slot()
 
     @property
     def fields_scope(self):
