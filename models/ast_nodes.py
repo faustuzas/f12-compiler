@@ -585,9 +585,8 @@ class ExprLitArray(ExprLit):
             handle_typing_error('Array cannot be empty', self.reference_token)
 
     def write_code(self, code_writer: CodeWriter):
-        for el in self.value:
+        for el in reversed(self.value):
             el.write_code(code_writer)
-        code_writer.write(InstructionType.ARRAY_INIT, len(self.value))
 
     @property
     def kind(self):
@@ -644,12 +643,12 @@ class ExprAssign(Expr):
         unify_types(self.object.reference_token, obj_type, value_type)
         return value_type
 
-    def write_code(self, code_writer: CodeWriter):
-        self.object.decl_node.write_assignment_code(self.object, self.value, code_writer)
-
     @property
     def reference_token(self):
         return self.object.reference_token
+
+    def write_code(self, code_writer: CodeWriter):
+        self.object.write_assigment_code(code_writer, self.value)
 
 
 class ExprVar(Expr, Assignable):
@@ -678,8 +677,35 @@ class ExprVar(Expr, Assignable):
     def reference_token(self):
         return self.identifier
 
+    @property
+    def is_local(self):
+        return type(self.decl_node) == StmntDeclVar
+
+    @property
+    def type(self):
+        return self.decl_node.type
+
+    @property
+    def slot(self):
+        if self.is_local:
+            return self.decl_node.stack_slot
+        return self.decl_node.global_slot
+
     def is_accessible(self):
         return isinstance(self.decl_node.type, TypeUnit)
+
+    def write_assigment_code(self, code_writer, value):
+        value.write_code(code_writer)
+        if self.is_local:
+            if isinstance(self.type, TypeArray):
+                code_writer.write(InstructionType.ARRAY_FILL_LOCAL, self.slot, self.type.length)
+            else:
+                code_writer.write(InstructionType.SET_LOCAL, self.slot)
+        else:
+            if isinstance(self.type, TypeArray):
+                code_writer.write(InstructionType.ARRAY_FILL_GLOBAL, self.slot, self.type.length)
+            else:
+                code_writer.write(InstructionType.SET_GLOBAL, self.slot)
 
 
 class ExprAccess(Expr, Assignable):
@@ -757,6 +783,14 @@ class ExprArrayAccess(Expr, Assignable):
     @property
     def reference_token(self):
         return self.array.reference_token
+
+    def write_assigment_code(self, code_writer, value):
+        value.write_code(code_writer)
+        self.index_expr.write_code(code_writer)
+        if self.array.is_local:
+            code_writer.write(InstructionType.ARRAY_SET_VALUE_LOCAL, self.array.slot)
+        else:
+            code_writer.write(InstructionType.ARRAY_SET_VALUE_GLOBAL, self.array.slot)
 
 
 class ExprFnCall(Expr):
@@ -933,7 +967,10 @@ class StmntDeclVar(Stmnt):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot)
+            if isinstance(self.type, TypeArray):
+                code_writer.write(InstructionType.ARRAY_FILL_LOCAL, self.stack_slot, self.type.length)
+            else:
+                code_writer.write(InstructionType.SET_LOCAL, self.stack_slot)
 
     @property
     def reference_token(self):
@@ -1079,7 +1116,13 @@ class StmntExpr(Stmnt):
             self.expr.write_code(code_writer)
             if self.expr.return_type.kind_type != TokenType.PRIMITIVE_VOID:
                 code_writer.write(InstructionType.POP)
-        # else no-op because it brings no value
+        elif isinstance(self.expr, (ExprLit, ExprArrayAccess, ExprVar)):
+            pass  # no-op
+        elif isinstance(self.expr, ExprAssign):
+            self.expr.write_code(code_writer)
+        else:
+            self.expr.write_code(code_writer)
+            code_writer.write(InstructionType.POP)
 
 
 class StmntToStdout(Stmnt):
@@ -1297,7 +1340,10 @@ class DeclVar(Decl):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
+            if isinstance(self.type, TypeArray):
+                code_writer.write(InstructionType.ARRAY_FILL_GLOBAL, self.global_slot, self.type.length)
+            else:
+                code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
 
     @property
     def reference_token(self):

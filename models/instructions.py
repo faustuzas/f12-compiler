@@ -55,7 +55,10 @@ class InstructionType(ExtendedEnum):
     PUSH_FLOAT = 'PUSH_FLOAT'
     PUSH_STRING = 'PUSH_STRING'
 
-    ARRAY_INIT = 'ARRAY_INIT'
+    ARRAY_FILL_GLOBAL = 'ARRAY_FILL_GLOBAL'
+    ARRAY_FILL_LOCAL = 'ARRAY_FILL_LOCAL'
+    ARRAY_SET_VALUE_LOCAL = 'ARRAY_SET_VALUE_LOCAL'
+    ARRAY_SET_VALUE_GLOBAL = 'ARRAY_SET_VALUE_GLOBAL'
 
     TO_STDOUT = 'TO_STDOUT'
 
@@ -133,6 +136,12 @@ add_instruction(0x59, InstructionType.GE_FLOAT, [])
 add_instruction(0x5A, InstructionType.LT_FLOAT, [])
 add_instruction(0x5B, InstructionType.LE_FLOAT, [])
 
-add_instruction(0x60, InstructionType.ARRAY_INIT, [int])
+# will take array at arg1 slot and fill it with arg2 values from stack
+add_instruction(0x60, InstructionType.ARRAY_FILL_LOCAL, [int, int])
+add_instruction(0x61, InstructionType.ARRAY_FILL_GLOBAL, [int, int])
+
+# will take array at arg1 slot and set the value at index from stack with value from stack
+add_instruction(0x62, InstructionType.ARRAY_SET_VALUE_GLOBAL, [int])
+add_instruction(0x63, InstructionType.ARRAY_SET_VALUE_LOCAL, [int])
 
 add_instruction(0x70, InstructionType.TO_STDOUT, [int])
