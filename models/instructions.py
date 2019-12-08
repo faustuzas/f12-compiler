@@ -46,6 +46,7 @@ class InstructionType(ExtendedEnum):
     SET_GLOBAL = 'SET_GLOBAL'
     SET_LOCAL = 'SET_LOCAL'
 
+    POP = 'POP'
     PUSH_INT = 'PUSH_INT'
     PUSH_BOOL = 'PUSH_BOOL'
     PUSH_FLOAT = 'PUSH_FLOAT'
@@ -80,10 +81,11 @@ def add_instruction(op_code, type_, ops_types):
     instructions_by_op_code[op_code] = inst
 
 
-add_instruction(0x10, InstructionType.PUSH_INT, [int])
-add_instruction(0x11, InstructionType.PUSH_BOOL, [bool])
-add_instruction(0x12, InstructionType.PUSH_FLOAT, [float])
-add_instruction(0x13, InstructionType.PUSH_STRING, [str])
+add_instruction(0x10, InstructionType.POP, [])
+add_instruction(0x11, InstructionType.PUSH_INT, [int])
+add_instruction(0x12, InstructionType.PUSH_BOOL, [bool])
+add_instruction(0x13, InstructionType.PUSH_FLOAT, [float])
+add_instruction(0x14, InstructionType.PUSH_STRING, [str])
 
 add_instruction(0x20, InstructionType.SET_GLOBAL, [int])
 add_instruction(0x21, InstructionType.SET_LOCAL, [int])
@@ -104,6 +106,11 @@ add_instruction(0x48, InstructionType.MUL_FLOAT, [])
 add_instruction(0x49, InstructionType.DIV_FLOAT, [])
 add_instruction(0x4A, InstructionType.MOD_FLOAT, [])
 add_instruction(0x4B, InstructionType.POW_FLOAT, [])
+
+add_instruction(0x4C, InstructionType.UNARY_PLUS_INT, [])
+add_instruction(0x4D, InstructionType.UNARY_MINUS_INT, [])
+add_instruction(0x4E, InstructionType.UNARY_PLUS_FLOAT, [])
+add_instruction(0x4F, InstructionType.UNARY_MINUS_FLOAT, [])
 
 add_instruction(0x50, InstructionType.OR, [])
 add_instruction(0x51, InstructionType.AND, [])

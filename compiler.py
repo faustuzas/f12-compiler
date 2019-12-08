@@ -40,8 +40,11 @@ def compile_file(file_to_compile):
         code_writer = CodeWriter()
         ast_root.write_code(code_writer)
 
-        with FileOutput('out.f12b') as output:
-            code_writer.print_code(output)
+        with FileOutput('instructions.f12b') as output:
+            code_writer.print_instructions(output)
+
+        with FileOutput('output.f12b') as output:
+            code_writer.dump_code(output)
         # except ValueError as e:
         #     print(e)
         #     pass

@@ -176,15 +176,11 @@ class ExprBinary(Expr, ABC):
         return self.left.reference_token
 
 
-class ExprBinaryNumeric(ExprBinary, ABC):
+class ExprNumeric(Expr, ABC):
 
-    def write_code(self, code_writer: CodeWriter):
-        self.left.write_code(code_writer)
-        self.right.write_code(code_writer)
-
-        type_ = self.left.resolve_types()
+    def write_code_for_type(self, type_, code_writer):
         if not isinstance(type_, TypePrimitive):
-            raise NotImplementedError(f'There are no binary operators for: {type_.__class__}')
+            raise NotImplementedError(f'There are no numeric expr for: {type_.__class__}')
 
         kind = type_.kind_type
         if kind == TokenType.PRIMITIVE_INT:
@@ -202,6 +198,16 @@ class ExprBinaryNumeric(ExprBinary, ABC):
     @property
     def instruction_type_for_float(self):
         raise NotImplementedError(f'Expr binary instruction type for float not implemented for {self.__class__}')
+
+
+class ExprBinaryNumeric(ExprBinary, ExprNumeric, ABC):
+
+    def write_code(self, code_writer: CodeWriter):
+        self.left.write_code(code_writer)
+        self.right.write_code(code_writer)
+
+        type_ = self.left.resolve_types()
+        self.write_code_for_type(type_, code_writer)
 
 
 class ExprBinaryArithmetic(ExprBinaryNumeric, ABC):
@@ -435,7 +441,7 @@ class ExprPow(ExprBinaryArithmetic):
         return InstructionType.POW_FLOAT
 
 
-class ExprUnaryOp(Expr):
+class ExprUnaryOp(ExprNumeric, Expr, ABC):
 
     def __init__(self, expr) -> None:
         super().__init__()
@@ -456,13 +462,33 @@ class ExprUnaryOp(Expr):
 
         handle_typing_error('Unary operators applicable only to int and float', self.reference_token)
 
+    def write_code(self, code_writer: CodeWriter):
+        self.expr.write_code(code_writer)
+
+        type_ = self.expr.resolve_types()
+        self.write_code_for_type(type_, code_writer)
+
 
 class ExprUPlus(ExprUnaryOp):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.UNARY_PLUS_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.UNARY_PLUS_FLOAT
 
 
 class ExprUMinus(ExprUnaryOp):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.UNARY_MINUS_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.UNARY_MINUS_FLOAT
 
 
 class ExprLit(Expr, ABC):
@@ -1014,6 +1040,10 @@ class StmntExpr(Stmnt):
     @property
     def reference_token(self):
         return self.expr.reference_token
+
+    def write_code(self, code_writer: CodeWriter):
+        self.expr.write_code(code_writer)
+        code_writer.write(InstructionType.POP)
 
 
 class StmntToStdout(Stmnt):

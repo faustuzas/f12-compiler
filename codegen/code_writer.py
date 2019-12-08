@@ -58,7 +58,7 @@ class CodeWriter:
             else:
                 self.code.extend(select_to_bytes_func(op_type)(operand))
 
-    def print_code(self, output):
+    def print_instructions(self, output):
         offset = 0
         while offset < len(self.code):
             start_offset = offset
@@ -72,3 +72,7 @@ class CodeWriter:
             (ops, offset) = instr.fetch_ops(self.code, offset)
             ops = list(map(lambda x: str(x), ops))
             output.out('{:4d}: 0x{:2x} {:>12s} {:s}'.format(start_offset, op_code, instr.type, ', '.join(ops)))
+
+    def dump_code(self, output):
+        str_code = list(map(lambda x: str(x), self.code))
+        output.out(''.join(str_code))
