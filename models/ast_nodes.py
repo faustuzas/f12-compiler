@@ -650,7 +650,7 @@ class ExprVar(Expr, Assignable):
 
     def resolve_types(self):
         if self.decl_node:
-            if isinstance(self.decl_node, (DeclVar, StmntDeclVar)):
+            if isinstance(self.decl_node, (DeclVar, StmntDeclVar, FunParam)):
                 return self.decl_node.type
             else:
                 handle_typing_error(f'Not a valid type for variable', self.reference_token)
@@ -778,6 +778,12 @@ class ExprFnCall(Expr):
                 if isinstance(arg, ExprLitArray):
                     type_ = arg.resolve_types()
         return self.function_decl_node.return_type
+
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.FN_CALL_BEGIN)
+        for arg in self.args:
+            arg.write_code(code_writer)
+        code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, len(self.args))
 
     @property
     def reference_token(self):
@@ -1023,6 +1029,13 @@ class StmntReturn(StmntControl):
             val_type = TypePrimitive(TokenType.PRIMITIVE_VOID)
         unify_types(self.token, ret_type, val_type)
 
+    def write_code(self, code_writer: CodeWriter):
+        if self.value:
+            self.value.write_code(code_writer)
+            code_writer.write(InstructionType.RET_VALUE)
+        else:
+            code_writer.write(InstructionType.RET)
+
 
 class StmntExpr(Stmnt):
 
@@ -1204,13 +1217,17 @@ class DeclFun(Decl):
         self.body.resolve_types()
 
     def write_code(self, code_writer: CodeWriter):
-        code_writer.place_label(self._label)
+        code_writer.place_label(self.label)
         self.body.write_code(code_writer)
         code_writer.write(InstructionType.RET)
 
     @property
     def reference_token(self):
         return self.name
+
+    @property
+    def label(self):
+        return self._label
 
 
 class DeclVar(Decl):

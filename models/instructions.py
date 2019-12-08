@@ -38,7 +38,10 @@ class InstructionType(ExtendedEnum):
     UNARY_PLUS_FLOAT = 'UNARY_PLUS_FLOAT'
     UNARY_MINUS_FLOAT = 'UNARY_MINUS_FLOAT'
 
+    FN_CALL_BEGIN = 'FN_CALL_BEGIN'
+    FN_CALL = 'FN_CALL'
     RET = 'RET'
+    RET_VALUE = 'RET_VALUE'
 
     JMP = 'JMP'
     JZ = 'JZ'
@@ -90,9 +93,12 @@ add_instruction(0x14, InstructionType.PUSH_STRING, [str])
 add_instruction(0x20, InstructionType.SET_GLOBAL, [int])
 add_instruction(0x21, InstructionType.SET_LOCAL, [int])
 
-add_instruction(0x30, InstructionType.RET, [])
-add_instruction(0x31, InstructionType.JZ, [int])
-add_instruction(0x32, InstructionType.JMP, [int])
+add_instruction(0x30, InstructionType.FN_CALL_BEGIN, [])
+add_instruction(0x31, InstructionType.FN_CALL, [int, int])
+add_instruction(0x32, InstructionType.RET, [])
+add_instruction(0x33, InstructionType.RET_VALUE, [])
+add_instruction(0x34, InstructionType.JZ, [int])
+add_instruction(0x35, InstructionType.JMP, [int])
 
 add_instruction(0x40, InstructionType.ADD_INT, [])
 add_instruction(0x41, InstructionType.SUB_INT, [])
