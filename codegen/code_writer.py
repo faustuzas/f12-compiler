@@ -71,4 +71,4 @@ class CodeWriter:
 
             (ops, offset) = instr.fetch_ops(self.code, offset)
             ops = list(map(lambda x: str(x), ops))
-            output.out('{:2d}: 0x{:2x} {:>12s} {:s}'.format(start_offset, op_code, instr.type, ', '.join(ops)))
+            output.out('{:4d}: 0x{:2x} {:>12s} {:s}'.format(start_offset, op_code, instr.type, ', '.join(ops)))

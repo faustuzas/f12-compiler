@@ -90,6 +90,9 @@ class Type(Node, ABC):
     def reference_token(self):
         return None
 
+    def write_code(self, code_writer: CodeWriter):
+        pass
+
 
 class TypeArray(Type):
 
@@ -173,7 +176,35 @@ class ExprBinary(Expr, ABC):
         return self.left.reference_token
 
 
-class ExprBinaryArithmetic(ExprBinary, ABC):
+class ExprBinaryNumeric(ExprBinary, ABC):
+
+    def write_code(self, code_writer: CodeWriter):
+        self.left.write_code(code_writer)
+        self.right.write_code(code_writer)
+
+        type_ = self.left.resolve_types()
+        if not isinstance(type_, TypePrimitive):
+            raise NotImplementedError(f'There are no binary operators for: {type_.__class__}')
+
+        kind = type_.kind_type
+        if kind == TokenType.PRIMITIVE_INT:
+            instruction_type = self.instruction_type_for_int
+        elif kind == TokenType.PRIMITIVE_FLOAT:
+            instruction_type = self.instruction_type_for_float
+        else:
+            raise NotImplementedError(f'There are no binary operators for: {kind}')
+        code_writer.write(instruction_type)
+
+    @property
+    def instruction_type_for_int(self):
+        raise NotImplementedError(f'Expr binary instruction type for int not implemented for {self.__class__}')
+
+    @property
+    def instruction_type_for_float(self):
+        raise NotImplementedError(f'Expr binary instruction type for float not implemented for {self.__class__}')
+
+
+class ExprBinaryArithmetic(ExprBinaryNumeric, ABC):
 
     def resolve_types(self):
         left_type = self.left.resolve_types()
@@ -193,7 +224,7 @@ class ExprBinaryArithmetic(ExprBinary, ABC):
         return left_type
 
 
-class ExprBinaryComparison(ExprBinary, ABC):
+class ExprBinaryComparison(ExprBinaryNumeric, ABC):
 
     def resolve_types(self):
         left_type = self.left.resolve_types()
@@ -232,6 +263,15 @@ class ExprBinaryEquality(ExprBinary, ABC):
             )
         return TypePrimitive(TokenType.PRIMITIVE_BOOL)
 
+    def write_code(self, code_writer: CodeWriter):
+        self.left.write_code(code_writer)
+        self.right.write_code(code_writer)
+        code_writer.write(self.instruction_type)
+
+    @property
+    def instruction_type(self):
+        raise NotImplementedError(f'Instruction type is not implemented for: {self.__class__} ')
+
 
 class ExprBinaryLogic(ExprBinary, ABC):
 
@@ -247,41 +287,97 @@ class ExprBinaryLogic(ExprBinary, ABC):
 
         return TypePrimitive(TokenType.PRIMITIVE_BOOL)
 
+    def write_code(self, code_writer: CodeWriter):
+        self.left.write_code(code_writer)
+        self.right.write_code(code_writer)
+        code_writer.write(self.instruction_type)
+
+    @property
+    def instruction_type(self):
+        raise NotImplementedError(f'Instruction type is not implemented for: {self.__class__} ')
+
 
 class ExprOr(ExprBinaryLogic):
-    pass
+
+    @property
+    def instruction_type(self):
+        return InstructionType.OR
 
 
 class ExprAnd(ExprBinaryLogic):
-    pass
+
+    @property
+    def instruction_type(self):
+        return InstructionType.AND
 
 
 class ExprEq(ExprBinaryEquality):
-    pass
+
+    @property
+    def instruction_type(self):
+        return InstructionType.EQ
 
 
 class ExprNe(ExprBinaryEquality):
-    pass
+
+    @property
+    def instruction_type(self):
+        return InstructionType.NE
 
 
 class ExprGt(ExprBinaryComparison):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.GT_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.GT_FLOAT
 
 
 class ExprGe(ExprBinaryComparison):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.GE_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.GE_FLOAT
 
 
 class ExprLt(ExprBinaryComparison):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.LT_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.LT_FLOAT
 
 
 class ExprLe(ExprBinaryComparison):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.LE_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.LE_FLOAT
 
 
 class ExprAdd(ExprBinaryArithmetic):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.ADD_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.ADD_FLOAT
 
 
 class ExprSub(ExprBinaryArithmetic):
@@ -371,6 +467,9 @@ class ExprLitFloat(ExprLit):
     def kind(self):
         return TokenType.PRIMITIVE_FLOAT
 
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.PUSH_FLOAT, float(self.value.value))
+
 
 class ExprLitInt(ExprLit):
 
@@ -410,6 +509,11 @@ class ExprLitArray(ExprLit):
                 unify_types(self.value[i].reference_token, first_val_type, self.value[i].resolve_types())
             return TypeArray(first_val_type) if first_val_type else None
         return None
+
+    def write_code(self, code_writer: CodeWriter):
+        for el in self.value:
+            el.write_code(code_writer)
+        code_writer.write(InstructionType.ARRAY_INIT, len(self.value))
 
     @property
     def kind(self):
@@ -610,7 +714,8 @@ class ExprFnCall(Expr):
             )
         else:
             for arg in self.args:
-                arg.resolve_types()
+                if isinstance(arg, ExprLitArray):
+                    type_ = arg.resolve_types()
         return self.function_decl_node.return_type
 
     @property

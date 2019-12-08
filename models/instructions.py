@@ -9,34 +9,34 @@ class InstructionType(ExtendedEnum):
     EQ = 'EQ'
     NE = 'NE'
 
-    INT_GT = 'INT_GT'
-    INT_GE = 'INT_GE'
-    INT_LT = 'INT_LT'
-    INT_LE = 'INT_LE'
+    GT_INT = 'GT_INT'
+    GE_INT = 'GE_INT'
+    LT_INT = 'LT_INT'
+    LE_INT = 'LE_INT'
 
-    FLOAT_GT = 'FLOAT_GT'
-    FLOAT_GE = 'FLOAT_GE'
-    FLOAT_LT = 'FLOAT_LT'
-    FLOAT_LE = 'FLOAT_LE'
+    GT_FLOAT = 'GT_FLOAT'
+    GE_FLOAT = 'GE_FLOAT'
+    LT_FLOAT = 'LT_FLOAT'
+    LE_FLOAT = 'LE_FLOAT'
 
-    INT_ADD = 'INT_ADD'
-    INT_SUB = 'INT_SUB'
-    INT_MUL = 'INT_MUL'
-    INT_DIV = 'INT_DIV'
-    INT_MOD = 'INT_MOD'
-    INT_POW = 'INT_POW'
+    ADD_INT = 'ADD_INT'
+    SUB_INT = 'SUB_INT'
+    MUL_INT = 'MUL_INT'
+    DIV_INT = 'DIV_INT'
+    MOD_INT = 'MOD_INT'
+    POW_INT = 'POW_INT'
 
-    FLOAT_ADD = 'FLOAT_ADD'
-    FLOAT_SUB = 'FLOAT_SUB'
-    FLOAT_MUL = 'FLOAT_MUL'
-    FLOAT_DIV = 'FLOAT_DIV'
-    FLOAT_MOD = 'FLOAT_MOD'
-    FLOAT_POW = 'FLOAT_POW'
+    ADD_FLOAT = 'ADD_FLOAT'
+    SUB_FLOAT = 'SUB_FLOAT'
+    MUL_FLOAT = 'MUL_FLOAT'
+    DIV_FLOAT = 'DIV_FLOAT'
+    MOD_FLOAT = 'MOD_FLOAT'
+    POW_FLOAT = 'POW_FLOAT'
 
-    INT_UNARY_PLUS = 'INT_UNARY_PLUS'
-    INT_UNARY_MINUS = 'INT_UNARY_MINUS'
-    FLOAT_UNARY_PLUS = 'FLOAT_UNARY_PLUS'
-    FLOAT_UNARY_MINUS = 'FLOAT_UNARY_MINUS'
+    UNARY_PLUS_INT = 'UNARY_PLUS_INT'
+    UNARY_MINUS_INT = 'UNARY_MINUS_INT'
+    UNARY_PLUS_FLOAT = 'UNARY_PLUS_FLOAT'
+    UNARY_MINUS_FLOAT = 'UNARY_MINUS_FLOAT'
 
     RET = 'RET'
 
@@ -50,6 +50,8 @@ class InstructionType(ExtendedEnum):
     PUSH_BOOL = 'PUSH_BOOL'
     PUSH_FLOAT = 'PUSH_FLOAT'
     PUSH_STRING = 'PUSH_STRING'
+
+    ARRAY_INIT = 'ARRAY_INIT'
 
 
 class Instruction:
@@ -89,3 +91,21 @@ add_instruction(0x21, InstructionType.SET_LOCAL, [int])
 add_instruction(0x30, InstructionType.RET, [])
 add_instruction(0x31, InstructionType.JZ, [int])
 add_instruction(0x32, InstructionType.JMP, [int])
+
+add_instruction(0x40, InstructionType.ADD_INT, [])
+add_instruction(0x41, InstructionType.ADD_FLOAT, [])
+
+add_instruction(0x50, InstructionType.OR, [])
+add_instruction(0x51, InstructionType.AND, [])
+add_instruction(0x52, InstructionType.EQ, [])
+add_instruction(0x53, InstructionType.NE, [])
+add_instruction(0x54, InstructionType.GT_INT, [])
+add_instruction(0x55, InstructionType.GE_INT, [])
+add_instruction(0x56, InstructionType.LT_INT, [])
+add_instruction(0x57, InstructionType.LE_INT, [])
+add_instruction(0x58, InstructionType.GT_FLOAT, [])
+add_instruction(0x59, InstructionType.GE_FLOAT, [])
+add_instruction(0x5A, InstructionType.LT_FLOAT, [])
+add_instruction(0x5B, InstructionType.LE_FLOAT, [])
+
+add_instruction(0x60, InstructionType.ARRAY_INIT, [int])

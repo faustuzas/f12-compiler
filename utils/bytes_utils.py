@@ -1,5 +1,10 @@
+import struct
+
 default_int_size = 4
 default_int_order = 'big'
+
+float_size = 8
+float_type = 'd'
 
 string_encoding = 'UTF-8'
 
@@ -19,6 +24,8 @@ def select_from_bytes_func(type_):
         return string_from_bytes
     if type_ is bool:
         return bool_from_bytes
+    if type_ is float:
+        return float_from_bytes
     raise TypeError(f'There is no from bytes function for: {type_}')
 
 
@@ -29,6 +36,8 @@ def select_to_bytes_func(type_):
         return string_to_bytes
     if type_ is bool:
         return bool_to_bytes
+    if type_ is float:
+        return float_to_bytes
     raise TypeError(f'There is no to bytes function for: {type_}')
 
 
@@ -38,9 +47,18 @@ def int_to_bytes(value: int, int_size=default_int_size, int_order=default_int_or
 
 def int_from_bytes(code, offset, int_size=default_int_size, int_order=default_int_order):
     int_bytes = code[offset: offset + int_size]
-    offset += int_size
     value = int.from_bytes(int_bytes, int_order, signed=True)
-    return value, offset
+    return value, offset + int_size
+
+
+def float_to_bytes(value: float):
+    return list(struct.pack(f'<{float_type}', value))
+
+
+def float_from_bytes(code, offset):
+    float_bytes = bytes(code[offset: offset + float_size])
+    value = struct.unpack(f'<{float_type}', float_bytes)
+    return value[0], offset + float_size
 
 
 def bool_to_bytes(value: bool):
@@ -61,5 +79,4 @@ def string_to_bytes(value: str):
 def string_from_bytes(code, offset):
     string_size, offset = int_from_bytes(code, offset)
     string = str(bytes(code[offset: offset + string_size]), string_encoding)
-    offset += string_size
-    return string, offset
+    return string, offset + string_size
