@@ -26,7 +26,7 @@ class FileOutput:
         if exc_val:
             print(exc_val)
         self.fd.close()
-        return True
+        return exc_val is not None
 
 
 class AstPrinter:

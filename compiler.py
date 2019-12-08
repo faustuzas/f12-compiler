@@ -26,10 +26,6 @@ def compile_file(file_to_compile):
         ast_root.resolve_types()
         ast_root.check_for_entry_point()
 
-        with FileOutput('ast_tree.yaml') as output:
-            ast_printer = AstPrinter(output)
-            ast_printer.print('root', ast_root)
-
         is_parsing_successful = error_counter.counter == 0
         if not is_parsing_successful:
             printer.error('', f'{error_counter.counter} errors found', header_len=80)
@@ -37,14 +33,18 @@ def compile_file(file_to_compile):
         else:
             printer.success('', f'Compilation successful', header_len=80)
 
-        code_writer = CodeWriter()
-        ast_root.write_code(code_writer)
+        with FileOutput('ast_tree.yaml') as output:
+            ast_printer = AstPrinter(output)
+            ast_printer.print('root', ast_root)
 
-        with FileOutput('instructions.f12b') as output:
-            code_writer.print_instructions(output)
-
-        with FileOutput('output.f12b') as output:
-            code_writer.dump_code(output)
+        # code_writer = CodeWriter()
+        # ast_root.write_code(code_writer)
+        #
+        # with FileOutput('instructions.f12b') as output:
+        #     code_writer.print_instructions(output)
+        #
+        # with FileOutput('output.f12b') as output:
+        #     code_writer.dump_code(output)
         # except ValueError as e:
         #     print(e)
         #     pass

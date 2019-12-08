@@ -96,15 +96,25 @@ class Type(Node, ABC):
 
 class TypeArray(Type):
 
-    def __init__(self, inner_type) -> None:
+    def __init__(self, inner_type, size) -> None:
         super().__init__()
         self.inner_type = inner_type
+        self.size = size
 
     def access_type(self) -> Type:
         return self.inner_type
 
     def resolve_names(self, scope: Scope):
         return self.inner_type.resolve_names(scope)
+
+    @property
+    def length(self):
+        return int(self.size.value if isinstance(self.size, Token) else self.size)
+
+    def resolve_types(self):
+        if self.length <= 0:
+            handle_typing_error('Array size must be bigger than 0', self.size)
+        return self
 
 
 class TypePrimitive(Type):
@@ -564,12 +574,14 @@ class ExprLitArray(ExprLit):
             el.resolve_names(scope)
 
     def resolve_types(self):
-        if len(self.value):
+        array_size = len(self.value)
+        if array_size > 0:
             first_val_type = self.value[0].resolve_types()
             for i in range(1, len(self.value)):
                 unify_types(self.value[i].reference_token, first_val_type, self.value[i].resolve_types())
-            return TypeArray(first_val_type) if first_val_type else None
-        return None
+            return TypeArray(first_val_type, array_size) if first_val_type else None
+        else:
+            handle_typing_error('Array cannot be empty', self.reference_token)
 
     def write_code(self, code_writer: CodeWriter):
         for el in self.value:
@@ -631,6 +643,9 @@ class ExprAssign(Expr):
         unify_types(self.object.reference_token, obj_type, value_type)
         return value_type
 
+    def write_code(self, code_writer: CodeWriter):
+        self.object.decl_node.write_assignment_code(self.object, self.value, code_writer)
+
     @property
     def reference_token(self):
         return self.object.reference_token
@@ -654,9 +669,6 @@ class ExprVar(Expr, Assignable):
                 return self.decl_node.type
             else:
                 handle_typing_error(f'Not a valid type for variable', self.reference_token)
-
-    # def write_code(self, code_writer: CodeWriter):
-    #     code_writer
 
     def resolve_identifier(self):
         return self.identifier
@@ -905,6 +917,7 @@ class StmntDeclVar(Stmnt):
         self.stack_slot = stack_slot_dispenser.get_slot()
 
     def resolve_types(self):
+        self.type.resolve_types()
         if not self.type.is_valid_var_type():
             handle_typing_error('Cannot create a variable of the given type', self.reference_token)
             return None
@@ -1197,6 +1210,9 @@ class FunParam(Node):
     def reference_token(self):
         return self.name
 
+    def write_code(self, code_writer: CodeWriter):
+        pass
+
 
 class Decl(Node, ABC):
     pass
@@ -1262,6 +1278,7 @@ class DeclVar(Decl):
         self.global_slot = global_slot_dispenser.get_slot()
 
     def resolve_types(self):
+        self.type.resolve_types()
         if not self.type.is_valid_var_type():
             handle_typing_error('Cannot create a variable of the given type', self.reference_token)
             return None
@@ -1328,6 +1345,7 @@ class DeclUnitField(Node):
         return self.type.is_accessible()
 
     def resolve_types(self):
+        self.type.resolve_types()
         if not self.type.is_valid_var_type():
             handle_typing_error('Cannot create a field of the given type', self.reference_token)
 
@@ -1366,14 +1384,13 @@ class DeclUnit(Decl):
     def reference_token(self):
         return self.name
 
-    # TODO: ???
     def write_code(self, code_writer: CodeWriter):
         pass
 
 
 class Helper(Node, ABC):
     """
-    Helpers are gone in semantic checking phase
+    Helpers are gone in semantic checking phase and later
     """
     def resolve_names(self, scope: Scope):
         pass
@@ -1384,6 +1401,9 @@ class Helper(Node, ABC):
     @property
     def reference_token(self):
         return None
+
+    def write_code(self, code_writer: CodeWriter):
+        pass
 
 
 class HelperInclude(Helper):

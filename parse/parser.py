@@ -428,11 +428,12 @@ class Parser:
                 self.next_token_type(1) == TokenType.IDENTIFIER:
             return True
 
-        # [int, string, ...][] hello ...
+        # [int, string, ...][10] hello ...
         if Parser.is_type_token(self.next_token_type()) and \
                 self.next_token_type(1) == TokenType.C_SQUARE_L and \
-                self.next_token_type(2) == TokenType.C_SQUARE_R and \
-                self.next_token_type(3) == TokenType.IDENTIFIER:
+                self.next_token_type(2) == TokenType.LIT_INT and \
+                self.next_token_type(3) == TokenType.C_SQUARE_R and \
+                self.next_token_type(4) == TokenType.IDENTIFIER:
             return True
 
         return False
@@ -444,7 +445,9 @@ class Parser:
         type_token = self.get_next_token()
 
         is_array = False
+        array_size = None
         if self.accept(TokenType.C_SQUARE_L):
+            array_size = self.expect(TokenType.LIT_INT, 'array size')
             self.expect(TokenType.C_SQUARE_R)
             is_array = True
 
@@ -454,7 +457,7 @@ class Parser:
             type_ = ast.TypeUnit(type_token)
 
         if is_array:
-            return ast.TypeArray(type_)
+            return ast.TypeArray(type_, array_size)
         return type_
 
     def print_error(self, error: ParsingError):
