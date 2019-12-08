@@ -114,6 +114,7 @@ class TypeArray(Type):
     def resolve_types(self):
         if self.length <= 0:
             handle_typing_error('Array size must be bigger than 0', self.size)
+            return None
         return self
 
 
@@ -775,10 +776,10 @@ class ExprFnCall(Expr):
 
     def resolve_types(self):
         if not self.function_decl_node:
-            return
+            return None
         if not isinstance(self.function_decl_node, DeclFun):
             handle_typing_error(f'Item "{self.function_name}" is not a function', self.reference_token)
-            return
+            return None
         params = self.function_decl_node.params
         if len(params) != len(self.args):
             handle_typing_error(
@@ -787,8 +788,7 @@ class ExprFnCall(Expr):
             )
         else:
             for arg in self.args:
-                if isinstance(arg, ExprLitArray):
-                    type_ = arg.resolve_types()
+                arg.resolve_types()
         return self.function_decl_node.return_type
 
     def write_code(self, code_writer: CodeWriter):
@@ -800,6 +800,10 @@ class ExprFnCall(Expr):
     @property
     def reference_token(self):
         return self.function_name
+
+    @property
+    def return_type(self):
+        return self.function_decl_node.return_type
 
 
 class ExprCreateUnit(Expr):
@@ -1071,8 +1075,11 @@ class StmntExpr(Stmnt):
         return self.expr.reference_token
 
     def write_code(self, code_writer: CodeWriter):
-        self.expr.write_code(code_writer)
-        code_writer.write(InstructionType.POP)
+        if isinstance(self.expr, ExprFnCall):
+            self.expr.write_code(code_writer)
+            if self.expr.return_type.kind_type != TokenType.PRIMITIVE_VOID:
+                code_writer.write(InstructionType.POP)
+        # else no-op because it brings no value
 
 
 class StmntToStdout(Stmnt):
@@ -1240,6 +1247,7 @@ class DeclFun(Decl):
         self.body.resolve_names(fn_scope)
 
     def resolve_types(self):
+        self.return_type.resolve_types()
         for param in self.params:
             param.resolve_types()
         self.body.resolve_types()

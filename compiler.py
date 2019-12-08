@@ -37,14 +37,14 @@ def compile_file(file_to_compile):
             ast_printer = AstPrinter(output)
             ast_printer.print('root', ast_root)
 
-        # code_writer = CodeWriter()
-        # ast_root.write_code(code_writer)
-        #
-        # with FileOutput('instructions.f12b') as output:
-        #     code_writer.print_instructions(output)
-        #
-        # with FileOutput('output.f12b') as output:
-        #     code_writer.dump_code(output)
+        code_writer = CodeWriter()
+        ast_root.write_code(code_writer)
+
+        with FileOutput('instructions.f12b') as output:
+            code_writer.print_instructions(output)
+
+        with FileOutput('output.f12b') as output:
+            code_writer.dump_code(output)
         # except ValueError as e:
         #     print(e)
         #     pass
