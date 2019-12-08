@@ -155,13 +155,14 @@ class Parser:
             self.expect(TokenType.C_SEMI, '";"')
             return result
 
-        if self.accept(TokenType.KW_TO_STDOUT):
+        if self.next_token_type() == TokenType.KW_TO_STDOUT:
+            token = self.accept(TokenType.KW_TO_STDOUT)
             values = []
             while not self.accept(TokenType.C_SEMI):
                 values.append(self.parse_expr())
                 self.accept(TokenType.C_COMMA)
 
-            return ast.StmntToStdout(values)
+            return ast.StmntToStdout(token, values)
 
         if self.next_token_type() == TokenType.KW_EACH:
             return self.parse_stmnt_each()

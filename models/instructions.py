@@ -57,6 +57,8 @@ class InstructionType(ExtendedEnum):
 
     ARRAY_INIT = 'ARRAY_INIT'
 
+    TO_STDOUT = 'TO_STDOUT'
+
 
 class Instruction:
 
@@ -132,3 +134,5 @@ add_instruction(0x5A, InstructionType.LT_FLOAT, [])
 add_instruction(0x5B, InstructionType.LE_FLOAT, [])
 
 add_instruction(0x60, InstructionType.ARRAY_INIT, [int])
+
+add_instruction(0x70, InstructionType.TO_STDOUT, [int])

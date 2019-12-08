@@ -881,6 +881,9 @@ class StmntEmpty(Stmnt):
     def reference_token(self):
         return None
 
+    def write_code(self, code_writer: CodeWriter):
+        pass
+
 
 class StmntDeclVar(Stmnt):
 
@@ -1061,9 +1064,10 @@ class StmntExpr(Stmnt):
 
 class StmntToStdout(Stmnt):
 
-    def __init__(self, values: List[Expr]) -> None:
+    def __init__(self, token, values: List[Expr]) -> None:
         super().__init__()
         self.add_children(*values)
+        self.token = token
         self.values = values
 
     def resolve_names(self, scope: Scope):
@@ -1071,12 +1075,20 @@ class StmntToStdout(Stmnt):
             value.resolve_names(scope)
 
     def resolve_types(self):
+        if len(self.values) == 0:
+            handle_typing_error("To stdout operator has to receive at least one value", self.reference_token)
+
         for value in self.values:
             value.resolve_types()
 
     @property
     def reference_token(self):
-        return self.values[0].reference_token if len(self.values) else None
+        return self.token
+
+    def write_code(self, code_writer: CodeWriter):
+        for value in self.values:
+            value.write_code(code_writer)
+        code_writer.write(InstructionType.TO_STDOUT, len(self.values))
 
 
 class StmntEach(Stmnt):
