@@ -381,23 +381,58 @@ class ExprAdd(ExprBinaryArithmetic):
 
 
 class ExprSub(ExprBinaryArithmetic):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.SUB_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.SUB_FLOAT
 
 
 class ExprMul(ExprBinaryArithmetic):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.MUL_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.MUL_FLOAT
 
 
 class ExprDiv(ExprBinaryArithmetic):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.DIV_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.DIV_FLOAT
 
 
 class ExprMod(ExprBinaryArithmetic):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.MOD_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.MOD_FLOAT
 
 
 class ExprPow(ExprBinaryArithmetic):
-    pass
+
+    @property
+    def instruction_type_for_int(self):
+        return InstructionType.POW_INT
+
+    @property
+    def instruction_type_for_float(self):
+        return InstructionType.POW_FLOAT
 
 
 class ExprUnaryOp(Expr):
