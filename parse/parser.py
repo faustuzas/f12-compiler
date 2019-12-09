@@ -173,6 +173,11 @@ class Parser:
         if self.next_token_type() == TokenType.KW_IF:
             return self.parse_stmnt_if()
 
+        if self.accept(TokenType.FREE):
+            ident = self.expect(TokenType.IDENTIFIER)
+            self.expect(TokenType.C_SEMI)
+            return ast.StmntFree(ast.ExprVar(ident))
+
         expr = self.parse_expr()
         self.expect(TokenType.C_SEMI, '";"')
         return ast.StmntExpr(expr)
@@ -344,10 +349,7 @@ class Parser:
             return ast.ExprLitBool(curr_token)
 
         if curr_token.type == TokenType.C_SQUARE_L:
-            items = []
-            while not self.accept(TokenType.C_SQUARE_R):
-                items.append(self.parse_expr())
-                self.accept(TokenType.C_COMMA)
+            items = self.parse_array_values()
             return ast.ExprLitArray(items, curr_token)
 
         if curr_token.type == TokenType.C_ROUND_L:
@@ -366,6 +368,17 @@ class Parser:
                 return self.parse_unit_call(curr_token)
 
             return ast.ExprVar(curr_token)
+
+        if curr_token.type == TokenType.NEW:
+            if self.next_token_type() == TokenType.C_SQUARE_L:
+                array_open = self.get_next_token()
+                items = self.parse_array_values()
+                return ast.ExprNewFromArrayLit(ast.ExprLitArray(items, array_open))
+            type_ = self.expect_type()
+            self.expect(TokenType.C_SQUARE_L, '[')
+            size = self.parse_expr()
+            self.expect(TokenType.C_SQUARE_R, ']')
+            return ast.ExprNewFromSizedType(curr_token, type_, size)
 
         raise ParsingError('Unrecognized symbol', curr_token)
 
@@ -394,6 +407,12 @@ class Parser:
     """
     Helper methods
     """
+    @staticmethod
+    def ensure_is_type_token(token: Token):
+        if not Parser.is_type_token(token.type):
+            raise ParsingError(f'type expected', token)
+        return token
+
     def accept(self, token_type: TokenType) -> Union[Token, None]:
         curr_token = self.tokens[self.offset]
         if curr_token.type == token_type:
@@ -423,20 +442,30 @@ class Parser:
         if self.next_token_type() == TokenType.KW_CONST:
             return True
 
-        # [int, string, ...] hello ...
-        if Parser.is_type_token(self.next_token_type()) and \
-                self.next_token_type(1) == TokenType.IDENTIFIER:
-            return True
+        if not Parser.is_type_token(self.next_token_type()):
+            return False
 
-        # [int, string, ...][10] hello ...
-        if Parser.is_type_token(self.next_token_type()) and \
-                self.next_token_type(1) == TokenType.C_SQUARE_L and \
-                self.next_token_type(2) == TokenType.LIT_INT and \
-                self.next_token_type(3) == TokenType.C_SQUARE_R and \
-                self.next_token_type(4) == TokenType.IDENTIFIER:
-            return True
+        offset = 1
+        while True:
+            if offset % 2 == 0:
+                if self.next_token_type(offset) == TokenType.C_SQUARE_R:
+                    offset += 1
+                    continue
+                return False
+            else:
+                if self.next_token_type(offset) == TokenType.IDENTIFIER:
+                    return True
+                if self.next_token_type(offset) == TokenType.C_SQUARE_L:
+                    offset += 1
+                    continue
+                return False
 
-        return False
+    def parse_array_values(self) -> List[ast.Expr]:
+        items = []
+        while not self.accept(TokenType.C_SQUARE_R):
+            items.append(self.parse_expr())
+            self.accept(TokenType.C_COMMA)
+        return items
 
     def expect_type(self) -> ast.Type:
         if self.next_token_type() not in type_tokens:
@@ -444,20 +473,22 @@ class Parser:
 
         type_token = self.get_next_token()
 
-        is_array = False
-        array_size = None
-        if self.accept(TokenType.C_SQUARE_L):
-            array_size = self.expect(TokenType.LIT_INT, 'array size')
-            self.expect(TokenType.C_SQUARE_R)
-            is_array = True
+        array_nesting = 0
+        while True:
+            if self.next_token_type() == TokenType.C_SQUARE_L and self.next_token_type(1) == TokenType.C_SQUARE_R:
+                self.expect(TokenType.C_SQUARE_L)
+                self.expect(TokenType.C_SQUARE_R)
+                array_nesting += 1
+            else:
+                break
 
         if type_token.type in primitive_type_tokens:
             type_ = ast.TypePrimitive(type_token)
         else:
             type_ = ast.TypeUnit(type_token)
 
-        if is_array:
-            return ast.TypeArray(type_, array_size)
+        for i in range(array_nesting):
+            type_ = ast.TypePointer(ast.TypeArray(type_))
         return type_
 
     def print_error(self, error: ParsingError):

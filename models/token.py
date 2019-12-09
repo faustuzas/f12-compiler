@@ -66,6 +66,9 @@ class TokenType(ExtendedEnum):
 
     IDENTIFIER = 'IDENTIFIER'
 
+    NEW = 'NEW'
+    FREE = 'FREE'
+
 
 class Token:
     def __init__(self, token_type: TokenType, line_number: int, file_name: str, offset_in_line, value='') -> None:
@@ -80,7 +83,7 @@ class Token:
         return str(self.type) + value_part
 
     def __str__(self):
-        return self.value
+        return self.__repr__()
 
 
 primitive_type_tokens = [

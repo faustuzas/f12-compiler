@@ -48,19 +48,24 @@ class InstructionType(ExtendedEnum):
 
     SET_GLOBAL = 'SET_GLOBAL'
     SET_LOCAL = 'SET_LOCAL'
+    GET_GLOBAL = 'GET_GLOBAL'
+    GET_LOCAL = 'GET_LOCAL'
 
     POP = 'POP'
+    POP_PUSH_N = 'POP_PUSH_N'
     PUSH_INT = 'PUSH_INT'
     PUSH_BOOL = 'PUSH_BOOL'
     PUSH_FLOAT = 'PUSH_FLOAT'
     PUSH_STRING = 'PUSH_STRING'
 
-    ARRAY_FILL_GLOBAL = 'ARRAY_FILL_GLOBAL'
-    ARRAY_FILL_LOCAL = 'ARRAY_FILL_LOCAL'
-    ARRAY_SET_VALUE_LOCAL = 'ARRAY_SET_VALUE_LOCAL'
-    ARRAY_SET_VALUE_GLOBAL = 'ARRAY_SET_VALUE_GLOBAL'
+    MEMORY_ALLOCATE = 'MEMORY_ALLOCATE'
+    MEMORY_FREE = 'MEMORY_FREE'
+    MEMORY_SET_INT = 'MEMORY_SET_INT'
+    MEMORY_SET_INT_P = 'MEMORY_SET_INT_P'
+    MEMORY_GET_INT = 'MEMORY_GET_INT'
 
     TO_STDOUT = 'TO_STDOUT'
+    FROM_STDIN = 'FROM_STDIN'
 
 
 class Instruction:
@@ -90,13 +95,16 @@ def add_instruction(op_code, type_, ops_types):
 
 
 add_instruction(0x10, InstructionType.POP, [])
-add_instruction(0x11, InstructionType.PUSH_INT, [int])
-add_instruction(0x12, InstructionType.PUSH_BOOL, [bool])
-add_instruction(0x13, InstructionType.PUSH_FLOAT, [float])
-add_instruction(0x14, InstructionType.PUSH_STRING, [str])
+add_instruction(0x11, InstructionType.POP_PUSH_N, [int])
+add_instruction(0x12, InstructionType.PUSH_INT, [int])
+add_instruction(0x13, InstructionType.PUSH_BOOL, [bool])
+add_instruction(0x14, InstructionType.PUSH_FLOAT, [float])
+add_instruction(0x15, InstructionType.PUSH_STRING, [str])
 
 add_instruction(0x20, InstructionType.SET_GLOBAL, [int])
 add_instruction(0x21, InstructionType.SET_LOCAL, [int])
+add_instruction(0x22, InstructionType.GET_GLOBAL, [int])
+add_instruction(0x23, InstructionType.GET_LOCAL, [int])
 
 add_instruction(0x30, InstructionType.FN_CALL_BEGIN, [])
 add_instruction(0x31, InstructionType.FN_CALL, [int, int])
@@ -136,12 +144,15 @@ add_instruction(0x59, InstructionType.GE_FLOAT, [])
 add_instruction(0x5A, InstructionType.LT_FLOAT, [])
 add_instruction(0x5B, InstructionType.LE_FLOAT, [])
 
-# will take array at arg1 slot and fill it with arg2 values from stack
-add_instruction(0x60, InstructionType.ARRAY_FILL_LOCAL, [int, int])
-add_instruction(0x61, InstructionType.ARRAY_FILL_GLOBAL, [int, int])
+# Pop item from stack, allocate that much memory and push address of allocated memory to stack
+add_instruction(0x60, InstructionType.MEMORY_ALLOCATE, [])
+add_instruction(0x61, InstructionType.MEMORY_FREE, [])
+# next item in stack is index, another next is value
+add_instruction(0x62, InstructionType.MEMORY_SET_INT, [])
+# push address back to stack
+add_instruction(0x63, InstructionType.MEMORY_SET_INT_P, [])
 
-# will take array at arg1 slot and set the value at index from stack with value from stack
-add_instruction(0x62, InstructionType.ARRAY_SET_VALUE_GLOBAL, [int])
-add_instruction(0x63, InstructionType.ARRAY_SET_VALUE_LOCAL, [int])
+add_instruction(0x64, InstructionType.MEMORY_GET_INT, [])
 
 add_instruction(0x70, InstructionType.TO_STDOUT, [int])
+add_instruction(0x71, InstructionType.FROM_STDIN, [])

@@ -6,6 +6,7 @@ from models import TokenType, Token
 from models.instructions import InstructionType
 from models.scope import Scope
 from models.slot_dispenser import SlotDispenser
+from utils.bytes_utils import int_size, bool_size, float_size, address_size
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
 from utils.list_utils import find_in_list
 from utils.type_checking_helpers import unify_types, prepare_for_printing
@@ -68,6 +69,10 @@ class Node(ABC):
     def is_accessible(self):
         return False
 
+    @property
+    def size_to_allocate(self):
+        raise Exception(f'Unreachable code. Reached with class: {self.__class__}')
+
 
 class Type(Node, ABC):
 
@@ -94,12 +99,29 @@ class Type(Node, ABC):
         pass
 
 
+class TypePointer(Type, ABC):
+
+    def __init__(self, of_type) -> None:
+        super().__init__()
+        self.of_type = of_type
+
+    def resolve_names(self, scope: Scope):
+        return self.of_type.resolve_names(scope)
+
+    @property
+    def size_to_allocate(self):
+        return address_size
+
+    @property
+    def kind(self):
+        return self.of_type.kind if self.of_type else None
+
+
 class TypeArray(Type):
 
-    def __init__(self, inner_type, size) -> None:
+    def __init__(self, inner_type) -> None:
         super().__init__()
         self.inner_type = inner_type
-        self.size = size
 
     def access_type(self) -> Type:
         return self.inner_type
@@ -108,14 +130,12 @@ class TypeArray(Type):
         return self.inner_type.resolve_names(scope)
 
     @property
-    def length(self):
-        return int(self.size.value if isinstance(self.size, Token) else self.size)
+    def size_to_allocate(self):
+        return self.inner_type.size_to_allocate  # real array size will be calculated in "new" keyword call
 
-    def resolve_types(self):
-        if self.length <= 0:
-            handle_typing_error('Array size must be bigger than 0', self.size)
-            return None
-        return self
+    @property
+    def kind(self):
+        return self.inner_type.kind
 
 
 class TypePrimitive(Type):
@@ -146,6 +166,16 @@ class TypePrimitive(Type):
         return self.kind.type if isinstance(self.kind, Token) else self.kind
 
     @property
+    def size_to_allocate(self):
+        if self.kind_type == TokenType.PRIMITIVE_INT:
+            return int_size
+        if self.kind_type == TokenType.PRIMITIVE_BOOL:
+            return bool_size
+        if self.kind_type == TokenType.PRIMITIVE_FLOAT:
+            return float_size
+        raise Exception("Unreachable code")
+
+    @property
     def reference_token(self):
         return None
 
@@ -171,6 +201,80 @@ class Expr(Node, ABC):
     pass
 
 
+class ExprNew(Node, ABC):
+
+    @property
+    def size_to_allocate(self):
+        return address_size
+
+
+class ExprNewFromSizedType(ExprNew):
+
+    def __init__(self, token, type_, size_expr) -> None:
+        super().__init__()
+        self.add_children(type_, size_expr)
+        self.token = token
+        self.type = type_
+        self.size_expr = size_expr
+
+    def resolve_names(self, scope: Scope):
+        self.type.resolve_names(scope)
+        self.size_expr.resolve_names(scope)
+
+    def resolve_types(self):
+        expr_type = self.size_expr.resolve_types()
+        unify_types(self.size_expr.reference_token, TypePrimitive(TokenType.PRIMITIVE_INT), expr_type)
+        return TypePointer(TypeArray(self.type))
+
+    def write_code(self, code_writer: CodeWriter):
+        self.size_expr.write_code(code_writer)
+        code_writer.write(InstructionType.PUSH_INT, self.type.size_to_allocate)
+        code_writer.write(InstructionType.MUL_INT)
+        code_writer.write(InstructionType.MEMORY_ALLOCATE)
+
+    @property
+    def reference_token(self):
+        return self.token
+
+
+class ExprNewFromArrayLit(ExprNew):
+
+    def __init__(self, array) -> None:
+        super().__init__()
+        self.add_children(array)
+        self.array = array
+
+    def resolve_names(self, scope: Scope):
+        self.array.resolve_names(scope)
+
+    def resolve_types(self):
+        type_ = self.array.resolve_types()
+        if type_:
+            return TypePointer(type_)
+
+    def write_code(self, code_writer: CodeWriter):
+        for el in reversed(self.array.value):
+            el.write_code(code_writer)
+
+        # allocate memory for an array
+        code_writer.write(InstructionType.PUSH_INT, self.array.size_to_allocate)
+        code_writer.write(InstructionType.MEMORY_ALLOCATE)
+
+        el_size = self.array.single_el_size
+        for i in range(self.array.length):
+            # TODO: pakeist is int i more generic
+            code_writer.write(InstructionType.MEMORY_SET_INT_P)
+            if i + 1 != self.array.length:
+                code_writer.write(InstructionType.PUSH_INT, el_size)
+                code_writer.write(InstructionType.ADD_INT)
+        code_writer.write(InstructionType.PUSH_INT, self.array.length * (el_size - 1) - 1)
+        code_writer.write(InstructionType.SUB_INT)
+
+    @property
+    def reference_token(self):
+        return self.array.reference_token
+
+
 class ExprBinary(Expr, ABC):
     def __init__(self, left, right) -> None:
         super().__init__()
@@ -189,18 +293,29 @@ class ExprBinary(Expr, ABC):
 
 class ExprNumeric(Expr, ABC):
 
-    def write_code_for_type(self, type_, code_writer):
+    def ensure_valid_type(self, type_):
         if not isinstance(type_, TypePrimitive):
             raise NotImplementedError(f'There are no numeric expr for: {type_.__class__}')
 
         kind = type_.kind_type
+        if kind == TokenType.PRIMITIVE_INT or kind == TokenType.PRIMITIVE_FLOAT:
+            return kind
+        raise NotImplementedError(f'There are no binary operators for: {kind}')
+
+    def write_code_for_type(self, type_, code_writer):
+        kind = self.ensure_valid_type(type_)
         if kind == TokenType.PRIMITIVE_INT:
             instruction_type = self.instruction_type_for_int
-        elif kind == TokenType.PRIMITIVE_FLOAT:
-            instruction_type = self.instruction_type_for_float
         else:
-            raise NotImplementedError(f'There are no binary operators for: {kind}')
+            instruction_type = self.instruction_type_for_float
         code_writer.write(instruction_type)
+
+    def get_size_for_type(self, type_):
+        kind = self.ensure_valid_type(type_)
+        if kind == TokenType.PRIMITIVE_INT:
+            return int_size
+        else:
+            return float_size
 
     @property
     def instruction_type_for_int(self):
@@ -219,6 +334,11 @@ class ExprBinaryNumeric(ExprBinary, ExprNumeric, ABC):
 
         type_ = self.left.resolve_types()
         self.write_code_for_type(type_, code_writer)
+
+    @property
+    def size_to_allocate(self):
+        type_ = self.left.resolve_types()
+        return self.get_size_for_type(type_)
 
 
 class ExprBinaryArithmetic(ExprBinaryNumeric, ABC):
@@ -552,6 +672,10 @@ class ExprLitInt(ExprLit):
     def write_code(self, code_writer: CodeWriter):
         code_writer.write(InstructionType.PUSH_INT, int(self.value.value))
 
+    @property
+    def size_to_allocate(self):
+        return int_size
+
 
 class ExprLitBool(ExprLit):
 
@@ -575,12 +699,11 @@ class ExprLitArray(ExprLit):
             el.resolve_names(scope)
 
     def resolve_types(self):
-        array_size = len(self.value)
-        if array_size > 0:
+        if self.length > 0:
             first_val_type = self.value[0].resolve_types()
             for i in range(1, len(self.value)):
                 unify_types(self.value[i].reference_token, first_val_type, self.value[i].resolve_types())
-            return TypeArray(first_val_type, array_size) if first_val_type else None
+            return TypeArray(first_val_type) if first_val_type else None
         else:
             handle_typing_error('Array cannot be empty', self.reference_token)
 
@@ -590,15 +713,27 @@ class ExprLitArray(ExprLit):
 
     @property
     def kind(self):
-        if len(self.value):
+        if self.length > 0:
             return self.value[0].resolve_types()
         return None
 
     @property
     def reference_token(self):
-        if len(self.value):
+        if self.length > 0:
             return self.value[0].reference_token
         return self._start_token
+
+    @property
+    def length(self):
+        return len(self.value)
+
+    @property
+    def single_el_size(self):
+        return self.value[0].resolve_types().size_to_allocate
+
+    @property
+    def size_to_allocate(self):
+        return self.length * self.single_el_size
 
 
 class ExprFromStdin(Expr):
@@ -608,10 +743,13 @@ class ExprFromStdin(Expr):
         return None
 
     def resolve_types(self):
-        return None
+        return TypePrimitive(TokenType.PRIMITIVE_STRING)
 
     def resolve_names(self, scope: Scope):
         pass
+
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.FROM_STDIN)
 
 
 class Assignable(ABC):
@@ -670,6 +808,12 @@ class ExprVar(Expr, Assignable):
             else:
                 handle_typing_error(f'Not a valid type for variable', self.reference_token)
 
+    def write_code(self, code_writer: CodeWriter):
+        if self.is_local:
+            code_writer.write(InstructionType.GET_LOCAL, self.slot)
+        else:
+            code_writer.write(InstructionType.GET_GLOBAL, self.slot)
+
     def resolve_identifier(self):
         return self.identifier
 
@@ -679,7 +823,7 @@ class ExprVar(Expr, Assignable):
 
     @property
     def is_local(self):
-        return type(self.decl_node) == StmntDeclVar
+        return isinstance(self.decl_node, (StmntDeclVar, FunParam))
 
     @property
     def type(self):
@@ -696,6 +840,7 @@ class ExprVar(Expr, Assignable):
 
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
+        code_writer.write(InstructionType.POP_PUSH_N, 2)
         if self.is_local:
             if isinstance(self.type, TypeArray):
                 code_writer.write(InstructionType.ARRAY_FILL_LOCAL, self.slot, self.type.length)
@@ -706,6 +851,10 @@ class ExprVar(Expr, Assignable):
                 code_writer.write(InstructionType.ARRAY_FILL_GLOBAL, self.slot, self.type.length)
             else:
                 code_writer.write(InstructionType.SET_GLOBAL, self.slot)
+
+    @property
+    def size_to_allocate(self):
+        return self.type.size_to_allocate
 
 
 class ExprAccess(Expr, Assignable):
@@ -747,6 +896,9 @@ class ExprAccess(Expr, Assignable):
             handle_typing_error('You cannot access this type', self.object.reference_token)
         return self.field_decl_node.type if self.field_decl_node else None
 
+    def write_code(self, code_writer: CodeWriter):
+        raise Exception('Unreachable code')
+
 
 class ExprArrayAccess(Expr, Assignable):
 
@@ -766,7 +918,7 @@ class ExprArrayAccess(Expr, Assignable):
     def resolve_types(self):
         # check if array variable is Iterable
         array_type = self.array.resolve_types()
-        if not isinstance(array_type, TypeArray):
+        if not (isinstance(array_type, TypePointer) and isinstance(array_type.of_type, TypeArray)):
             handle_typing_error(f'You cannot access {array_type.__class__.__name__}', self.reference_token)
             return None
 
@@ -775,7 +927,7 @@ class ExprArrayAccess(Expr, Assignable):
                     TypePrimitive(TokenType.PRIMITIVE_INT),
                     self.index_expr.resolve_types())
 
-        return array_type.inner_type.resolve_types()
+        return array_type.of_type.inner_type.resolve_types()
 
     def is_accessible(self):
         return self.array.is_accessible()
@@ -784,13 +936,33 @@ class ExprArrayAccess(Expr, Assignable):
     def reference_token(self):
         return self.array.reference_token
 
+    def write_code(self, code_writer: CodeWriter):
+        self.array.write_code(code_writer)
+        self.index_expr.write_code(code_writer)
+        code_writer.write(InstructionType.PUSH_INT, self.array.size_to_allocate)
+        code_writer.write(InstructionType.MUL_INT)
+        code_writer.write(InstructionType.ADD_INT)
+        # TODO: generic get
+        code_writer.write(InstructionType.MEMORY_GET_INT)
+
+    # TODO: pasiziuret kad liktu value po assign
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
+        code_writer.write(InstructionType.POP_PUSH_N, 2)
         self.index_expr.write_code(code_writer)
+        code_writer.write(InstructionType.PUSH_INT, self.array.size_to_allocate)
+        code_writer.write(InstructionType.MUL_INT)
         if self.array.is_local:
-            code_writer.write(InstructionType.ARRAY_SET_VALUE_LOCAL, self.array.slot)
+            code_writer.write(InstructionType.GET_LOCAL, self.array.slot)
         else:
-            code_writer.write(InstructionType.ARRAY_SET_VALUE_GLOBAL, self.array.slot)
+            code_writer.write(InstructionType.GET_GLOBAL, self.array.slot)
+        code_writer.write(InstructionType.ADD_INT)
+        # TODO: generic set
+        code_writer.write(InstructionType.MEMORY_SET_INT)
+
+    @property
+    def size_to_allocate(self):
+        return self.array.resolve_types().size_to_allocate
 
 
 class ExprFnCall(Expr):
@@ -889,6 +1061,9 @@ class ExprCreateUnit(Expr):
     def reference_token(self):
         return self.unit_name
 
+    def write_code(self, code_writer: CodeWriter):
+        raise NotImplementedError('This feature is not implemented yet')
+
 
 class CreateUnitArg(Node):
 
@@ -914,6 +1089,9 @@ class CreateUnitArg(Node):
     def reference_token(self):
         return self.value.reference_token
 
+    def write_code(self, code_writer: CodeWriter):
+        raise NotImplementedError('This feature is not implemented yet')
+
 
 class Stmnt(Node, ABC):
     pass
@@ -933,6 +1111,29 @@ class StmntEmpty(Stmnt):
 
     def write_code(self, code_writer: CodeWriter):
         pass
+
+
+class StmntFree(Stmnt):
+
+    def __init__(self, address) -> None:
+        super().__init__()
+        self.add_children(address)
+        self.address = address
+
+    def resolve_names(self, scope: Scope):
+        self.address.resolve_names(scope)
+
+    def resolve_types(self):
+        type_ = self.address.resolve_types()
+        unify_types(self.reference_token, TypePointer(None), type_)
+
+    @property
+    def reference_token(self):
+        return self.address.reference_token
+
+    def write_code(self, code_writer: CodeWriter):
+        self.address.write_code(code_writer)
+        code_writer.write(InstructionType.MEMORY_FREE)
 
 
 class StmntDeclVar(Stmnt):
@@ -967,10 +1168,7 @@ class StmntDeclVar(Stmnt):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            if isinstance(self.type, TypeArray):
-                code_writer.write(InstructionType.ARRAY_FILL_LOCAL, self.stack_slot, self.type.length)
-            else:
-                code_writer.write(InstructionType.SET_LOCAL, self.stack_slot)
+            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot)
 
     @property
     def reference_token(self):
@@ -1033,8 +1231,7 @@ class StmntControl(Stmnt, ABC):
         outer_while = self.find_parent(StmntWhile)
         if outer_while:
             return outer_while
-
-        return self.find_parent(StmntEach)
+        return None
 
 
 class StmntBreak(StmntControl):
@@ -1116,13 +1313,8 @@ class StmntExpr(Stmnt):
             self.expr.write_code(code_writer)
             if self.expr.return_type.kind_type != TokenType.PRIMITIVE_VOID:
                 code_writer.write(InstructionType.POP)
-        elif isinstance(self.expr, (ExprLit, ExprArrayAccess, ExprVar)):
-            pass  # no-op
-        elif isinstance(self.expr, ExprAssign):
-            self.expr.write_code(code_writer)
-        else:
-            self.expr.write_code(code_writer)
-            code_writer.write(InstructionType.POP)
+        self.expr.write_code(code_writer)
+        code_writer.write(InstructionType.POP)
 
 
 class StmntToStdout(Stmnt):
@@ -1176,6 +1368,9 @@ class StmntEach(Stmnt):
     @property
     def reference_token(self):
         return self.element.reference_token
+
+    def write_code(self, code_writer: CodeWriter):
+        raise NotImplementedError('This construct is deprecated')
 
 
 class StmntWhile(Stmnt):
@@ -1263,6 +1458,10 @@ class FunParam(Node):
     def write_code(self, code_writer: CodeWriter):
         pass
 
+    @property
+    def is_local(self):
+        return True
+
 
 class Decl(Node, ABC):
     pass
@@ -1340,10 +1539,7 @@ class DeclVar(Decl):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            if isinstance(self.type, TypeArray):
-                code_writer.write(InstructionType.ARRAY_FILL_GLOBAL, self.global_slot, self.type.length)
-            else:
-                code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
+            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
 
     @property
     def reference_token(self):
@@ -1355,7 +1551,6 @@ class DeclArrayElement(Decl):
     This class is used to represent temporary variable
     which is created when we iterate thought an array
     """
-
     def __init__(self, name, iterable_node: Expr):
         super().__init__()
         self.add_children(iterable_node)
@@ -1380,6 +1575,9 @@ class DeclArrayElement(Decl):
     @property
     def reference_token(self):
         return self.name
+
+    def write_code(self, code_writer: CodeWriter):
+        raise NotImplementedError('This construct is deprecated')
 
 
 class DeclUnitField(Node):
@@ -1406,6 +1604,9 @@ class DeclUnitField(Node):
     @property
     def reference_token(self):
         return self.name
+
+    def write_code(self, code_writer: CodeWriter):
+        pass
 
 
 class DeclUnit(Decl):
@@ -1536,11 +1737,11 @@ class Program(Node):
         main_fn = main_fns[0]
 
         ret_type = main_fn.return_type
-        returns_int = isinstance(ret_type, TypePrimitive) and ret_type.kind_type == TokenType.PRIMITIVE_INT
+        returns_int = isinstance(ret_type, TypePrimitive) and ret_type.kind_type == TokenType.PRIMITIVE_VOID
         if not returns_int:
             print_error(
                 'Entry point',
-                '\'main\' function has to return int',
+                '\'main\' does not return anything',
                 main_fn.reference_token
             )
 

@@ -11,7 +11,9 @@ keywords = {
     'const': TokenType.KW_CONST,
     'continue': TokenType.KW_CONTINUE,
     'break': TokenType.KW_BREAK,
-    'in': TokenType.KW_IN
+    'in': TokenType.KW_IN,
+    'new': TokenType.NEW,
+    'free': TokenType.FREE
 }
 
 primitive_types = {

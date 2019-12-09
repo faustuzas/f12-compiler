@@ -1,7 +1,10 @@
 import struct
 
-default_int_size = 4
-default_int_order = 'big'
+bool_size = 1
+address_size = 4
+
+int_size = 4
+int_order = 'big'
 
 float_size = 8
 float_type = 'd'
@@ -10,11 +13,11 @@ string_encoding = 'UTF-8'
 
 
 def op_code_to_bytes(op_code):
-    return int_to_bytes(int(op_code), int_size=1)
+    return int_to_bytes(int(op_code), size=bool_size)
 
 
 def op_code_from_bytes(code, offset):
-    return int_from_bytes(code, offset, int_size=1)
+    return int_from_bytes(code, offset, size=bool_size)
 
 
 def select_from_bytes_func(type_):
@@ -41,14 +44,14 @@ def select_to_bytes_func(type_):
     raise TypeError(f'There is no to bytes function for: {type_}')
 
 
-def int_to_bytes(value: int, int_size=default_int_size, int_order=default_int_order):
-    return list(value.to_bytes(int_size, int_order, signed=True))
+def int_to_bytes(value: int, size=int_size, order=int_order):
+    return list(value.to_bytes(size, order, signed=True))
 
 
-def int_from_bytes(code, offset, int_size=default_int_size, int_order=default_int_order):
-    int_bytes = code[offset: offset + int_size]
-    value = int.from_bytes(int_bytes, int_order, signed=True)
-    return value, offset + int_size
+def int_from_bytes(code, offset, size=int_size, order=int_order):
+    int_bytes = code[offset: offset + size]
+    value = int.from_bytes(int_bytes, order, signed=True)
+    return value, offset + size
 
 
 def float_to_bytes(value: float):
@@ -62,11 +65,11 @@ def float_from_bytes(code, offset):
 
 
 def bool_to_bytes(value: bool):
-    return int_to_bytes(1 if value else 0, int_size=1)
+    return int_to_bytes(1 if value else 0, size=1)
 
 
 def bool_from_bytes(code, offset):
-    val, offset = int_from_bytes(code, offset, int_size=1)
+    val, offset = int_from_bytes(code, offset, size=1)
     return val == 1, offset
 
 
