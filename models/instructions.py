@@ -67,6 +67,8 @@ class InstructionType(ExtendedEnum):
     TO_STDOUT = 'TO_STDOUT'
     FROM_STDIN = 'FROM_STDIN'
 
+    MARKER_STATIC_START = 'MARKER_STATIC_START'
+
 
 class Instruction:
 
@@ -99,7 +101,7 @@ add_instruction(0x11, InstructionType.POP_PUSH_N, [int])
 add_instruction(0x12, InstructionType.PUSH_INT, [int])
 add_instruction(0x13, InstructionType.PUSH_BOOL, [bool])
 add_instruction(0x14, InstructionType.PUSH_FLOAT, [float])
-add_instruction(0x15, InstructionType.PUSH_STRING, [str])
+add_instruction(0x15, InstructionType.PUSH_STRING, [int])
 
 add_instruction(0x20, InstructionType.SET_GLOBAL, [int])
 add_instruction(0x21, InstructionType.SET_LOCAL, [int])
@@ -156,3 +158,5 @@ add_instruction(0x64, InstructionType.MEMORY_GET_INT, [])
 
 add_instruction(0x70, InstructionType.TO_STDOUT, [int])
 add_instruction(0x71, InstructionType.FROM_STDIN, [])
+
+add_instruction(0xE0, InstructionType.MARKER_STATIC_START, [])

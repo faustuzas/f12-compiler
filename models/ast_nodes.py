@@ -6,6 +6,7 @@ from models import TokenType, Token
 from models.instructions import InstructionType
 from models.scope import Scope
 from models.slot_dispenser import SlotDispenser
+from codegen.string_storage import string_storage
 from utils.bytes_utils import int_size, bool_size, float_size, address_size
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
 from utils.list_utils import find_in_list
@@ -689,12 +690,20 @@ class ExprLitChar(ExprLit):
 
 class ExprLitStr(ExprLit):
 
+    def __init__(self, value):
+        super().__init__(value)
+        self._label = string_storage.add_string(value.value)
+
     @property
     def kind(self):
         return TokenType.PRIMITIVE_STRING
 
+    @property
+    def label(self):
+        return self._label
+
     def write_code(self, code_writer: CodeWriter):
-        code_writer.write(InstructionType.PUSH_STRING, self.value.value)
+        code_writer.write(InstructionType.PUSH_STRING, self.label)
 
 
 class ExprLitFloat(ExprLit):
@@ -1805,6 +1814,7 @@ class Program(Node):
     def write_code(self, code_writer: CodeWriter):
         for element in self.root_elements:
             element.write_code(code_writer)
+        string_storage.place_labels(code_writer)
 
     @property
     def reference_token(self):

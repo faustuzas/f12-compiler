@@ -2,6 +2,7 @@ import struct
 
 bool_size = 1
 address_size = 4
+op_code_size = 2
 
 int_size = 4
 int_order = 'big'
@@ -13,11 +14,11 @@ string_encoding = 'UTF-8'
 
 
 def op_code_to_bytes(op_code):
-    return int_to_bytes(int(op_code), size=bool_size)
+    return int_to_bytes(int(op_code), size=op_code_size)
 
 
 def op_code_from_bytes(code, offset):
-    return int_from_bytes(code, offset, size=bool_size)
+    return int_from_bytes(code, offset, size=op_code_size)
 
 
 def select_from_bytes_func(type_):
