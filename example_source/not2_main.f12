@@ -1,3 +1,6 @@
 fun main {
-    char a = 'a';
+    '"';
+    "'";
+    string a = "labaslabaslabaslabaslabaslabaslabaslabaslabas";
+    a[4] = 'c';
 }

@@ -1,6 +1,9 @@
 import struct
 
+from models.types import Char
+
 bool_size = 1
+char_size = 1
 address_size = 4
 op_code_size = 2
 
@@ -30,6 +33,8 @@ def select_from_bytes_func(type_):
         return bool_from_bytes
     if type_ is float:
         return float_from_bytes
+    if type_ is Char:
+        return char_from_bytes
     raise TypeError(f'There is no from bytes function for: {type_}')
 
 
@@ -42,6 +47,8 @@ def select_to_bytes_func(type_):
         return bool_to_bytes
     if type_ is float:
         return float_to_bytes
+    if type_ is Char:
+        return char_to_bytes
     raise TypeError(f'There is no to bytes function for: {type_}')
 
 
@@ -84,3 +91,12 @@ def string_from_bytes(code, offset):
     string_size, offset = int_from_bytes(code, offset)
     string = str(bytes(code[offset: offset + string_size]), string_encoding)
     return string, offset + string_size
+
+
+def char_to_bytes(char):
+    return int_to_bytes(ord(char), char_size)
+
+
+def char_from_bytes(code, offset):
+    char = str(bytes(code[offset: offset + char_size]), string_encoding)
+    return char, offset + char_size

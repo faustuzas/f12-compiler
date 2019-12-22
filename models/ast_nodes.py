@@ -7,7 +7,7 @@ from models.instructions import InstructionType
 from models.scope import Scope
 from models.slot_dispenser import SlotDispenser
 from codegen.string_storage import string_storage
-from utils.bytes_utils import int_size, bool_size, float_size, address_size
+from utils.bytes_utils import int_size, bool_size, float_size, address_size, char_size
 from utils.error_printer import print_error_from_token as print_error, print_error_simple
 from utils.list_utils import find_in_list
 from utils.type_checking_helpers import unify_types, prepare_for_printing
@@ -198,6 +198,8 @@ class TypePrimitive(Type):
             return bool_size
         if self.kind_type == TokenType.PRIMITIVE_FLOAT:
             return float_size
+        if self.kind_type == TokenType.PRIMITIVE_STRING:
+            return char_size  # TODO:
         raise Exception("Unreachable code")
 
     @property
@@ -684,8 +686,8 @@ class ExprLitChar(ExprLit):
     def kind(self):
         return TokenType.PRIMITIVE_CHAR
 
-    # def write_code(self, code_writer: CodeWriter):
-    #     code_writer.write(InstructionType.PUSH_CHAR, self.value.value)
+    def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.PUSH_CHAR, self.value.value)
 
 
 class ExprLitStr(ExprLit):
@@ -1004,17 +1006,21 @@ class ExprArrayAccess(Expr, Assignable):
         # TODO: generic get
         code_writer.write(InstructionType.MEMORY_GET_INT)
 
-    # TODO: pasiziuret kad liktu value po assign
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
+        # pop the value and push it two times into the stack because assignment has to have value
         code_writer.write(InstructionType.POP_PUSH_N, 2)
+
+        # offset bytes depending on the type
         self.index_expr.write_code(code_writer)
         code_writer.write(InstructionType.PUSH_INT, self.array.size_to_allocate)
         code_writer.write(InstructionType.MUL_INT)
+
         if self.array.is_local:
             code_writer.write(InstructionType.GET_LOCAL, self.array.slot)
         else:
             code_writer.write(InstructionType.GET_GLOBAL, self.array.slot)
+
         code_writer.write(InstructionType.ADD_INT)
         # TODO: generic set
         code_writer.write(InstructionType.MEMORY_SET_INT)

@@ -1,4 +1,5 @@
 from models import ExtendedEnum
+from models.types import Char
 from utils.bytes_utils import select_from_bytes_func
 
 
@@ -57,6 +58,7 @@ class InstructionType(ExtendedEnum):
     PUSH_BOOL = 'PUSH_BOOL'
     PUSH_FLOAT = 'PUSH_FLOAT'
     PUSH_STRING = 'PUSH_STRING'
+    PUSH_CHAR = 'PUSH_CHAR'
 
     MEMORY_ALLOCATE = 'MEMORY_ALLOCATE'
     MEMORY_FREE = 'MEMORY_FREE'
@@ -102,6 +104,7 @@ add_instruction(0x12, InstructionType.PUSH_INT, [int])
 add_instruction(0x13, InstructionType.PUSH_BOOL, [bool])
 add_instruction(0x14, InstructionType.PUSH_FLOAT, [float])
 add_instruction(0x15, InstructionType.PUSH_STRING, [int])
+add_instruction(0x16, InstructionType.PUSH_CHAR, [Char])
 
 add_instruction(0x20, InstructionType.SET_GLOBAL, [int])
 add_instruction(0x21, InstructionType.SET_LOCAL, [int])

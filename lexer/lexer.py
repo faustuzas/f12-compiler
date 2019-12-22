@@ -329,8 +329,9 @@ class Lexer:
     _s_lit_str = Switcher.from_dict({
         '"': lambda ctx: ctx.add_token(TokenType.LIT_STR),
         '\\': lambda ctx: ctx.to_state(LexingState.LIT_STR_ESCAPE),
-        '\n': lambda ctx: (ctx.add_to_buff(), ctx.inc_new_line())
-    }).default(lambda ctx: ctx.add_to_buff())
+        '\n': lambda ctx: (ctx.add_to_buff(), ctx.inc_new_line()),
+        ranges.string_chars: lambda ctx: ctx.add_to_buff()
+    }).default(lambda ctx: throw(LexingError('Only ASCII chars supported')))
 
     def lex_lit_str(self):
         Lexer._s_lit_str.exec(self, self.current_char)

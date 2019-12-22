@@ -10,7 +10,12 @@ upper_letters = char_range('A', 'Z')
 letters = lower_letters + upper_letters
 digits = char_range('0', '9')
 digits_without_zero = char_range('1', '9')
-chars = letters + digits + (
-    '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.',
-    '/', ':', ';', '<', '=', '>', '?', '\n', '@', '{', '|', '}', '~'
+
+special_chars_without_quotes = (
+    '!', '#', '$', '%', '&', '(', ')', '*', '+', ',', '-', '.',
+    '/', ':', ';', '<', '=', '>', '?', '@', '{', '|', '}', '~'
 )
+
+chars = letters + digits + special_chars_without_quotes + ('"',)
+string_chars = letters + digits + special_chars_without_quotes + ('\'',)
+
