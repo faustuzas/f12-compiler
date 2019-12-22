@@ -87,6 +87,7 @@ class Lexer:
         LexingState.OP_GT: lambda ctx: ctx.lex_op_gt(),
         LexingState.AFTER_GT: lambda ctx: ctx.lex_after_gt(),
         LexingState.LIT_CHAR: lambda ctx: ctx.lex_char(),
+        LexingState.LIT_CHAR_ESCAPE: lambda ctx: ctx.lex_char_escape(),
         LexingState.LIT_CHAR_END: lambda ctx: ctx.lex_char_end(),
         LexingState.LIT_STR: lambda ctx: ctx.lex_lit_str(),
         LexingState.LIT_STR_ESCAPE: lambda ctx: ctx.lex_lit_str_escape(),
@@ -302,11 +303,21 @@ class Lexer:
         Lexer._s_after_gt.exec(self, self.current_char)
 
     _s_lit_char = Switcher.from_dict({
-        ranges.chars: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_CHAR_END))
+        ranges.chars: lambda ctx: (ctx.add_to_buff(), ctx.to_state(LexingState.LIT_CHAR_END)),
+        '\\': lambda ctx: ctx.to_state(LexingState.LIT_CHAR_ESCAPE)
     }).default(lambda ctx: throw(LexingError('Not supported character')))
 
     def lex_char(self):
         Lexer._s_lit_char.exec(self, self.current_char)
+
+    _s_lit_char_escape = Switcher.from_dict({
+        '"': lambda ctx: (ctx.add_to_buff('\"'), ctx.to_state(LexingState.LIT_CHAR_END)),
+        't': lambda ctx: (ctx.add_to_buff('\t'), ctx.to_state(LexingState.LIT_CHAR_END)),
+        'n': lambda ctx: (ctx.add_to_buff('\n'), ctx.to_state(LexingState.LIT_CHAR_END))
+    })
+
+    def lex_char_escape(self):
+        Lexer._s_lit_char_escape.exec(self, self.current_char)
 
     _s_lit_char_end = Switcher.from_dict({
         '\'': lambda ctx: ctx.add_token(TokenType.LIT_CHAR)

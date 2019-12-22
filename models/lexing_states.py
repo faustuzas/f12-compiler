@@ -8,6 +8,7 @@ class LexingState(ExtendedEnum):
     LIT_STR_ESCAPE = 'LIT_STR_ESCAPE'
 
     LIT_CHAR = 'LIT_CHAR'
+    LIT_CHAR_ESCAPE = 'LIT_CHAR_ESCAPE'
     LIT_CHAR_END = 'LIT_CHAR_END'
 
     LIT_INT = 'LIT_INT'
