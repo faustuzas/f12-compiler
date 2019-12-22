@@ -643,6 +643,16 @@ class ExprLit(Expr, ABC):
         return TypePrimitive(self.kind)
 
 
+class ExprLitChar(ExprLit):
+
+    @property
+    def kind(self):
+        return TokenType.PRIMITIVE_CHAR
+
+    # def write_code(self, code_writer: CodeWriter):
+    #     code_writer.write(InstructionType.PUSH_CHAR, self.value.value)
+
+
 class ExprLitStr(ExprLit):
 
     @property

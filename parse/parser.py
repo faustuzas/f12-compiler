@@ -345,6 +345,9 @@ class Parser:
         if curr_token.type == TokenType.LIT_INT:
             return ast.ExprLitInt(curr_token)
 
+        if curr_token.type == TokenType.LIT_CHAR:
+            return ast.ExprLitChar(curr_token)
+
         if curr_token.type == TokenType.CONSTANT_TRUE or curr_token.type == TokenType.CONSTANT_FALSE:
             return ast.ExprLitBool(curr_token)
 

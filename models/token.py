@@ -7,6 +7,7 @@ class TokenType(ExtendedEnum):
     LIT_STR = 'LIT_STR'
     LIT_FLOAT = 'LIT_FLOAT'
     LIT_INT = 'LIT_INT'
+    LIT_CHAR = 'LIT_CHAR'
     LIT_BOOL = 'LIT_BOOL'
 
     OP_PLUS = 'OP_PLUS'
@@ -57,6 +58,7 @@ class TokenType(ExtendedEnum):
     PRIMITIVE_FLOAT = 'PRIMITIVE_FLOAT'
     PRIMITIVE_STRING = 'PRIMITIVE_STRING'
     PRIMITIVE_BOOL = 'PRIMITIVE_BOOL'
+    PRIMITIVE_CHAR = 'PRIMITIVE_CHAR'
     PRIMITIVE_VOID = 'PRIMITIVE_VOID'
 
     CONSTANT_TRUE = 'CONSTANT_TRUE'
@@ -92,6 +94,7 @@ primitive_type_tokens = [
     TokenType.PRIMITIVE_BOOL,
     TokenType.PRIMITIVE_FLOAT,
     TokenType.PRIMITIVE_STRING,
+    TokenType.PRIMITIVE_CHAR
 ]
 
 primitive_type_tokens_names = {
@@ -99,7 +102,8 @@ primitive_type_tokens_names = {
     TokenType.PRIMITIVE_VOID: 'void',
     TokenType.PRIMITIVE_BOOL: 'bool',
     TokenType.PRIMITIVE_FLOAT: 'float',
-    TokenType.PRIMITIVE_STRING: 'string'
+    TokenType.PRIMITIVE_STRING: 'string',
+    TokenType.PRIMITIVE_CHAR: 'char',
 }
 
 type_tokens = [

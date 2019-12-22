@@ -1,3 +1,3 @@
 fun main {
-    float[] b = new [5.5];
+    char a = 'a';
 }

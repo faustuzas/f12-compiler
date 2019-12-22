@@ -21,6 +21,7 @@ primitive_types = {
     'float': TokenType.PRIMITIVE_FLOAT,
     'string': TokenType.PRIMITIVE_STRING,
     'bool': TokenType.PRIMITIVE_BOOL,
+    'char': TokenType.PRIMITIVE_CHAR,
     'void': TokenType.PRIMITIVE_VOID
 }
 
