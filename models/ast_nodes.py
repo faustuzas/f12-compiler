@@ -98,6 +98,14 @@ class Type(Node, ABC):
     def write_code(self, code_writer: CodeWriter):
         pass
 
+    @property
+    def is_iterable(self):
+        return False
+
+    @property
+    def iterable_element_type(self):
+        raise TypeError(f'You cannot iterate through {prepare_for_printing(self)}')
+
 
 class TypePointer(Type, ABC):
 
@@ -115,6 +123,14 @@ class TypePointer(Type, ABC):
     @property
     def kind(self):
         return self.of_type.kind if self.of_type else None
+
+    @property
+    def is_iterable(self):
+        return self.of_type.is_iterable if self.of_type else False
+
+    @property
+    def iterable_element_type(self):
+        return self.of_type
 
 
 class TypeArray(Type):
@@ -136,6 +152,14 @@ class TypeArray(Type):
     @property
     def kind(self):
         return self.inner_type.kind
+
+    @property
+    def is_iterable(self):
+        return True
+
+    @property
+    def iterable_element_type(self):
+        return self.inner_type
 
 
 class TypePrimitive(Type):
@@ -176,8 +200,18 @@ class TypePrimitive(Type):
         raise Exception("Unreachable code")
 
     @property
+    def is_iterable(self):
+        return self.kind_type == TokenType.PRIMITIVE_STRING
+
+    @property
     def reference_token(self):
         return None
+
+    @property
+    def iterable_element_type(self):
+        if self.kind_type == TokenType.PRIMITIVE_STRING:
+            return TypePrimitive(TokenType.PRIMITIVE_CHAR)
+        return super().iterable_element_type()
 
 
 class TypeUnit(Type):
@@ -928,8 +962,14 @@ class ExprArrayAccess(Expr, Assignable):
     def resolve_types(self):
         # check if array variable is Iterable
         array_type = self.array.resolve_types()
-        if not (isinstance(array_type, TypePointer) and isinstance(array_type.of_type, TypeArray)):
-            handle_typing_error(f'You cannot access {array_type.__class__.__name__}', self.reference_token)
+        if isinstance(array_type, TypePointer):
+            array_type = array_type.of_type
+
+        if not array_type.is_iterable:
+            handle_typing_error(
+                f'You cannot access variable of {prepare_for_printing(array_type)}',
+                self.reference_token
+            )
             return None
 
         # check if index expr evaluates to int
@@ -937,7 +977,7 @@ class ExprArrayAccess(Expr, Assignable):
                     TypePrimitive(TokenType.PRIMITIVE_INT),
                     self.index_expr.resolve_types())
 
-        return array_type.of_type.inner_type.resolve_types()
+        return array_type.iterable_element_type.resolve_types()
 
     def is_accessible(self):
         return self.array.is_accessible()
