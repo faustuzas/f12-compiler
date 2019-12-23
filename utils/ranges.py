@@ -13,7 +13,7 @@ digits_without_zero = char_range('1', '9')
 
 special_chars_without_quotes = (
     '!', '#', '$', '%', '&', '(', ')', '*', '+', ',', '-', '.',
-    '/', ':', ';', '<', '=', '>', '?', '@', '{', '|', '}', '~'
+    '/', ':', ';', '<', '=', '>', '?', '@', '{', '|', '}', '~', ' '
 )
 
 chars = letters + digits + special_chars_without_quotes + ('"',)
