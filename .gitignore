@@ -27,3 +27,7 @@ pip-delete-this-directory.txt
 
 # Translations
 *.mo
+
+# Project related
+*.f12b
+*.yaml
