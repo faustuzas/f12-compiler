@@ -1,27 +1,15 @@
 import struct
 
 from models.types import Char
-
-bool_size = 1
-char_size = 1
-address_size = 4
-op_code_size = 2
-
-int_size = 4
-int_order = 'big'
-
-float_size = 8
-float_type = 'd'
-
-string_encoding = 'UTF-8'
+import utils.sizes as sizes
 
 
 def op_code_to_bytes(op_code):
-    return int_to_bytes(int(op_code), size=op_code_size)
+    return int_to_bytes(int(op_code), size=sizes.op_code)
 
 
 def op_code_from_bytes(code, offset):
-    return int_from_bytes(code, offset, size=op_code_size)
+    return int_from_bytes(code, offset, size=sizes.op_code)
 
 
 def select_from_bytes_func(type_):
@@ -63,13 +51,13 @@ def int_from_bytes(code, offset, size=int_size, order=int_order):
 
 
 def float_to_bytes(value: float):
-    return list(struct.pack(f'<{float_type}', value))
+    return list(struct.pack(f'<{sizes.float_type}', value))
 
 
 def float_from_bytes(code, offset):
-    float_bytes = bytes(code[offset: offset + float_size])
-    value = struct.unpack(f'<{float_type}', float_bytes)
-    return value[0], offset + float_size
+    float_bytes = bytes(code[offset: offset + sizes.float])
+    value = struct.unpack(f'<{sizes.float_type}', float_bytes)
+    return value[0], offset + sizes.float
 
 
 def bool_to_bytes(value: bool):
@@ -83,20 +71,20 @@ def bool_from_bytes(code, offset):
 
 def string_to_bytes(value: str):
     bytes_ = int_to_bytes(len(value))
-    bytes_.extend(bytes(value, string_encoding))
+    bytes_.extend(bytes(value, sizes.string_encoding))
     return bytes_
 
 
 def string_from_bytes(code, offset):
     string_size, offset = int_from_bytes(code, offset)
-    string = str(bytes(code[offset: offset + string_size]), string_encoding)
+    string = str(bytes(code[offset: offset + string_size]), sizes.string_encoding)
     return string, offset + string_size
 
 
 def char_to_bytes(char):
-    return int_to_bytes(ord(char), char_size)
+    return int_to_bytes(ord(char), sizes.char)
 
 
 def char_from_bytes(code, offset):
-    char = str(bytes(code[offset: offset + char_size]), string_encoding)
-    return char, offset + char_size
+    char = str(bytes(code[offset: offset + sizes.char]), sizes.string_encoding)
+    return char, offset + sizes.char
