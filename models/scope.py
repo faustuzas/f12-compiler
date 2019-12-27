@@ -1,4 +1,4 @@
-from models import Token
+from models.token import Token
 from utils.error_printer import print_error_from_token as print_error
 
 

@@ -1,4 +1,5 @@
 from models.enums import ExtendedEnum
+from models.types import Types
 
 
 class TokenType(ExtendedEnum):
@@ -88,6 +89,15 @@ class Token:
         return self.__repr__()
 
 
+primitive_types_by_token_type = {
+    TokenType.PRIMITIVE_INT: Types.INT,
+    TokenType.PRIMITIVE_VOID: Types.VOID,
+    TokenType.PRIMITIVE_BOOL: Types.INT,
+    TokenType.PRIMITIVE_FLOAT: Types.FLOAT,
+    TokenType.PRIMITIVE_STRING: Types.STRING,
+    TokenType.PRIMITIVE_CHAR: Types.CHAR
+}
+
 primitive_type_tokens = [
     TokenType.PRIMITIVE_INT,
     TokenType.PRIMITIVE_VOID,
@@ -96,15 +106,6 @@ primitive_type_tokens = [
     TokenType.PRIMITIVE_STRING,
     TokenType.PRIMITIVE_CHAR
 ]
-
-primitive_type_tokens_names = {
-    TokenType.PRIMITIVE_INT: 'int',
-    TokenType.PRIMITIVE_VOID: 'void',
-    TokenType.PRIMITIVE_BOOL: 'bool',
-    TokenType.PRIMITIVE_FLOAT: 'float',
-    TokenType.PRIMITIVE_STRING: 'string',
-    TokenType.PRIMITIVE_CHAR: 'char',
-}
 
 type_tokens = [
     *primitive_type_tokens,

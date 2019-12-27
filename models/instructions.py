@@ -1,4 +1,4 @@
-from models import ExtendedEnum
+from models.enums import ExtendedEnum
 from models.types import Char
 from utils.bytes_utils import select_from_bytes_func
 
@@ -163,8 +163,7 @@ add_instruction(0x60, InstructionType.MEMORY_ALLOCATE, [])
 add_instruction(0x61, InstructionType.MEMORY_FREE, [])
 #  Pop integer from stack then pop N bytes from stack and set them at the address provided
 add_instruction(0x62, InstructionType.MEMORY_SET, [int])
-#  Same as MEMORY_SET just push the address back into memory
-#  TODO: get rid of it
+#  Same as MEMORY_SET but additionally pushes the address back into memory
 add_instruction(0x63, InstructionType.MEMORY_SET_PUSH, [int])
 
 #  Pop address from stack and push N bytes from that address

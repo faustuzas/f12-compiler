@@ -20,3 +20,6 @@ class ErrorCounter:
 
     def reset(self):
         self.counter = 0
+
+
+error_counter = ErrorCounter()

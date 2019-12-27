@@ -1,6 +1,8 @@
 from typing import List
-from models import LexingState, Token, TokenType, LexingError
 from models.builtins import keywords, primitive_types, constants, helpers
+from models.errors import LexingError
+from models.lexing_states import LexingState
+from models.token import Token, TokenType
 from utils import FasterSwitcher as Switcher, throw, ranges, printer
 from utils.error_printer import print_error
 

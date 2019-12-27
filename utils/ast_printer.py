@@ -1,5 +1,6 @@
-from models import Token, TokenType
+from models import types
 from models.ast_nodes import Node
+from models.token import Token, TokenType
 
 
 class ConsoleOutput:
@@ -51,6 +52,8 @@ class AstPrinter:
             self.print_token(title, obj)
         elif isinstance(obj, TokenType):
             self.print_text(title, str(obj))
+        elif issubclass(obj, types.Type):
+            self.print_text(title, obj.name_in_code())
         else:
             raise ValueError(f'Invalid print argument: {type(obj)}')
 

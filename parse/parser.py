@@ -1,7 +1,8 @@
 from typing import List, Union
 
-from models import Token, TokenType, type_tokens, primitive_type_tokens, ParsingError
 import models.ast_nodes as ast
+from models.errors import ParsingError
+from models.token import Token, TokenType, type_tokens, primitive_type_tokens, primitive_types_by_token_type
 from utils.error_printer import print_error as p_error
 
 
@@ -57,7 +58,7 @@ class Parser:
         if self.accept(TokenType.KW_FAT_ARROW):
             return_type = self.expect_type()
         else:
-            return_type = ast.TypePrimitive(TokenType.PRIMITIVE_VOID)
+            return_type = ast.AstTypePrimitive(TokenType.PRIMITIVE_VOID)
 
         statement_block = self.parse_block()
 
@@ -81,7 +82,7 @@ class Parser:
         name = self.expect(TokenType.IDENTIFIER, 'identifier')
         return ast.FunParam(type_, name)
 
-    def parse_decl_var(self) -> (ast.Type, Token, ast.Expr, bool):
+    def parse_decl_var(self) -> (ast.AstType, Token, ast.Expr, bool):
         is_constant = self.accept(TokenType.KW_CONST) is not None
         type_ = self.expect_type()
         name = self.expect(TokenType.IDENTIFIER, 'identifier')
@@ -470,7 +471,7 @@ class Parser:
             self.accept(TokenType.C_COMMA)
         return items
 
-    def expect_type(self) -> ast.Type:
+    def expect_type(self) -> ast.AstType:
         if self.next_token_type() not in type_tokens:
             raise ParsingError('type expected', self.get_next_token())
 
@@ -486,12 +487,12 @@ class Parser:
                 break
 
         if type_token.type in primitive_type_tokens:
-            type_ = ast.TypePrimitive(type_token)
+            type_ = ast.AstTypePrimitive(primitive_types_by_token_type.get(type_token.type))
         else:
-            type_ = ast.TypeUnit(type_token)
+            type_ = ast.AstTypeUnit(type_token)  # type token will hold the name of the unit
 
         for i in range(array_nesting):
-            type_ = ast.TypePointer(ast.TypeArray(type_))
+            type_ = ast.AstTypePointer(ast.AstTypeArray(type_))
         return type_
 
     def print_error(self, error: ParsingError):

@@ -40,11 +40,11 @@ def select_to_bytes_func(type_):
     raise TypeError(f'There is no to bytes function for: {type_}')
 
 
-def int_to_bytes(value: int, size=int_size, order=int_order):
+def int_to_bytes(value: int, size=sizes.int, order=sizes.int_order):
     return list(value.to_bytes(size, order, signed=True))
 
 
-def int_from_bytes(code, offset, size=int_size, order=int_order):
+def int_from_bytes(code, offset, size=sizes.int, order=sizes.int_order):
     int_bytes = code[offset: offset + size]
     value = int.from_bytes(int_bytes, order, signed=True)
     return value, offset + size

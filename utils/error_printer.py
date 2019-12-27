@@ -1,5 +1,5 @@
+from models.errors import error_counter
 from utils import printer
-from models import error_counter
 
 
 def line_number_prefix(number):
