@@ -6,7 +6,7 @@ op_code = 2
 int = 4
 int_order = 'big'
 
-float = 4
-float_type = 'f'
+float = 8
+float_type = 'd'
 
 string_encoding = 'ascii'

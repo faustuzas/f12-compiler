@@ -87,4 +87,6 @@ def char_to_bytes(char):
 
 def char_from_bytes(code, offset):
     char = str(bytes(code[offset: offset + sizes.char]), sizes.string_encoding)
+    if char == '\n':
+        char = '\\n'
     return char, offset + sizes.char

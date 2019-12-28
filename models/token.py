@@ -1,5 +1,5 @@
 from models.enums import ExtendedEnum
-from models.types import Types
+import models.types as types
 
 
 class TokenType(ExtendedEnum):
@@ -48,7 +48,6 @@ class TokenType(ExtendedEnum):
     KW_RETURN = 'KW_RETURN'
     KW_UNIT = 'KW_UNIT'
     KW_ELSE = 'KW_ELSE'
-    KW_EACH = 'KW_EACH'
     KW_WHILE = 'KW_WHILE'
     KW_CONST = 'KW_CONST'
     KW_CONTINUE = 'KW_CONTINUE'
@@ -90,12 +89,12 @@ class Token:
 
 
 primitive_types_by_token_type = {
-    TokenType.PRIMITIVE_INT: Types.INT,
-    TokenType.PRIMITIVE_VOID: Types.VOID,
-    TokenType.PRIMITIVE_BOOL: Types.INT,
-    TokenType.PRIMITIVE_FLOAT: Types.FLOAT,
-    TokenType.PRIMITIVE_STRING: Types.STRING,
-    TokenType.PRIMITIVE_CHAR: Types.CHAR
+    TokenType.PRIMITIVE_INT: types.Int,
+    TokenType.PRIMITIVE_VOID: types.Void,
+    TokenType.PRIMITIVE_BOOL: types.Bool,
+    TokenType.PRIMITIVE_FLOAT: types.Float,
+    TokenType.PRIMITIVE_STRING: types.String,
+    TokenType.PRIMITIVE_CHAR: types.Char
 }
 
 primitive_type_tokens = [

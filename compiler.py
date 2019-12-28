@@ -6,7 +6,6 @@ from models.errors import error_counter
 from models.scope import Scope
 from parse.parser import Parser
 from utils import printer
-from models.types import Types
 
 from utils.ast_printer import AstPrinter, FileOutput
 
@@ -25,30 +24,27 @@ def compile_file(file_to_compile):
             error_counter.reset()
             ast_root.resolve_names(Scope(None))
             ast_root.resolve_types()
-            # ast_root.check_for_entry_point()
-            #
-            # is_parsing_successful = error_counter.counter == 0
-            # if not is_parsing_successful:
-            #     printer.error('', f'{error_counter.counter} errors found', header_len=80)
-            #     return
-            # else:
-            #     printer.success('', f'Compilation successful', header_len=80)
+            ast_root.check_for_entry_point()
 
-            ast_printer = AstPrinter()
-            ast_printer.print('root', ast_root)
+            is_parsing_successful = error_counter.counter == 0
+            if not is_parsing_successful:
+                printer.error('', f'{error_counter.counter} errors found', header_len=80)
+                return
+            else:
+                printer.success('', f'Compilation successful', header_len=80)
 
-            # with FileOutput('ast_tree.yaml') as output:
-            #     ast_printer = AstPrinter(output)
-            #     ast_printer.print('root', ast_root)
+            with FileOutput('ast_tree.yaml') as output:
+                ast_printer = AstPrinter(output)
+                ast_printer.print('root', ast_root)
 
-            # code_writer = CodeWriter()
-            # ast_root.write_code(code_writer)
+            code_writer = CodeWriter()
+            ast_root.write_code(code_writer)
 
-            # with FileOutput('instructions.f12b') as output:
-            #     code_writer.print_instructions(output)
+            with FileOutput('instructions.f12b') as output:
+                code_writer.print_instructions(output)
 
-            # with FileOutput('output.f12b') as output:
-            #     code_writer.dump_code(output)
+            with FileOutput('output.f12b') as output:
+                code_writer.dump_code(output)
         except ValueError as e:
             print(e)
             pass

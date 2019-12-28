@@ -3,6 +3,7 @@ from typing import List, Union
 import models.ast_nodes as ast
 from models.errors import ParsingError
 from models.token import Token, TokenType, type_tokens, primitive_type_tokens, primitive_types_by_token_type
+import models.types as types
 from utils.error_printer import print_error as p_error
 
 
@@ -58,7 +59,7 @@ class Parser:
         if self.accept(TokenType.KW_FAT_ARROW):
             return_type = self.expect_type()
         else:
-            return_type = ast.AstTypePrimitive(TokenType.PRIMITIVE_VOID)
+            return_type = ast.AstTypePrimitive(types.Void)
 
         statement_block = self.parse_block()
 
@@ -165,9 +166,6 @@ class Parser:
 
             return ast.StmntToStdout(token, values)
 
-        if self.next_token_type() == TokenType.KW_EACH:
-            return self.parse_stmnt_each()
-
         if self.accept(TokenType.KW_WHILE):
             return ast.StmntWhile(self.parse_expr(), self.parse_block())
 
@@ -182,14 +180,6 @@ class Parser:
         expr = self.parse_expr()
         self.expect(TokenType.C_SEMI, '";"')
         return ast.StmntExpr(expr)
-
-    def parse_stmnt_each(self) -> ast.StmntEach:
-        self.expect(TokenType.KW_EACH, 'each keyword')
-        item = self.expect(TokenType.IDENTIFIER, 'identifier')
-        self.expect(TokenType.KW_IN, 'keyword in')
-        array = self.parse_expr()
-        stmnt_block = self.parse_block()
-        return ast.StmntEach(ast.DeclArrayElement(item, array), array, stmnt_block)
 
     def parse_stmnt_if(self) -> ast.StmntIf:
         self.expect(TokenType.KW_IF, 'keyword if')

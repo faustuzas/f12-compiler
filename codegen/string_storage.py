@@ -20,6 +20,9 @@ class StringStorage:
         return entry.label
 
     def place_labels(self, code_writer: CodeWriter):
+        if len(self.entries) == 0:
+            return
+
         code_writer.write(InstructionType.MARKER_STATIC_START)
         for entry in self.entries:
             code_writer.place_label(entry.label)

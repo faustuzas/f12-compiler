@@ -44,7 +44,7 @@ class Node(ABC):
 
     @property
     def size_in_heap(self):
-        raise Exception(f'Size in heap not implemented for "{self.__class__}"')
+        raise Exception('Unreachable code')
 
     def add_children(self, *children):
         for child in children:
@@ -67,6 +67,9 @@ class Node(ABC):
 
             val = self.__dict__[key]
             ast_printer.print(key, val)
+
+    def to_stdout_instr(self):
+        raise Exception('Unreachable code')
 
     def resolve_includes(self):
         return None
@@ -124,13 +127,17 @@ class AstType(Node, ABC):
 
 class AstTypePointer(AstType):
 
-    def __init__(self, of_type: AstType) -> None:
+    def __init__(self, of_type: Union[AstType, None]) -> None:
         super().__init__()
         self.of_type = of_type
 
     @property
     def size_in_stack(self) -> int:
         return sizes.address
+
+    @property
+    def size_in_heap(self):
+        return self.of_type.size_in_heap
 
     @property
     def kind(self):
@@ -147,20 +154,27 @@ class AstTypePointer(AstType):
     def resolve_names(self, scope: Scope):
         return self.of_type.resolve_names(scope)
 
+    def to_stdout_instr(self):
+        return self.of_type.to_stdout_instr()
+
 
 class AstTypeArray(AstType):
 
-    def __init__(self, inner_type: AstType) -> None:
+    def __init__(self, inner_type) -> None:
         super().__init__()
         self.inner_type = inner_type
 
     @property
-    def access_type(self) -> AstType:
+    def access_type(self):
         return self.inner_type
 
     @property
     def size_in_stack(self):
         return sizes.address
+
+    @property
+    def size_in_heap(self):
+        return self.inner_type.size_in_heap
 
     @property
     def kind(self):
@@ -204,10 +218,16 @@ class AstTypePrimitive(AstType):
 
     @property
     def is_valid_var_type(self):
-        return self.type != types.Float
+        return self.type != types.Void
 
     @property
     def size_in_stack(self) -> int:
+        return self.type.size_in_bytes()
+
+    @property
+    def size_in_heap(self):
+        if self.type == types.String:
+            return types.Char.size_in_bytes()
         return self.type.size_in_bytes()
 
     @property
@@ -223,6 +243,9 @@ class AstTypePrimitive(AstType):
         if self.type == types.String:
             return AstTypePrimitive(types.Char)
         return super().iterable_element_type()
+
+    def to_stdout_instr(self):
+        return self.type.to_stdout_instr()
 
     def resolve_names(self, scope: Scope):
         pass
@@ -312,7 +335,7 @@ class ExprLitStr(ExprLit):
         return self._label
 
     def write_code(self, code_writer: CodeWriter):
-        code_writer.write(InstructionType.PUSH_STRING, self.label)
+        code_writer.write(InstructionType.PUSH_INT, self.label)
 
 
 class ExprLitFloat(ExprLit):
@@ -460,7 +483,7 @@ class ExprNewFromArrayLit(ExprNew):
 
     @property
     def size_in_stack(self):
-        raise Exception('Unreachable code')
+        return sizes.address
 
     def resolve_names(self, scope: Scope):
         self.array.resolve_names(scope)
@@ -558,7 +581,7 @@ class ExprBinaryArithmetic(ExprBinaryNumeric, ABC):
             return None
 
         reference_token = self.left.reference_token
-        if left_type.is_arithmetic():
+        if left_type.is_arithmetic:
             unify_types(reference_token, left_type, right_type, 'Right operand type does not match left\'s one')
         else:
             handle_typing_error(
@@ -578,7 +601,7 @@ class ExprBinaryComparison(ExprBinaryNumeric, ABC):
             return None
 
         reference_token = self.left.reference_token
-        if left_type.is_comparable():
+        if left_type.is_comparable:
             unify_types(reference_token, left_type, right_type, 'Right operand type does not match left\'s one')
         else:
             handle_typing_error(
@@ -602,8 +625,8 @@ class ExprBinaryEquality(ExprBinary, ABC):
             return None
 
         reference_token = self.left.reference_token
-        if left_type.has_value():
-            unify_types(reference_token, left_type, right_type, 'Right operand type does not match left\'s one')
+        if left_type.has_value:
+            unify_types(reference_token, left_type, right_type, 'Valueless expressions cannot be comparable')
         else:
             handle_typing_error(
                 f'Cannot perform equality operations with {prepare_for_printing(left_type)}',
@@ -916,9 +939,9 @@ class ExprVar(Expr, Assignable):
 
     def write_code(self, code_writer: CodeWriter):
         if self.is_local:
-            code_writer.write(InstructionType.GET_LOCAL, self.slot)
+            code_writer.write(InstructionType.GET_LOCAL, self.slot, self.type.size_in_stack)
         else:
-            code_writer.write(InstructionType.GET_GLOBAL, self.slot)
+            code_writer.write(InstructionType.GET_GLOBAL, self.slot, self.type.size_in_stack)
 
     def resolve_identifier(self):
         return self.identifier
@@ -941,6 +964,15 @@ class ExprVar(Expr, Assignable):
             return self.decl_node.stack_slot
         return self.decl_node.global_slot
 
+    @property
+    def size_in_stack(self):
+        return self.type.size_in_stack
+
+    @property
+    def size_in_heap(self):
+        return self.type.size_in_heap
+
+    @property
     def is_accessible(self):
         return isinstance(self.decl_node.type, AstTypeUnit)
 
@@ -958,10 +990,6 @@ class ExprVar(Expr, Assignable):
             else:
                 code_writer.write(InstructionType.SET_GLOBAL, self.slot)
 
-    @property
-    def size_to_allocate(self):
-        return self.type.size_to_allocate
-
 
 class ExprAccess(Expr, Assignable):
 
@@ -972,6 +1000,18 @@ class ExprAccess(Expr, Assignable):
         self.field = field
         self.field_decl_node = None
 
+    @property
+    def reference_token(self):
+        return self.field
+
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
+
+    @property
+    def is_accessible(self):
+        return self.field_decl_node and self.field_decl_node.is_accessible()
+
     def resolve_names(self, scope: Scope):
         object_decl_node = self.object.resolve_names(scope)
 
@@ -980,21 +1020,14 @@ class ExprAccess(Expr, Assignable):
             return None
 
         if isinstance(object_decl_node.type, AstTypeArray):
-            unit_decl_node = object_decl_node.type.inner_type.unit_decl_node
+            unit_decl_node = object_decl_node.type.inner_type.decl_node
         else:
-            unit_decl_node = object_decl_node.type.unit_decl_node
+            unit_decl_node = object_decl_node.type.decl_node
         self.field_decl_node = unit_decl_node.fields_scope.resolve_name(self.field)
         return self.field_decl_node
 
     def resolve_identifier(self):
         return self.object.resolve_identifier()
-
-    @property
-    def reference_token(self):
-        return self.field
-
-    def is_accessible(self):
-        return self.field_decl_node and self.field_decl_node.is_accessible()
 
     def resolve_types(self):
         type_ = self.object.resolve_types()
@@ -1013,6 +1046,18 @@ class ExprArrayAccess(Expr, Assignable):
         self.add_children(array, index_expr)
         self.array = array
         self.index_expr = index_expr
+
+    @property
+    def size_in_stack(self):
+        return self.array.resolve_types().size_in_stack
+
+    @property
+    def is_accessible(self):
+        return self.array.is_accessible()
+
+    @property
+    def reference_token(self):
+        return self.array.reference_token
 
     def resolve_names(self, scope: Scope):
         self.index_expr.resolve_names(scope)
@@ -1036,49 +1081,43 @@ class ExprArrayAccess(Expr, Assignable):
 
         # check if index expr evaluates to int
         unify_types(self.index_expr.reference_token,
-                    AstTypePrimitive(TokenType.PRIMITIVE_INT),
+                    AstTypePrimitive(types.Int),
                     self.index_expr.resolve_types())
 
         return array_type.iterable_element_type.resolve_types()
 
-    def is_accessible(self):
-        return self.array.is_accessible()
-
-    @property
-    def reference_token(self):
-        return self.array.reference_token
-
     def write_code(self, code_writer: CodeWriter):
         self.array.write_code(code_writer)
         self.index_expr.write_code(code_writer)
-        code_writer.write(InstructionType.PUSH_INT, self.array.size_to_allocate)
+        code_writer.write(InstructionType.PUSH_INT, self.array.size_in_heap)
         code_writer.write(InstructionType.MUL_INT)
         code_writer.write(InstructionType.ADD_INT)
-        # TODO: generic get
-        code_writer.write(InstructionType.MEMORY_GET_INT)
+
+        type_ = self.array.resolve_types()
+        if isinstance(type_, AstTypePointer):
+            bytes_to_get = type_.size_in_heap
+        else:
+            bytes_to_get = type_.size_in_stack
+        code_writer.write(InstructionType.MEMORY_GET, bytes_to_get)
 
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
         # pop the value and push it two times into the stack because assignment has to have value
-        code_writer.write(InstructionType.POP_PUSH_N, 2)
+        code_writer.write(InstructionType.POP_PUSH_N, value.size_in_heap, 2)
 
         # offset bytes depending on the type
         self.index_expr.write_code(code_writer)
-        code_writer.write(InstructionType.PUSH_INT, self.array.size_to_allocate)
+        code_writer.write(InstructionType.PUSH_INT, self.array.size_in_heap)
         code_writer.write(InstructionType.MUL_INT)
 
         if self.array.is_local:
             code_writer.write(InstructionType.GET_LOCAL, self.array.slot)
         else:
             code_writer.write(InstructionType.GET_GLOBAL, self.array.slot)
-
+        # add offset to address stored in variable
         code_writer.write(InstructionType.ADD_INT)
-        # TODO: generic set
-        code_writer.write(InstructionType.MEMORY_SET_INT)
 
-    @property
-    def size_to_allocate(self):
-        return self.array.resolve_types().size_to_allocate
+        code_writer.write(InstructionType.MEMORY_SET, self.array.size_in_heap)
 
 
 class ExprFnCall(Expr):
@@ -1089,6 +1128,18 @@ class ExprFnCall(Expr):
         self.function_name = function_name
         self.args = args
         self.function_decl_node = None
+
+    @property
+    def reference_token(self):
+        return self.function_name
+
+    @property
+    def return_type(self):
+        return self.function_decl_node.return_type
+
+    @property
+    def size_in_stack(self):
+        return self.function_decl_node.return_type.size_in_stack
 
     def resolve_names(self, scope: Scope):
         self.function_decl_node = scope.resolve_name(self.function_name)
@@ -1119,14 +1170,6 @@ class ExprFnCall(Expr):
             arg.write_code(code_writer)
         code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, len(self.args))
 
-    @property
-    def reference_token(self):
-        return self.function_name
-
-    @property
-    def return_type(self):
-        return self.function_decl_node.return_type
-
 
 class ExprCreateUnit(Expr):
 
@@ -1136,6 +1179,14 @@ class ExprCreateUnit(Expr):
         self.unit_name = unit_name
         self.args = args
         self.unit_decl_node = None
+
+    @property
+    def reference_token(self):
+        return self.unit_name
+
+    @property
+    def size_in_stack(self):
+        raise NotImplementedError()
 
     def resolve_names(self, scope: Scope):
         self.unit_decl_node = scope.resolve_name(self.unit_name)
@@ -1160,7 +1211,7 @@ class ExprCreateUnit(Expr):
             return None
 
         for field in fields:
-            if not field.type.is_valid_var_type():
+            if not field.type.is_valid_var_type:
                 continue
 
             arg_for_field = find_in_list(self.args, lambda a: field.name.value == a.field.value)
@@ -1172,10 +1223,6 @@ class ExprCreateUnit(Expr):
             unify_types(arg_for_field.reference_token, field.type, value_type)
 
         return AstTypeUnit(self.unit_decl_node.name, self.unit_decl_node)
-
-    @property
-    def reference_token(self):
-        return self.unit_name
 
     def write_code(self, code_writer: CodeWriter):
         raise NotImplementedError('This feature is not implemented yet')
@@ -1191,6 +1238,14 @@ class CreateUnitArg(Node):
         self.value = value
         self.field_decl_node = None
 
+    @property
+    def reference_token(self):
+        return self.value.reference_token
+
+    @property
+    def size_in_stack(self):
+        return self.field_decl_node.size_in_stack
+
     def resolve_names(self, scope: Scope):
         unit_decl_node = scope.resolve_name(self.unit_name)
         if unit_decl_node:
@@ -1201,29 +1256,28 @@ class CreateUnitArg(Node):
     def resolve_types(self):
         return self.value.resolve_types()
 
-    @property
-    def reference_token(self):
-        return self.value.reference_token
-
     def write_code(self, code_writer: CodeWriter):
         raise NotImplementedError('This feature is not implemented yet')
 
 
 class Stmnt(Node, ABC):
-    pass
+
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
 
 
 class StmntEmpty(Stmnt):
+
+    @property
+    def reference_token(self):
+        return None
 
     def resolve_names(self, scope: Scope):
         pass
 
     def resolve_types(self):
         pass
-
-    @property
-    def reference_token(self):
-        return None
 
     def write_code(self, code_writer: CodeWriter):
         pass
@@ -1236,16 +1290,16 @@ class StmntFree(Stmnt):
         self.add_children(address)
         self.address = address
 
+    @property
+    def reference_token(self):
+        return self.address.reference_token
+
     def resolve_names(self, scope: Scope):
         self.address.resolve_names(scope)
 
     def resolve_types(self):
         type_ = self.address.resolve_types()
         unify_types(self.reference_token, AstTypePointer(None), type_)
-
-    @property
-    def reference_token(self):
-        return self.address.reference_token
 
     def write_code(self, code_writer: CodeWriter):
         self.address.write_code(code_writer)
@@ -1263,13 +1317,17 @@ class StmntDeclVar(Stmnt):
         self.is_constant = is_constant
         self.stack_slot = 0
 
+    @property
+    def reference_token(self):
+        return self.name
+
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
         if self.value:
             self.value.resolve_names(scope)
 
         scope.add(self.name, self)
-        self.stack_slot = stack_slot_dispenser.get_slot(self.type.size_in_bytes)
+        self.stack_slot = stack_slot_dispenser.get_slot(self.type.size_in_stack)
 
     def resolve_types(self):
         self.type.resolve_types()
@@ -1284,11 +1342,7 @@ class StmntDeclVar(Stmnt):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot)
-
-    @property
-    def reference_token(self):
-        return self.name
+            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot, self.value.size_in_stack)
 
 
 class StmntIf(Stmnt):
@@ -1300,6 +1354,10 @@ class StmntIf(Stmnt):
         self.stmnt_block = stmnt_block
         self.else_clause = else_clause
 
+    @property
+    def reference_token(self):
+        return self.condition.reference_token
+
     def resolve_names(self, scope: Scope):
         self.condition.resolve_names(scope)
         self.stmnt_block.resolve_names(scope)
@@ -1308,7 +1366,7 @@ class StmntIf(Stmnt):
 
     def resolve_types(self):
         condition_type = self.condition.resolve_types()
-        unify_types(self.condition.reference_token, AstTypePrimitive(TokenType.PRIMITIVE_BOOL), condition_type)
+        unify_types(self.condition.reference_token, AstTypePrimitive(types.Bool), condition_type)
         self.stmnt_block.resolve_types()
         if self.else_clause:
             self.else_clause.resolve_types()
@@ -1325,10 +1383,6 @@ class StmntIf(Stmnt):
             self.else_clause.write_code(code_writer)
         code_writer.place_label(end_label)
 
-    @property
-    def reference_token(self):
-        return self.condition.reference_token
-
 
 class StmntControl(Stmnt, ABC):
 
@@ -1336,12 +1390,12 @@ class StmntControl(Stmnt, ABC):
         super().__init__()
         self.token = token
 
-    def resolve_types(self):
-        pass
-
     @property
     def reference_token(self):
         return self.token
+
+    def resolve_types(self):
+        pass
 
     def _outer_loop(self):
         outer_while = self.find_parent(StmntWhile)
@@ -1396,13 +1450,13 @@ class StmntReturn(StmntControl):
         if self.value:
             val_type = self.value.resolve_types()
         else:
-            val_type = AstTypePrimitive(TokenType.PRIMITIVE_VOID)
+            val_type = AstTypePrimitive(types.Void)
         unify_types(self.token, ret_type, val_type)
 
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.RET_VALUE)
+            code_writer.write(InstructionType.RET_VALUE, self.value.size_in_stack)
         else:
             code_writer.write(InstructionType.RET)
 
@@ -1425,12 +1479,8 @@ class StmntExpr(Stmnt):
         return self.expr.reference_token
 
     def write_code(self, code_writer: CodeWriter):
-        if isinstance(self.expr, ExprFnCall):
-            self.expr.write_code(code_writer)
-            if self.expr.return_type.kind_type != TokenType.PRIMITIVE_VOID:
-                code_writer.write(InstructionType.POP)
         self.expr.write_code(code_writer)
-        code_writer.write(InstructionType.POP)
+        code_writer.write(InstructionType.POP, self.expr.size_in_stack)
 
 
 class StmntToStdout(Stmnt):
@@ -1446,11 +1496,13 @@ class StmntToStdout(Stmnt):
             value.resolve_names(scope)
 
     def resolve_types(self):
-        if len(self.values) == 0:
-            handle_typing_error("To stdout operator has to receive at least one value", self.reference_token)
-
         for value in self.values:
-            value.resolve_types()
+            type_ = value.resolve_types()
+            if type_ is None:
+                continue
+
+            if not isinstance(type_, AstTypePrimitive):
+                handle_typing_error(f'You cannot print {prepare_for_printing(type_)}', value.reference_token)
 
     @property
     def reference_token(self):
@@ -1459,34 +1511,11 @@ class StmntToStdout(Stmnt):
     def write_code(self, code_writer: CodeWriter):
         for value in self.values:
             value.write_code(code_writer)
-        code_writer.write(InstructionType.TO_STDOUT, len(self.values))
+            instr = value.resolve_types().to_stdout_instr()
+            code_writer.write(instr)
 
-
-class StmntEach(Stmnt):
-
-    def __init__(self, element, array, stmnt_block) -> None:
-        super().__init__()
-        self.add_children(element, array, stmnt_block)
-        self.element = element
-        self.array = array
-        self.stmnt_block = stmnt_block
-
-    def resolve_names(self, scope: Scope):
-        self.element.resolve_names(scope)
-        self.array.resolve_names(scope)
-        self.stmnt_block.resolve_names(scope)
-
-    def resolve_types(self):
-        self.element.resolve_types()
-        self.array.resolve_types()
-        self.stmnt_block.resolve_types()
-
-    @property
-    def reference_token(self):
-        return self.element.reference_token
-
-    def write_code(self, code_writer: CodeWriter):
-        raise NotImplementedError('This construct is deprecated')
+        code_writer.write(InstructionType.PUSH_CHAR, '\n')
+        code_writer.write(InstructionType.TO_STDOUT_CHAR)
 
 
 class StmntWhile(Stmnt):
@@ -1497,13 +1526,17 @@ class StmntWhile(Stmnt):
         self.condition = condition
         self.stmnt_block = stmnt_block
 
+    @property
+    def reference_token(self):
+        return self.condition.reference_token
+
     def resolve_names(self, scope: Scope):
         self.condition.resolve_names(scope)
         self.stmnt_block.resolve_names(scope)
 
     def resolve_types(self):
         condition_type = self.condition.resolve_types()
-        unify_types(self.condition.reference_token, AstTypePrimitive(TokenType.PRIMITIVE_BOOL), condition_type)
+        unify_types(self.condition.reference_token, AstTypePrimitive(types.Bool), condition_type)
 
         self.stmnt_block.resolve_types()
 
@@ -1520,10 +1553,6 @@ class StmntWhile(Stmnt):
         code_writer.place_label(end_label)
         code_writer.end_loop()
 
-    @property
-    def reference_token(self):
-        return self.condition.reference_token
-
 
 class StmntBlock(Node):
 
@@ -1531,6 +1560,14 @@ class StmntBlock(Node):
         super().__init__()
         self.add_children(*statements)
         self.statements = statements
+
+    @property
+    def reference_token(self):
+        return self.statements[0].reference_token if len(self.statements) else None
+
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
 
     def resolve_names(self, scope: Scope):
         block_scope = Scope(scope)
@@ -1546,10 +1583,6 @@ class StmntBlock(Node):
         for stmnt in self.statements:
             stmnt.write_code(code_writer)
 
-    @property
-    def reference_token(self):
-        return self.statements[0].reference_token if len(self.statements) else None
-
 
 class FunParam(Node):
 
@@ -1560,23 +1593,27 @@ class FunParam(Node):
         self.name = name
         self.stack_slot = 0
 
-    def resolve_names(self, scope: Scope):
-        scope.add(self.name, self)
-
-    def resolve_types(self):
-        if not self.type.is_valid_var_type():
-            handle_typing_error('Cannot create a parameter of the given type', self.reference_token)
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
 
     @property
     def reference_token(self):
         return self.name
 
-    def write_code(self, code_writer: CodeWriter):
-        pass
-
     @property
     def is_local(self):
         return True
+
+    def resolve_names(self, scope: Scope):
+        scope.add(self.name, self)
+
+    def resolve_types(self):
+        if not self.type.is_valid_var_type:
+            handle_typing_error('Cannot create a parameter of the given type', self.reference_token)
+
+    def write_code(self, code_writer: CodeWriter):
+        pass
 
 
 class Decl(Node, ABC):
@@ -1594,13 +1631,25 @@ class DeclFun(Decl):
         self.body = body
         self._label = Label()
 
+    @property
+    def reference_token(self):
+        return self.name
+
+    @property
+    def label(self):
+        return self._label
+
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
+
     def resolve_names(self, scope: Scope):
         fn_scope = Scope(scope)
 
         stack_slot_dispenser.reset()
         for param in self.params:
             param.resolve_names(fn_scope)
-            param.stack_slot = stack_slot_dispenser.get_slot(param.type.size_in_bytes)
+            param.stack_slot = stack_slot_dispenser.get_slot(param.type.size_in_stack)
 
         self.body.resolve_names(fn_scope)
 
@@ -1611,17 +1660,9 @@ class DeclFun(Decl):
         self.body.resolve_types()
 
     def write_code(self, code_writer: CodeWriter):
-        code_writer.place_label(self.label)
         self.body.write_code(code_writer)
+        code_writer.place_label(self.label)
         code_writer.write(InstructionType.RET)
-
-    @property
-    def reference_token(self):
-        return self.name
-
-    @property
-    def label(self):
-        return self._label
 
 
 class DeclVar(Decl):
@@ -1635,17 +1676,25 @@ class DeclVar(Decl):
         self.is_constant = is_constant
         self.global_slot = 0
 
+    @property
+    def reference_token(self):
+        return self.name
+
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
+
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
         if self.value:
             self.value.resolve_names(scope)
 
         scope.add(self.name, self)
-        self.global_slot = global_slot_dispenser.get_slot(self.type.size_in_bytes)
+        self.global_slot = global_slot_dispenser.get_slot(self.type.size_in_stack)
 
     def resolve_types(self):
         self.type.resolve_types()
-        if not self.type.is_valid_var_type():
+        if not self.type.is_valid_var_type:
             handle_typing_error('Cannot create a variable of the given type', self.reference_token)
             return None
 
@@ -1657,44 +1706,6 @@ class DeclVar(Decl):
             self.value.write_code(code_writer)
             code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
 
-    @property
-    def reference_token(self):
-        return self.name
-
-
-class DeclArrayElement(Decl):
-    """
-    This class is used to represent temporary variable
-    which is created when we iterate thought an array
-    """
-    def __init__(self, name, iterable_node: Expr):
-        super().__init__()
-        self.add_children(iterable_node)
-        self.name = name
-        self.iterable_node = iterable_node
-        self._type = None
-
-    def resolve_names(self, scope: Scope):
-        scope.add(self.name, self)
-
-    def resolve_types(self):
-        array_type = self.iterable_node.resolve_types()
-        if array_type:
-            self._type = array_type.inner_type
-            return self._type
-        return None
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def reference_token(self):
-        return self.name
-
-    def write_code(self, code_writer: CodeWriter):
-        raise NotImplementedError('This construct is deprecated')
-
 
 class DeclUnitField(Node):
 
@@ -1705,21 +1716,25 @@ class DeclUnitField(Node):
         self.name = name
         self.field_slot = 0
 
+    @property
+    def reference_token(self):
+        return self.name
+
+    @property
+    def size_in_stack(self):
+        return self.type.size_in_stack
+
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
         scope.add(self.name, self)
 
     def is_accessible(self):
-        return self.type.is_accessible()
+        return self.type.is_accessible
 
     def resolve_types(self):
         self.type.resolve_types()
-        if not self.type.is_valid_var_type():
+        if not self.type.is_valid_var_type:
             handle_typing_error('Cannot create a field of the given type', self.reference_token)
-
-    @property
-    def reference_token(self):
-        return self.name
 
     def write_code(self, code_writer: CodeWriter):
         pass
@@ -1734,6 +1749,18 @@ class DeclUnit(Decl):
         self.fields = fields
         self._fields_scope = None
 
+    @property
+    def fields_scope(self):
+        return self._fields_scope
+
+    @property
+    def reference_token(self):
+        return self.name
+
+    @property
+    def size_in_stack(self):
+        return sizes.address
+
     def resolve_names(self, scope: Scope):
         self._fields_scope = Scope(scope)
         scope.add(self.name, self)
@@ -1741,19 +1768,11 @@ class DeclUnit(Decl):
         field_slot_dispenser = SlotDispenser()
         for field in self.fields:
             field.resolve_names(self._fields_scope)
-            field.field_slot = field_slot_dispenser.get_slot(field.type.size_in_bytes)
-
-    @property
-    def fields_scope(self):
-        return self._fields_scope
+            field.field_slot = field_slot_dispenser.get_slot(field.type.size_in_stack)
 
     def resolve_types(self):
         for field in self.fields:
             field.resolve_types()
-
-    @property
-    def reference_token(self):
-        return self.name
 
     def write_code(self, code_writer: CodeWriter):
         pass
@@ -1763,15 +1782,19 @@ class Helper(Node, ABC):
     """
     Helpers are gone in semantic checking phase and later
     """
+    @property
+    def reference_token(self):
+        return None
+
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
+
     def resolve_names(self, scope: Scope):
         pass
 
     def resolve_types(self):
         pass
-
-    @property
-    def reference_token(self):
-        return None
 
     def write_code(self, code_writer: CodeWriter):
         pass
@@ -1815,6 +1838,14 @@ class Program(Node):
         self.add_children(*root_elements)
         self.root_elements = root_elements
 
+    @property
+    def size_in_stack(self):
+        raise Exception('Unreachable code')
+
+    @property
+    def reference_token(self):
+        return None
+
     def resolve_includes(self):
         new_root_elements = []
         for el in self.root_elements:
@@ -1853,7 +1884,7 @@ class Program(Node):
         main_fn = main_fns[0]
 
         ret_type = main_fn.return_type
-        returns_int = isinstance(ret_type, AstTypePrimitive) and ret_type.kind_type == TokenType.PRIMITIVE_VOID
+        returns_int = isinstance(ret_type, AstTypePrimitive) and ret_type.type == types.Void
         if not returns_int:
             print_error(
                 'Entry point',
@@ -1872,7 +1903,3 @@ class Program(Node):
         for element in self.root_elements:
             element.write_code(code_writer)
         string_storage.place_labels(code_writer)
-
-    @property
-    def reference_token(self):
-        return None

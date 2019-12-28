@@ -65,7 +65,7 @@ class InstructionType(ExtendedEnum):
     MEMORY_FREE = 'MEMORY_FREE'
 
     MEMORY_SET = 'MEMORY_SET'
-    MEMORY_SET_PUSH = 'MEMORY_SET_INT_P'
+    MEMORY_SET_PUSH = 'MEMORY_SET_PUSH'
     MEMORY_GET = 'MEMORY_GET'
 
     TO_STDOUT_INT = 'TO_STDOUT_INT'
@@ -105,12 +105,14 @@ def add_instruction(op_code, type_, ops_types):
     instructions_by_op_code[op_code] = inst
 
 
-add_instruction(0x10, InstructionType.POP, [])
-add_instruction(0x11, InstructionType.PUSH_INT, [int])
-add_instruction(0x12, InstructionType.PUSH_BOOL, [bool])
-add_instruction(0x13, InstructionType.PUSH_FLOAT, [float])
-add_instruction(0x14, InstructionType.PUSH_CHAR, [Char])
-add_instruction(0x15, InstructionType.POP_PUSH_N, [int])
+# Pop N bytes from stack
+add_instruction(0x10, InstructionType.POP, [int])
+# Pop N bytes from stack and push them K times
+add_instruction(0x11, InstructionType.POP_PUSH_N, [int, int])
+add_instruction(0x12, InstructionType.PUSH_INT, [int])
+add_instruction(0x13, InstructionType.PUSH_BOOL, [bool])
+add_instruction(0x14, InstructionType.PUSH_FLOAT, [float])
+add_instruction(0x15, InstructionType.PUSH_CHAR, [Char])
 
 #  Set/Get from X address N bytes
 add_instruction(0x20, InstructionType.SET_GLOBAL, [int, int])

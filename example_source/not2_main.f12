@@ -1,5 +1,30 @@
+/*fun int2 => int {}
+fun char2 => char {}
+fun string2 => string {}
+fun bool2 => bool {}
+fun float2 => float {}*/
+
 fun main {
-    int a = 5;
-    char c = 's';
-    string cv = "labas";
+    /*int int1 = 4;
+    char char1 = 'a';
+    string string1 = "laba diena as krabas";
+    bool bool1 = true;
+    float float1 = 5.6;*/
+
+    int[] int3 = new [4, 5, 6];
+    char[] char3 = new ['a', '\n', 'c'];
+    string[] string3 = new ["laba diena as krabas"];
+    bool[] bool3 = new [true, false];
+    float[] float3 = new [5.6, 1.2e-3];
+
+    /*int2();
+    char2();
+    string2();
+    bool2();
+    float2();*/
+
+    // --> int2(), char2(), string2(), bool2(), float2();
+    --> int3[0], char3[1], string3[2], bool3[0], float3[1];
+
+    // float3[1];
 }

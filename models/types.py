@@ -10,6 +10,10 @@ class Type(ABC):
         raise NotImplementedError()
 
     @staticmethod
+    def to_stdout_instr():
+        raise NotImplementedError()
+
+    @staticmethod
     def size_in_bytes():
         raise NotImplementedError()
 
@@ -21,6 +25,11 @@ class Int(Type):
         return 'int'
 
     @staticmethod
+    def to_stdout_instr():
+        from models.instructions import InstructionType
+        return InstructionType.TO_STDOUT_INT
+
+    @staticmethod
     def size_in_bytes():
         return sizes.int
 
@@ -29,7 +38,12 @@ class Float(Type):
 
     @staticmethod
     def name_in_code():
-        return 'int'
+        return 'float'
+
+    @staticmethod
+    def to_stdout_instr():
+        from models.instructions import InstructionType
+        return InstructionType.TO_STDOUT_FLOAT
 
     @staticmethod
     def size_in_bytes():
@@ -43,6 +57,11 @@ class Char(Type):
         return 'char'
 
     @staticmethod
+    def to_stdout_instr():
+        from models.instructions import InstructionType
+        return InstructionType.TO_STDOUT_CHAR
+
+    @staticmethod
     def size_in_bytes():
         return sizes.char
 
@@ -52,6 +71,11 @@ class String(Type):
     @staticmethod
     def name_in_code():
         return 'string'
+
+    @staticmethod
+    def to_stdout_instr():
+        from models.instructions import InstructionType
+        return InstructionType.TO_STDOUT_STRING
 
     @staticmethod
     def size_in_bytes():
@@ -65,6 +89,11 @@ class Bool(Type):
         return 'bool'
 
     @staticmethod
+    def to_stdout_instr():
+        from models.instructions import InstructionType
+        return InstructionType.TO_STDOUT_BOOL
+
+    @staticmethod
     def size_in_bytes():
         return sizes.bool
 
@@ -74,6 +103,10 @@ class Void(Type):
     @staticmethod
     def name_in_code():
         return 'void'
+
+    @staticmethod
+    def to_stdout_instr():
+        raise Exception('Unreachable code')
 
     @staticmethod
     def size_in_bytes():
