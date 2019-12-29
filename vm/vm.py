@@ -9,7 +9,6 @@ from models.instructions import op_code_by_type as op_codes, InstructionType as 
 from utils.list_utils import resize
 
 total_memory = 1024 * 1024
-total_memory = 200
 pointer_size = sizes.int
 heap_size = int(total_memory / 4)
 
