@@ -1689,7 +1689,7 @@ class DeclVar(Decl):
 
     @property
     def size_in_stack(self):
-        raise Exception('Unreachable code')
+        return self.type.size_in_stack
 
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
@@ -1711,7 +1711,7 @@ class DeclVar(Decl):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot)
+            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot, self.value.size_in_stack)
 
 
 class DeclUnitField(Node):
@@ -1910,9 +1910,26 @@ class Program(Node):
         self._main_label = main_fn.label
 
     def write_code(self, code_writer: CodeWriter):
+        global_vars = []
+        others = []
+
+        global_vars_size = 0
+        for element in self.root_elements:
+            if isinstance(element, DeclVar):
+                global_vars_size += element.size_in_stack
+                global_vars.append(element)
+            else:
+                others.append(element)
+
+        code_writer.write(InstructionType.ALLOCATE_GLOBAL, global_vars_size)
+        for global_var in global_vars:
+            global_var.write_code(code_writer)
+
         code_writer.write(InstructionType.FN_CALL_BEGIN)
         code_writer.write(InstructionType.FN_CALL, self._main_label, 0)
         code_writer.write(InstructionType.EXIT)
-        for element in self.root_elements:
+
+        for element in others:
             element.write_code(code_writer)
+
         string_storage.place_labels(code_writer)

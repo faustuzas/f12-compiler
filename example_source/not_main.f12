@@ -1,3 +1,10 @@
+string a = init_string();
+
+fun init_string => string {
+    ret "opaa vaziuojam";
+}
+
 fun main {
-    --> 'a', 'b', 'c';
+    string a = "labas vakaras";
+    --> a;
 }

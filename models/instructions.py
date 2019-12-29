@@ -48,9 +48,9 @@ class InstructionType(ExtendedEnum):
     JMP = 'JMP'
     JZ = 'JZ'
 
+    ALLOCATE_GLOBAL = 'ALLOCATE_GLOBAL'
     SET_GLOBAL = 'SET_GLOBAL'
     SET_LOCAL = 'SET_LOCAL'
-
     GET_GLOBAL = 'GET_GLOBAL'
     GET_LOCAL = 'GET_LOCAL'
 
@@ -121,10 +121,11 @@ add_instruction(0x14, InstructionType.PUSH_FLOAT, [Float])
 add_instruction(0x15, InstructionType.PUSH_CHAR, [Char])
 
 #  Set/Get from X address N bytes
-add_instruction(0x20, InstructionType.SET_GLOBAL, [Int, Int])
-add_instruction(0x21, InstructionType.SET_LOCAL, [Int, Int])
-add_instruction(0x22, InstructionType.GET_GLOBAL, [Int, Int])
-add_instruction(0x23, InstructionType.GET_LOCAL, [Int, Int])
+add_instruction(0x20, InstructionType.ALLOCATE_GLOBAL, [Int])
+add_instruction(0x21, InstructionType.SET_GLOBAL, [Int, Int])
+add_instruction(0x22, InstructionType.SET_LOCAL, [Int, Int])
+add_instruction(0x23, InstructionType.GET_GLOBAL, [Int, Int])
+add_instruction(0x24, InstructionType.GET_LOCAL, [Int, Int])
 
 add_instruction(0x30, InstructionType.FN_CALL_BEGIN, [])
 add_instruction(0x31, InstructionType.FN_CALL, [Int, Int])
