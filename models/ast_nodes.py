@@ -214,7 +214,7 @@ class AstTypePrimitive(AstType):
 
     @property
     def has_value(self):
-        return self.type != types.Int
+        return self.type != types.Void
 
     @property
     def is_valid_var_type(self):
@@ -637,7 +637,7 @@ class ExprBinaryEquality(ExprBinary, ABC):
     def write_code(self, code_writer: CodeWriter):
         self.left.write_code(code_writer)
         self.right.write_code(code_writer)
-        code_writer.write(self.instruction_type)
+        code_writer.write(self.instruction_type, self.left.resolve_types().size_in_stack)
 
 
 class ExprBinaryLogic(ExprBinary, ABC):

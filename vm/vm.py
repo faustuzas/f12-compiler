@@ -76,6 +76,21 @@ class VM:
         op_codes.get(IType.UNARY_MINUS_INT): lambda ctx: ctx.push_type(-ctx.pop_type(types.Int)),
         op_codes.get(IType.UNARY_MINUS_FLOAT): lambda ctx: ctx.push_type(-ctx.pop_type(types.Float)),
 
+        op_codes.get(IType.OR): lambda ctx: ctx.push_type(ctx.pop_type(types.Bool) or ctx.pop_type(types.Bool)),
+        op_codes.get(IType.AND): lambda ctx: ctx.push_type(ctx.pop_type(types.Bool) and ctx.pop_type(types.Bool)),
+        op_codes.get(IType.EQ): lambda ctx: ctx.eq(ctx.read_int()),
+        op_codes.get(IType.NE): lambda ctx: ctx.neq(ctx.read_int()),
+        
+        op_codes.get(IType.GT_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) > ctx.pop_type(types.Int)),
+        op_codes.get(IType.GE_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) >= ctx.pop_type(types.Int)),
+        op_codes.get(IType.LT_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) < ctx.pop_type(types.Int)),
+        op_codes.get(IType.LE_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) <= ctx.pop_type(types.Int)),
+
+        op_codes.get(IType.GT_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) > ctx.pop_type(types.Float)),
+        op_codes.get(IType.GE_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) >= ctx.pop_type(types.Float)),
+        op_codes.get(IType.LT_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) < ctx.pop_type(types.Float)),
+        op_codes.get(IType.LE_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) <= ctx.pop_type(types.Float)),
+
         op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
         op_codes.get(IType.TO_STDOUT_INT): lambda ctx: ctx.to_stdout(types.Int),
         op_codes.get(IType.TO_STDOUT_FLOAT): lambda ctx: ctx.to_stdout(types.Float),
@@ -128,6 +143,16 @@ class VM:
     def jump(self, address, conditional=True):
         if conditional:
             self.ip = address
+
+    def eq(self, bytes_len):
+        bytes1 = self.pop_bytes(bytes_len)
+        bytes2 = self.pop_bytes(bytes_len)
+        self.push_type(bytes1 == bytes2)
+
+    def neq(self, bytes_len):
+        bytes1 = self.pop_bytes(bytes_len)
+        bytes2 = self.pop_bytes(bytes_len)
+        self.push_type(bytes1 != bytes2)
 
     def to_stdout(self, type_: Type[types.Type]):
         if type_ is types.String:
