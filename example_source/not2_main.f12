@@ -4,27 +4,32 @@ fun string2 => string {}
 fun bool2 => bool {}
 fun float2 => float {}*/
 
+fun fun1(int a, char b, string d, int[] bb) {}
+
 fun main {
     /*int int1 = 4;
     char char1 = 'a';
-    string string1 = "laba diena as krabas";
+    string string1 = "laba diena as krabas123";
     bool bool1 = true;
-    float float1 = 5.6;*/
+    float float1 = 5.6;
 
-    int[] int3 = new [4, 5, 6];
+    int[] int3 = new [4];
     char[] char3 = new ['a', '\n', 'c'];
-    string[] string3 = new ["laba diena as krabas"];
+    string[] string3 = new ["laba diena"];
     bool[] bool3 = new [true, false];
     float[] float3 = new [5.6, 1.2e-3];
 
-    /*int2();
+    int2();
     char2();
     string2();
     bool2();
-    float2();*/
+    float2();
 
-    // --> int2(), char2(), string2(), bool2(), float2();
+    --> int2(), char2(), string2(), bool2(), float2();
     --> int3[0], char3[1], string3[2], bool3[0], float3[1];
 
-    // float3[1];
+    float3[1];*/
+
+    int[] int3 = new [4];
+    fun1(5, 'c', "labas", int3);
 }

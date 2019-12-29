@@ -74,8 +74,8 @@ class CodeWriter:
                 raise TypeError(f'There is no instruction with op_code: {op_code}')
 
             if instr.type == InstructionType.MARKER_STATIC_START:
-                offset = self.print_static_strings(output, offset)
-                continue
+                self.print_static_strings(output, offset)
+                break
 
             (ops, offset) = instr.fetch_ops(self.code, offset)
             ops = list(map(lambda x: str(x), ops))
@@ -84,10 +84,10 @@ class CodeWriter:
     def print_static_strings(self, output, offset):
         padding = '*' * 20
         output.out(f'\n{padding} STATIC STRINGS {padding}')
-        start_offset = offset
-        value, offset = codec.select_from_bytes_func(str)(self.code, offset)
-        output.out('{:6d}      {:s}'.format(start_offset, value))
-        return offset
+        while offset < len(self.code):
+            start_offset = offset
+            value, offset = codec.select_from_bytes_func(str)(self.code, offset)
+            output.out('{:6d}      {:s}'.format(start_offset, value))
 
     def dump_code(self, output):
         str_code = list(map(lambda x: str(x), self.code))

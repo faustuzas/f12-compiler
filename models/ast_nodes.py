@@ -1168,7 +1168,7 @@ class ExprFnCall(Expr):
         code_writer.write(InstructionType.FN_CALL_BEGIN)
         for arg in self.args:
             arg.write_code(code_writer)
-        code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, len(self.args))
+        code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, self.function_decl_node.slots_sum)
 
 
 class ExprCreateUnit(Expr):
@@ -1595,7 +1595,7 @@ class FunParam(Node):
 
     @property
     def size_in_stack(self):
-        raise Exception('Unreachable code')
+        return self.type.size_in_stack
 
     @property
     def reference_token(self):
@@ -1643,6 +1643,13 @@ class DeclFun(Decl):
     def size_in_stack(self):
         raise Exception('Unreachable code')
 
+    @property
+    def slots_sum(self):
+        sum_ = 0
+        for param in self.params:
+            sum_ += param.size_in_stack
+        return sum_
+
     def resolve_names(self, scope: Scope):
         fn_scope = Scope(scope)
 
@@ -1660,8 +1667,8 @@ class DeclFun(Decl):
         self.body.resolve_types()
 
     def write_code(self, code_writer: CodeWriter):
-        self.body.write_code(code_writer)
         code_writer.place_label(self.label)
+        self.body.write_code(code_writer)
         code_writer.write(InstructionType.RET)
 
 
@@ -1837,6 +1844,7 @@ class Program(Node):
         super().__init__()
         self.add_children(*root_elements)
         self.root_elements = root_elements
+        self._main_label = None
 
     @property
     def size_in_stack(self):
@@ -1899,7 +1907,12 @@ class Program(Node):
                 main_fn.reference_token
             )
 
+        self._main_label = main_fn.label
+
     def write_code(self, code_writer: CodeWriter):
+        code_writer.write(InstructionType.FN_CALL_BEGIN)
+        code_writer.write(InstructionType.FN_CALL, self._main_label, 0)
+        code_writer.write(InstructionType.EXIT)
         for element in self.root_elements:
             element.write_code(code_writer)
         string_storage.place_labels(code_writer)

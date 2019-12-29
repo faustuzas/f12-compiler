@@ -76,6 +76,8 @@ class InstructionType(ExtendedEnum):
 
     FROM_STDIN = 'FROM_STDIN'
 
+    EXIT = 'EXIT'
+
     MARKER_STATIC_START = 'MARKER_STATIC_START'
 
 
@@ -179,3 +181,4 @@ add_instruction(0x74, InstructionType.TO_STDOUT_BOOL, [])
 add_instruction(0x75, InstructionType.FROM_STDIN, [])
 
 add_instruction(0xE0, InstructionType.MARKER_STATIC_START, [])
+add_instruction(0xE1, InstructionType.EXIT, [])

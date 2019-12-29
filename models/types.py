@@ -106,9 +106,9 @@ class Void(Type):
 
     @staticmethod
     def to_stdout_instr():
-        raise Exception('Unreachable code')
+        return 0
 
     @staticmethod
     def size_in_bytes():
-        raise Exception('Unreachable code')
+        return 0
 
