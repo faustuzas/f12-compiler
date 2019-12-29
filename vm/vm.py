@@ -49,13 +49,32 @@ class VM:
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.gp + ctx.read_int(), ctx.read_int())),
         op_codes.get(IType.GET_LOCAL):
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.fp + ctx.read_int(), ctx.read_int())),
-        op_codes.get(IType.JZ): lambda ctx: ctx.jump(ctx.read_int(), not ctx.pop_type(types.Bool)),
-        op_codes.get(IType.JMP): lambda ctx: ctx.jump(ctx.read_int()),
 
         op_codes.get(IType.FN_CALL_BEGIN): lambda ctx: ctx.fn_call_begin(),
         op_codes.get(IType.FN_CALL): lambda ctx: ctx.fn_call(ctx.read_int(), ctx.read_int()),
         op_codes.get(IType.RET): lambda ctx: ctx.ret(),
         op_codes.get(IType.RET_VALUE): lambda ctx: ctx.ret_value(ctx.read_int()),
+        op_codes.get(IType.JZ): lambda ctx: ctx.jump(ctx.read_int(), not ctx.pop_type(types.Bool)),
+        op_codes.get(IType.JMP): lambda ctx: ctx.jump(ctx.read_int()),
+
+        op_codes.get(IType.ADD_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) + ctx.pop_type(types.Int)),
+        op_codes.get(IType.SUB_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) - ctx.pop_type(types.Int)),
+        op_codes.get(IType.MUL_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) * ctx.pop_type(types.Int)),
+        op_codes.get(IType.DIV_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) / ctx.pop_type(types.Int)),
+        op_codes.get(IType.MOD_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) % ctx.pop_type(types.Int)),
+        op_codes.get(IType.POW_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) ** ctx.pop_type(types.Int)),
+
+        op_codes.get(IType.ADD_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) + ctx.pop_type(types.Float)),
+        op_codes.get(IType.SUB_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) - ctx.pop_type(types.Float)),
+        op_codes.get(IType.MUL_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) * ctx.pop_type(types.Float)),
+        op_codes.get(IType.DIV_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) / ctx.pop_type(types.Float)),
+        op_codes.get(IType.MOD_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) % ctx.pop_type(types.Float)),
+        op_codes.get(IType.POW_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float)**ctx.pop_type(types.Float)),
+
+        op_codes.get(IType.UNARY_PLUS_INT): lambda ctx: (),
+        op_codes.get(IType.UNARY_MINUS_FLOAT): lambda ctx: (),
+        op_codes.get(IType.UNARY_MINUS_INT): lambda ctx: ctx.push_type(-ctx.pop_type(types.Int)),
+        op_codes.get(IType.UNARY_MINUS_FLOAT): lambda ctx: ctx.push_type(-ctx.pop_type(types.Float)),
 
         op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
         op_codes.get(IType.TO_STDOUT_INT): lambda ctx: ctx.to_stdout(types.Int),

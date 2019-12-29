@@ -822,7 +822,7 @@ class ExprUnaryOp(ExprNumeric, Expr, ABC):
 
     def resolve_types(self):
         type_ = self.expr.resolve_types()
-        if type_.is_arithmetic():
+        if type_.is_arithmetic:
             return type_
 
         handle_typing_error('Unary operators applicable only to int and float', self.reference_token)
