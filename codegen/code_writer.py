@@ -1,8 +1,9 @@
+from models import types
 from models.instructions import InstructionType, instructions_by_type, instructions_by_op_code
 import utils.bytes_utils as codec
 
 op_code_size_in_bytes = 1
-label_placeholder = codec.select_to_bytes_func(int)(0)
+label_placeholder = codec.select_to_bytes_func(types.Int)(0)
 
 
 class Label:
@@ -32,7 +33,7 @@ class CodeWriter:
         return self.loops_stack[-1]
 
     def place_label(self, label):
-        label.value = codec.select_to_bytes_func(int)(len(self.code))
+        label.value = codec.select_to_bytes_func(types.Int)(len(self.code))
         for offset in label.offsets:
             for i, byte_val in enumerate(label.value):
                 self.code[offset + i] = byte_val
@@ -86,7 +87,7 @@ class CodeWriter:
         output.out(f'\n{padding} STATIC STRINGS {padding}')
         while offset < len(self.code):
             start_offset = offset
-            value, offset = codec.select_from_bytes_func(str)(self.code, offset)
+            value, offset = codec.select_from_bytes_func(types.String)(self.code, offset)
             output.out('{:6d}      {:s}'.format(start_offset, value))
 
     def dump_code(self, output):

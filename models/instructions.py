@@ -1,5 +1,5 @@
 from models.enums import ExtendedEnum
-from models.types import Char
+from models.types import Char, Int, Bool, Float
 from utils.bytes_utils import select_from_bytes_func
 
 
@@ -92,6 +92,8 @@ class Instruction:
         ops = []
         for op_type in self.ops_types:
             value, offset = select_from_bytes_func(op_type)(code, offset)
+            if value == '\n':
+                value = '\\n'
             ops.append(value)
 
         return ops, offset
@@ -99,36 +101,38 @@ class Instruction:
 
 instructions_by_type = {}
 instructions_by_op_code = {}
+op_code_by_type = {}
 
 
 def add_instruction(op_code, type_, ops_types):
     inst = Instruction(op_code, type_, ops_types)
     instructions_by_type[type_] = inst
     instructions_by_op_code[op_code] = inst
+    op_code_by_type[type_] = op_code
 
 
 # Pop N bytes from stack
-add_instruction(0x10, InstructionType.POP, [int])
+add_instruction(0x10, InstructionType.POP, [Int])
 # Pop N bytes from stack and push them K times
-add_instruction(0x11, InstructionType.POP_PUSH_N, [int, int])
-add_instruction(0x12, InstructionType.PUSH_INT, [int])
-add_instruction(0x13, InstructionType.PUSH_BOOL, [bool])
-add_instruction(0x14, InstructionType.PUSH_FLOAT, [float])
+add_instruction(0x11, InstructionType.POP_PUSH_N, [Int, Int])
+add_instruction(0x12, InstructionType.PUSH_INT, [Int])
+add_instruction(0x13, InstructionType.PUSH_BOOL, [Bool])
+add_instruction(0x14, InstructionType.PUSH_FLOAT, [Float])
 add_instruction(0x15, InstructionType.PUSH_CHAR, [Char])
 
 #  Set/Get from X address N bytes
-add_instruction(0x20, InstructionType.SET_GLOBAL, [int, int])
-add_instruction(0x21, InstructionType.SET_LOCAL, [int, int])
-add_instruction(0x22, InstructionType.GET_GLOBAL, [int, int])
-add_instruction(0x23, InstructionType.GET_LOCAL, [int, int])
+add_instruction(0x20, InstructionType.SET_GLOBAL, [Int, Int])
+add_instruction(0x21, InstructionType.SET_LOCAL, [Int, Int])
+add_instruction(0x22, InstructionType.GET_GLOBAL, [Int, Int])
+add_instruction(0x23, InstructionType.GET_LOCAL, [Int, Int])
 
 add_instruction(0x30, InstructionType.FN_CALL_BEGIN, [])
-add_instruction(0x31, InstructionType.FN_CALL, [int, int])
+add_instruction(0x31, InstructionType.FN_CALL, [Int, Int])
 add_instruction(0x32, InstructionType.RET, [])
 #  Return N bytes
-add_instruction(0x33, InstructionType.RET_VALUE, [int])
-add_instruction(0x34, InstructionType.JZ, [int])
-add_instruction(0x35, InstructionType.JMP, [int])
+add_instruction(0x33, InstructionType.RET_VALUE, [Int])
+add_instruction(0x34, InstructionType.JZ, [Int])
+add_instruction(0x35, InstructionType.JMP, [Int])
 
 add_instruction(0x40, InstructionType.ADD_INT, [])
 add_instruction(0x41, InstructionType.SUB_INT, [])
@@ -166,12 +170,12 @@ add_instruction(0x60, InstructionType.MEMORY_ALLOCATE, [])
 #  Pop integer from stack and free the memory at the address
 add_instruction(0x61, InstructionType.MEMORY_FREE, [])
 #  Pop integer from stack then pop N bytes from stack and set them at the address provided
-add_instruction(0x62, InstructionType.MEMORY_SET, [int])
+add_instruction(0x62, InstructionType.MEMORY_SET, [Int])
 #  Same as MEMORY_SET but additionally pushes the address back into memory
-add_instruction(0x63, InstructionType.MEMORY_SET_PUSH, [int])
+add_instruction(0x63, InstructionType.MEMORY_SET_PUSH, [Int])
 
 #  Pop address from stack and push N bytes from that address
-add_instruction(0x64, InstructionType.MEMORY_GET, [int])
+add_instruction(0x64, InstructionType.MEMORY_GET, [Int])
 
 add_instruction(0x70, InstructionType.TO_STDOUT_INT, [])
 add_instruction(0x71, InstructionType.TO_STDOUT_FLOAT, [])

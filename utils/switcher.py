@@ -30,7 +30,7 @@ class Switcher:
                 return self.__cases.get(case)()
 
         if self.__default is not None:
-            return self.__default()
+            return self.__default(v)
         return None
 
     @staticmethod

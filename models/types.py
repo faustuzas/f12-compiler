@@ -112,3 +112,14 @@ class Void(Type):
     def size_in_bytes():
         return 0
 
+
+def find_type(type_):
+    if type_ is int:
+        return Int
+    if type_ is float:
+        return Float
+    if type_ is str:
+        return String
+    if type_ is bool:
+        return Bool
+    raise ValueError(f'There is no type class for {type_}')

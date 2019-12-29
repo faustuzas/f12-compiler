@@ -1,6 +1,6 @@
 import struct
 
-from models.types import Char
+from models.types import Char, Int, String, Bool, Float
 import utils.sizes as sizes
 
 
@@ -13,13 +13,13 @@ def op_code_from_bytes(code, offset):
 
 
 def select_from_bytes_func(type_):
-    if type_ is int:
+    if type_ is Int:
         return int_from_bytes
-    if type_ is str:
+    if type_ is String:
         return string_from_bytes
-    if type_ is bool:
+    if type_ is Bool:
         return bool_from_bytes
-    if type_ is float:
+    if type_ is Float:
         return float_from_bytes
     if type_ is Char:
         return char_from_bytes
@@ -27,13 +27,13 @@ def select_from_bytes_func(type_):
 
 
 def select_to_bytes_func(type_):
-    if type_ is int:
+    if type_ is Int:
         return int_to_bytes
-    if type_ is str:
+    if type_ is String:
         return string_to_bytes
-    if type_ is bool:
+    if type_ is Bool:
         return bool_to_bytes
-    if type_ is float:
+    if type_ is Float:
         return float_to_bytes
     if type_ is Char:
         return char_to_bytes
@@ -87,6 +87,4 @@ def char_to_bytes(char):
 
 def char_from_bytes(code, offset):
     char = str(bytes(code[offset: offset + sizes.char]), sizes.string_encoding)
-    if char == '\n':
-        char = '\\n'
     return char, offset + sizes.char

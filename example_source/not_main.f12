@@ -1,26 +1,3 @@
-unit Toy {
-    int size;
-}
-
-unit Child {
-    string name;
-    Toy toy;
-}
-
-unit Human {
-    string name;
-    int age;
-    string[10] addresses;
-    Child[10] children;
-}
-
-fun add(float[10] x, int y) => A {
-    const Human human = Human| name: "Faustas", age: 5, addresses: [ "Sauletekio 6" ], children: [ Child| name: "aaa", toy: Toy | size: 5 | | ]|;
-    human.children[0].name = "labas";
-}
-
-int c;
-fun main => int {
-    int b;
-    Toy[10] t;
+fun main {
+    --> 'a', 'b', 'c';
 }

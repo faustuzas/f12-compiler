@@ -1,4 +1,5 @@
 from codegen.code_writer import Label, CodeWriter
+from models import types
 from models.instructions import InstructionType
 
 
@@ -26,7 +27,7 @@ class StringStorage:
         code_writer.write(InstructionType.MARKER_STATIC_START)
         for entry in self.entries:
             code_writer.place_label(entry.label)
-            code_writer.write_raw(entry.value, str)
+            code_writer.write_raw(entry.value, types.String)
 
     def clear(self):
         self.entries = []
