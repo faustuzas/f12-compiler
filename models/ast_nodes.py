@@ -295,6 +295,10 @@ class ExprLit(Expr, ABC):
     def kind(self):  # -> Union[Type[types.Type], AstType]
         raise NotImplementedError(f'Kind not implemented for "{self.__class__}"')
 
+    @property
+    def size_in_heap(self):
+        return self.size_in_stack
+
     def resolve_names(self, scope: Scope):
         pass
 
@@ -434,7 +438,10 @@ class ExprLitArray(ExprLit):
 
 
 class ExprNew(Node, ABC):
-    pass
+
+    @property
+    def size_in_stack(self):
+        return sizes.address
 
 
 class ExprNewFromSizedType(ExprNew):
@@ -445,10 +452,6 @@ class ExprNewFromSizedType(ExprNew):
         self.token = token
         self.type = type_
         self.size_expr = size_expr
-
-    @property
-    def size_in_stack(self):
-        raise Exception('Unreachable code')
 
     @property
     def reference_token(self):
@@ -886,7 +889,7 @@ class ExprAssign(Expr):
 
     @property
     def size_in_stack(self):
-        raise Exception('Unreachable code')
+        return self.value.size_in_stack
 
     @property
     def reference_token(self):
@@ -978,17 +981,11 @@ class ExprVar(Expr, Assignable):
 
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
-        code_writer.write(InstructionType.POP_PUSH_N, 2)
+        code_writer.write(InstructionType.POP_PUSH_N, self.size_in_stack, 2)
         if self.is_local:
-            if isinstance(self.type, AstTypeArray):
-                code_writer.write(InstructionType.ARRAY_FILL_LOCAL, self.slot, self.type.length)
-            else:
-                code_writer.write(InstructionType.SET_LOCAL, self.slot)
+            code_writer.write(InstructionType.SET_LOCAL, self.slot, self.size_in_stack)
         else:
-            if isinstance(self.type, AstTypeArray):
-                code_writer.write(InstructionType.ARRAY_FILL_GLOBAL, self.slot, self.type.length)
-            else:
-                code_writer.write(InstructionType.SET_GLOBAL, self.slot)
+            code_writer.write(InstructionType.SET_GLOBAL, self.slot, self.size_in_stack)
 
 
 class ExprAccess(Expr, Assignable):
@@ -1094,10 +1091,11 @@ class ExprArrayAccess(Expr, Assignable):
         code_writer.write(InstructionType.ADD_INT)
 
         type_ = self.array.resolve_types()
-        if isinstance(type_, AstTypePointer):
-            bytes_to_get = type_.size_in_heap
-        else:
-            bytes_to_get = type_.size_in_stack
+        # if isinstance(type_, AstTypePointer):
+        #     bytes_to_get = type_.size_in_heap
+        # else:
+        #     bytes_to_get = type_.size_in_stack
+        bytes_to_get = type_.size_in_heap
         code_writer.write(InstructionType.MEMORY_GET, bytes_to_get)
 
     def write_assigment_code(self, code_writer, value):
@@ -1111,9 +1109,9 @@ class ExprArrayAccess(Expr, Assignable):
         code_writer.write(InstructionType.MUL_INT)
 
         if self.array.is_local:
-            code_writer.write(InstructionType.GET_LOCAL, self.array.slot)
+            code_writer.write(InstructionType.GET_LOCAL, self.array.slot, self.array.size_in_stack)
         else:
-            code_writer.write(InstructionType.GET_GLOBAL, self.array.slot)
+            code_writer.write(InstructionType.GET_GLOBAL, self.array.slot, self.array.size_in_stack)
         # add offset to address stored in variable
         code_writer.write(InstructionType.ADD_INT)
 
@@ -1168,7 +1166,7 @@ class ExprFnCall(Expr):
         code_writer.write(InstructionType.FN_CALL_BEGIN)
         for arg in self.args:
             arg.write_code(code_writer)
-        code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, self.function_decl_node.slots_sum)
+        code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, self.function_decl_node.params_offset)
 
 
 class ExprCreateUnit(Expr):
@@ -1514,9 +1512,6 @@ class StmntToStdout(Stmnt):
             instr = value.resolve_types().to_stdout_instr()
             code_writer.write(instr)
 
-        code_writer.write(InstructionType.PUSH_CHAR, '\n')
-        code_writer.write(InstructionType.TO_STDOUT_CHAR)
-
 
 class StmntWhile(Stmnt):
 
@@ -1630,6 +1625,7 @@ class DeclFun(Decl):
         self.return_type = return_type
         self.body = body
         self._label = Label()
+        self._locals_offset = 0
 
     @property
     def reference_token(self):
@@ -1644,7 +1640,7 @@ class DeclFun(Decl):
         raise Exception('Unreachable code')
 
     @property
-    def slots_sum(self):
+    def params_offset(self):
         sum_ = 0
         for param in self.params:
             sum_ += param.size_in_stack
@@ -1659,6 +1655,7 @@ class DeclFun(Decl):
             param.stack_slot = stack_slot_dispenser.get_slot(param.type.size_in_stack)
 
         self.body.resolve_names(fn_scope)
+        self._locals_offset = stack_slot_dispenser.current_slot
 
     def resolve_types(self):
         self.return_type.resolve_types()
@@ -1668,6 +1665,8 @@ class DeclFun(Decl):
 
     def write_code(self, code_writer: CodeWriter):
         code_writer.place_label(self.label)
+        if self._locals_offset > 0:
+            code_writer.write(InstructionType.ALLOCATE_IN_STACK, self._locals_offset)
         self.body.write_code(code_writer)
         code_writer.write(InstructionType.RET)
 
@@ -1844,7 +1843,7 @@ class Program(Node):
         super().__init__()
         self.add_children(*root_elements)
         self.root_elements = root_elements
-        self._main_label = None
+        self._main_fn = None
 
     @property
     def size_in_stack(self):
@@ -1907,7 +1906,7 @@ class Program(Node):
                 main_fn.reference_token
             )
 
-        self._main_label = main_fn.label
+        self._main_fn = main_fn
 
     def write_code(self, code_writer: CodeWriter):
         global_vars = []
@@ -1921,12 +1920,12 @@ class Program(Node):
             else:
                 others.append(element)
 
-        code_writer.write(InstructionType.ALLOCATE_GLOBAL, global_vars_size)
+        code_writer.write(InstructionType.ALLOCATE_IN_STACK, global_vars_size)
         for global_var in global_vars:
             global_var.write_code(code_writer)
 
         code_writer.write(InstructionType.FN_CALL_BEGIN)
-        code_writer.write(InstructionType.FN_CALL, self._main_label, 0)
+        code_writer.write(InstructionType.FN_CALL, self._main_fn.label, self._main_fn.params_offset)
         code_writer.write(InstructionType.EXIT)
 
         for element in others:

@@ -48,7 +48,7 @@ class InstructionType(ExtendedEnum):
     JMP = 'JMP'
     JZ = 'JZ'
 
-    ALLOCATE_GLOBAL = 'ALLOCATE_GLOBAL'
+    ALLOCATE_IN_STACK = 'ALLOCATE_IN_STACK'
     SET_GLOBAL = 'SET_GLOBAL'
     SET_LOCAL = 'SET_LOCAL'
     GET_GLOBAL = 'GET_GLOBAL'
@@ -121,7 +121,7 @@ add_instruction(0x14, InstructionType.PUSH_FLOAT, [Float])
 add_instruction(0x15, InstructionType.PUSH_CHAR, [Char])
 
 #  Set/Get from X address N bytes
-add_instruction(0x20, InstructionType.ALLOCATE_GLOBAL, [Int])
+add_instruction(0x20, InstructionType.ALLOCATE_IN_STACK, [Int])
 add_instruction(0x21, InstructionType.SET_GLOBAL, [Int, Int])
 add_instruction(0x22, InstructionType.SET_LOCAL, [Int, Int])
 add_instruction(0x23, InstructionType.GET_GLOBAL, [Int, Int])
@@ -141,6 +141,7 @@ add_instruction(0x42, InstructionType.MUL_INT, [])
 add_instruction(0x43, InstructionType.DIV_INT, [])
 add_instruction(0x44, InstructionType.MOD_INT, [])
 add_instruction(0x45, InstructionType.POW_INT, [])
+
 add_instruction(0x46, InstructionType.ADD_FLOAT, [])
 add_instruction(0x47, InstructionType.SUB_FLOAT, [])
 add_instruction(0x48, InstructionType.MUL_FLOAT, [])
@@ -174,7 +175,6 @@ add_instruction(0x61, InstructionType.MEMORY_FREE, [])
 add_instruction(0x62, InstructionType.MEMORY_SET, [Int])
 #  Same as MEMORY_SET but additionally pushes the address back into memory
 add_instruction(0x63, InstructionType.MEMORY_SET_PUSH, [Int])
-
 #  Pop address from stack and push N bytes from that address
 add_instruction(0x64, InstructionType.MEMORY_GET, [Int])
 

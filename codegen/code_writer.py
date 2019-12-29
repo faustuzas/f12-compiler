@@ -32,8 +32,8 @@ class CodeWriter:
     def current_loop(self):
         return self.loops_stack[-1]
 
-    def place_label(self, label):
-        label.value = codec.select_to_bytes_func(types.Int)(len(self.code))
+    def place_label(self, label, offset=0):
+        label.value = codec.select_to_bytes_func(types.Int)(len(self.code) + offset)
         for offset in label.offsets:
             for i, byte_val in enumerate(label.value):
                 self.code[offset + i] = byte_val

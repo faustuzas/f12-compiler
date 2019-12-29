@@ -34,9 +34,9 @@ def compile_file(file_to_compile):
             else:
                 printer.success('', f'Compilation successful', header_len=80)
 
-            with FileOutput('ast_tree.yaml') as output:
-                ast_printer = AstPrinter(output)
-                ast_printer.print('root', ast_root)
+            # with FileOutput('ast_tree.yaml') as output:
+            #     ast_printer = AstPrinter(output)
+            #     ast_printer.print('root', ast_root)
 
             code_writer = CodeWriter()
             ast_root.write_code(code_writer)

@@ -9,7 +9,9 @@ from models.instructions import op_code_by_type as op_codes, InstructionType as 
 from utils.list_utils import resize
 
 total_memory = 1024 * 1024
+total_memory = 200
 pointer_size = sizes.int
+heap_size = int(total_memory / 4)
 
 
 class VM:
@@ -28,6 +30,9 @@ class VM:
         self.sp = len(opcodes)
         # global variables pointer
         self.gp = len(opcodes)
+        # heap pointer
+        self.hp = total_memory - heap_size
+        self.init_heap()
 
     def exec(self):
         while self.running:
@@ -41,7 +46,7 @@ class VM:
         op_codes.get(IType.PUSH_CHAR): lambda ctx: ctx.push_type(ctx.read_char(), types.Char),
         op_codes.get(IType.PUSH_BOOL): lambda ctx: ctx.push_type(ctx.read_bool(), types.Bool),
 
-        op_codes.get(IType.ALLOCATE_GLOBAL): lambda ctx: ctx.allocate_global(ctx.read_int()),
+        op_codes.get(IType.ALLOCATE_IN_STACK): lambda ctx: ctx.allocate_in_stack(ctx.read_int()),
         op_codes.get(IType.SET_GLOBAL):
             lambda ctx: ctx.set_bytes(ctx.gp + ctx.read_int(), ctx.pop_bytes(ctx.read_int())),
         op_codes.get(IType.SET_LOCAL):
@@ -55,22 +60,46 @@ class VM:
         op_codes.get(IType.FN_CALL): lambda ctx: ctx.fn_call(ctx.read_int(), ctx.read_int()),
         op_codes.get(IType.RET): lambda ctx: ctx.ret(),
         op_codes.get(IType.RET_VALUE): lambda ctx: ctx.ret_value(ctx.read_int()),
-        op_codes.get(IType.JZ): lambda ctx: ctx.jump(ctx.read_int(), not ctx.pop_type(types.Bool)),
+        op_codes.get(IType.JZ): lambda ctx: ctx.jump(ctx.read_int(), ctx.pop_type(types.Bool)),
         op_codes.get(IType.JMP): lambda ctx: ctx.jump(ctx.read_int()),
 
-        op_codes.get(IType.ADD_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) + ctx.pop_type(types.Int)),
-        op_codes.get(IType.SUB_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) - ctx.pop_type(types.Int)),
-        op_codes.get(IType.MUL_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) * ctx.pop_type(types.Int)),
-        op_codes.get(IType.DIV_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) / ctx.pop_type(types.Int)),
-        op_codes.get(IType.MOD_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) % ctx.pop_type(types.Int)),
-        op_codes.get(IType.POW_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) ** ctx.pop_type(types.Int)),
+        op_codes.get(IType.ADD_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x + y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.SUB_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x - y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.MUL_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x * y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.DIV_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x / y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.MOD_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x % y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.POW_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x ** y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
 
-        op_codes.get(IType.ADD_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) + ctx.pop_type(types.Float)),
-        op_codes.get(IType.SUB_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) - ctx.pop_type(types.Float)),
-        op_codes.get(IType.MUL_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) * ctx.pop_type(types.Float)),
-        op_codes.get(IType.DIV_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) / ctx.pop_type(types.Float)),
-        op_codes.get(IType.MOD_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) % ctx.pop_type(types.Float)),
-        op_codes.get(IType.POW_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float)**ctx.pop_type(types.Float)),
+        op_codes.get(IType.ADD_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x + y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.SUB_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x - y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.MUL_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x * y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.DIV_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x / y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.MOD_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x % y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.POW_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x ** y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
 
         op_codes.get(IType.UNARY_PLUS_INT): lambda ctx: (),
         op_codes.get(IType.UNARY_MINUS_FLOAT): lambda ctx: (),
@@ -82,15 +111,37 @@ class VM:
         op_codes.get(IType.EQ): lambda ctx: ctx.eq(ctx.read_int()),
         op_codes.get(IType.NE): lambda ctx: ctx.neq(ctx.read_int()),
         
-        op_codes.get(IType.GT_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) > ctx.pop_type(types.Int)),
-        op_codes.get(IType.GE_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) >= ctx.pop_type(types.Int)),
-        op_codes.get(IType.LT_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) < ctx.pop_type(types.Int)),
-        op_codes.get(IType.LE_INT): lambda ctx: ctx.push_type(ctx.pop_type(types.Int) <= ctx.pop_type(types.Int)),
+        op_codes.get(IType.GT_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x > y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.GE_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x >= y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.LT_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x < y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+        op_codes.get(IType.LE_INT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x <= y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
 
-        op_codes.get(IType.GT_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) > ctx.pop_type(types.Float)),
-        op_codes.get(IType.GE_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) >= ctx.pop_type(types.Float)),
-        op_codes.get(IType.LT_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) < ctx.pop_type(types.Float)),
-        op_codes.get(IType.LE_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) <= ctx.pop_type(types.Float)),
+        op_codes.get(IType.GT_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x > y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.GE_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x >= y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.LT_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x < y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+        op_codes.get(IType.LE_FLOAT):
+            lambda ctx: ctx.push_type(VM.reverse_binary(
+                lambda x, y: x <= y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
+
+        op_codes.get(IType.MEMORY_ALLOCATE): lambda ctx: ctx.memory_allocate(ctx.pop_type(types.Int)),
+        op_codes.get(IType.MEMORY_GET):
+            lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.pop_type(types.Int), ctx.read_int())),
+        op_codes.get(IType.MEMORY_SET):
+            lambda ctx: ctx.set_bytes(ctx.pop_type(types.Int), ctx.pop_bytes(ctx.read_int())),
 
         op_codes.get(IType.FROM_STDIN): lambda ctx: ctx.from_stdin(),
         op_codes.get(IType.TO_STDOUT_INT): lambda ctx: ctx.to_stdout(types.Int),
@@ -104,8 +155,10 @@ class VM:
 
     def exec_one(self):
         op_code = self.read_op_code()
+        instr = instructions_by_op_code.get(op_code)
         if instructions_by_op_code.get(op_code) is None:
             self.op_code_not_defined()
+        instr = instr.type
         self.op_codes_actions.exec(self, op_code)
 
     def fn_call_begin(self):
@@ -140,12 +193,18 @@ class VM:
         self.ret()
         self.push_bytes(bytes_to_return)
 
-    def allocate_global(self, bytes_len):
+    def allocate_in_stack(self, bytes_len):
         self.sp += bytes_len
 
-    def jump(self, address, conditional=True):
-        if conditional:
+    def jump(self, address, conditional_value=False):
+        # Jump zero and simple jump
+        if not conditional_value:
             self.ip = address
+
+    def pop_push_n(self, bytes_len, times):
+        bytes_ = self.pop_bytes(bytes_len)
+        for i in range(times):
+            self.push_bytes(bytes_)
 
     def eq(self, bytes_len):
         bytes1 = self.pop_bytes(bytes_len)
@@ -162,7 +221,7 @@ class VM:
 
     def to_stdout(self, type_: Type[types.Type]):
         if type_ is types.String:
-            address = self.pop_type(types.Int)
+            address = self.pop_type(types.Int) - sizes.int
             value_to_print, _ = codec.string_from_bytes(self.memory, address)
         else:
             value_to_print = self.pop_type(type_)
@@ -181,6 +240,13 @@ class VM:
 
     def exit(self):
         self.running = False
+
+    """
+    Heap management
+    """
+    def init_heap(self):
+        # self.set_value(self.hp, )
+        pass
 
     """
     Helpers
@@ -238,3 +304,7 @@ class VM:
     def set_bytes(self, offset, bytes_):
         for i in range(len(bytes_)):
             self.memory[offset + i] = bytes_[i]
+
+    @staticmethod
+    def reverse_binary(op, val1, val2):
+        return op(val2, val1)
