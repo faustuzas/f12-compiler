@@ -49,13 +49,15 @@ class VM:
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.gp + ctx.read_int(), ctx.read_int())),
         op_codes.get(IType.GET_LOCAL):
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.fp + ctx.read_int(), ctx.read_int())),
+        op_codes.get(IType.JZ): lambda ctx: ctx.jump(ctx.read_int(), not ctx.pop_type(types.Bool)),
+        op_codes.get(IType.JMP): lambda ctx: ctx.jump(ctx.read_int()),
 
         op_codes.get(IType.FN_CALL_BEGIN): lambda ctx: ctx.fn_call_begin(),
         op_codes.get(IType.FN_CALL): lambda ctx: ctx.fn_call(ctx.read_int(), ctx.read_int()),
         op_codes.get(IType.RET): lambda ctx: ctx.ret(),
         op_codes.get(IType.RET_VALUE): lambda ctx: ctx.ret_value(ctx.read_int()),
 
-        op_codes.get(IType.EXIT): lambda ctx: exit(0),
+        op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
         op_codes.get(IType.TO_STDOUT_INT): lambda ctx: ctx.to_stdout(types.Int),
         op_codes.get(IType.TO_STDOUT_FLOAT): lambda ctx: ctx.to_stdout(types.Float),
         op_codes.get(IType.TO_STDOUT_CHAR): lambda ctx: ctx.to_stdout(types.Char),
@@ -104,6 +106,10 @@ class VM:
     def allocate_global(self, bytes_len):
         self.sp += bytes_len
 
+    def jump(self, address, conditional=True):
+        if conditional:
+            self.ip = address
+
     def to_stdout(self, type_: Type[types.Type]):
         if type_ is types.String:
             address = self.pop_type(types.Int)
@@ -122,6 +128,9 @@ class VM:
         op_code = self.read_op_code()
         instr = instructions_by_op_code.get(op_code)
         throw(ValueError(f'Behaviour for {instr.type} is not defined'))
+
+    def exit(self):
+        self.running = False
 
     """
     Helpers
