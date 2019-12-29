@@ -860,7 +860,7 @@ class ExprFromStdin(Expr):
 
     @property
     def size_in_stack(self):
-        raise Exception('Unreachable code')
+        return types.Char.size_in_bytes()
 
     @property
     def reference_token(self):

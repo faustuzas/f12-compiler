@@ -1,3 +1,4 @@
+import sys
 from typing import Type
 
 import utils.bytes_utils as codec
@@ -91,12 +92,14 @@ class VM:
         op_codes.get(IType.LT_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) < ctx.pop_type(types.Float)),
         op_codes.get(IType.LE_FLOAT): lambda ctx: ctx.push_type(ctx.pop_type(types.Float) <= ctx.pop_type(types.Float)),
 
-        op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
+        op_codes.get(IType.FROM_STDIN): lambda ctx: ctx.from_stdin(),
         op_codes.get(IType.TO_STDOUT_INT): lambda ctx: ctx.to_stdout(types.Int),
         op_codes.get(IType.TO_STDOUT_FLOAT): lambda ctx: ctx.to_stdout(types.Float),
         op_codes.get(IType.TO_STDOUT_CHAR): lambda ctx: ctx.to_stdout(types.Char),
         op_codes.get(IType.TO_STDOUT_BOOL): lambda ctx: ctx.to_stdout(types.Bool),
-        op_codes.get(IType.TO_STDOUT_STRING): lambda ctx: ctx.to_stdout(types.String)
+        op_codes.get(IType.TO_STDOUT_STRING): lambda ctx: ctx.to_stdout(types.String),
+
+        op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
     }).default(lambda ctx: ctx.behaviour_not_defined())
 
     def exec_one(self):
@@ -153,6 +156,9 @@ class VM:
         bytes1 = self.pop_bytes(bytes_len)
         bytes2 = self.pop_bytes(bytes_len)
         self.push_type(bytes1 != bytes2)
+
+    def from_stdin(self):
+        self.push_type(sys.stdin.read(1), types.Char)
 
     def to_stdout(self, type_: Type[types.Type]):
         if type_ is types.String:
