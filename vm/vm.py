@@ -8,9 +8,11 @@ from utils import FasterSwitcher as Switcher, throw, sizes
 from models.instructions import op_code_by_type as op_codes, InstructionType as IType, instructions_by_op_code
 from utils.list_utils import resize
 
-total_memory = 1024 * 1024
+# total_memory = 1024 * 1024
+total_memory = 200
 pointer_size = sizes.int
 heap_size = int(total_memory / 4)
+block_meta_info_size = 2 * sizes.int
 
 
 class VM:
@@ -136,7 +138,7 @@ class VM:
             lambda ctx: ctx.push_type(VM.reverse_binary(
                 lambda x, y: x <= y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
 
-        op_codes.get(IType.MEMORY_ALLOCATE): lambda ctx: ctx.memory_allocate(ctx.pop_type(types.Int)),
+        op_codes.get(IType.MEMORY_ALLOCATE): lambda ctx: ctx.memory_allocate(ctx.hp, ctx.pop_type(types.Int)),
         op_codes.get(IType.MEMORY_GET):
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.pop_type(types.Int), ctx.read_int())),
         op_codes.get(IType.MEMORY_SET):
@@ -242,10 +244,51 @@ class VM:
 
     """
     Heap management
+    
+    Each memory block has to integers in front of it:
+    1. Available size
+    2. Next block address
+    
+    TODO: 
+    1. No more space left
+    2. Last block mark with 0000000
+    
     """
     def init_heap(self):
-        # self.set_value(self.hp, )
-        pass
+        self.set_value(self.hp, heap_size - block_meta_info_size)
+        self.set_value(self.hp + sizes.int, 0)
+
+    def memory_allocate(self, block_address, size_to_alloc):
+        available_size_in_block = self.get_value(block_address, types.Int)
+        next_block_address = self.get_value(block_address + sizes.int, types.Int)
+
+        if available_size_in_block < size_to_alloc:
+            if next_block_address == 0:
+                self.error('Out of heap memory')
+            else:
+                # recursively go to the next block to check if there is space available
+                self.memory_allocate(next_block_address, size_to_alloc)
+            return
+
+        memory_used = block_meta_info_size + size_to_alloc
+        if next_block_address == 0:
+            new_block_address = block_address + memory_used
+            new_block_size = heap_size - memory_used
+            new_block_next_address = 0
+        else:
+            raise NotImplementedError()
+
+        # set allocated block meta info
+        self.set_value(block_address, size_to_alloc)
+        self.set_value(block_address + sizes.int, new_block_address)
+
+        # if new block's size is 0, it means there is no next new block
+        if new_block_size != 0:
+            self.set_value(next_block_address, new_block_size)
+            self.set_value(next_block_address + sizes.int, next_block_address)
+
+        # push address of allocated data to stack
+        self.push_type(block_address + block_meta_info_size)
 
     """
     Helpers
@@ -303,6 +346,10 @@ class VM:
     def set_bytes(self, offset, bytes_):
         for i in range(len(bytes_)):
             self.memory[offset + i] = bytes_[i]
+
+    def error(self, message):
+        print(message)
+        self.running = False
 
     @staticmethod
     def reverse_binary(op, val1, val2):
