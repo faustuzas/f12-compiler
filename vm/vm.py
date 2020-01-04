@@ -9,10 +9,10 @@ from models.instructions import op_code_by_type as op_codes, InstructionType as 
 from utils.list_utils import resize
 
 # total_memory = 1024 * 1024
-total_memory = 200
+total_memory = 500
 pointer_size = sizes.int
 heap_size = int(total_memory / 4)
-block_meta_info_size = 2 * sizes.int
+block_metadata_size = 2 * sizes.int
 
 
 class VM:
@@ -143,6 +143,8 @@ class VM:
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.pop_type(types.Int), ctx.read_int())),
         op_codes.get(IType.MEMORY_SET):
             lambda ctx: ctx.set_bytes(ctx.pop_type(types.Int), ctx.pop_bytes(ctx.read_int())),
+        op_codes.get(IType.MEMORY_SET_PUSH):
+            lambda ctx: ctx.memory_set_push(ctx.pop_type(types.Int), ctx.pop_bytes(ctx.read_int()), ctx.read_int()),
 
         op_codes.get(IType.FROM_STDIN): lambda ctx: ctx.from_stdin(),
         op_codes.get(IType.TO_STDOUT_INT): lambda ctx: ctx.to_stdout(types.Int),
@@ -181,9 +183,9 @@ class VM:
         self.sp = new_sp
 
     def ret(self):
-        old_ip, _ = self.get_value(self.fp - 3 * pointer_size, types.Int)
-        old_fp, _ = self.get_value(self.fp - 2 * pointer_size, types.Int)
-        old_sp, _ = self.get_value(self.fp - 1 * pointer_size, types.Int)
+        old_ip = self.get_value(self.fp - 3 * pointer_size, types.Int)
+        old_fp = self.get_value(self.fp - 2 * pointer_size, types.Int)
+        old_sp = self.get_value(self.fp - 1 * pointer_size, types.Int)
 
         self.ip = old_ip
         self.fp = old_fp
@@ -228,6 +230,11 @@ class VM:
             value_to_print = self.pop_type(type_)
         print(value_to_print, end='')
 
+    def memory_set_push(self, offset, bytes_, push_times):
+        self.set_bytes(offset, bytes_)
+        for i in range(push_times):
+            self.push_type(offset)
+
     def op_code_not_defined(self):
         self.ip -= sizes.op_code
         op_code = self.read_op_code()
@@ -255,40 +262,58 @@ class VM:
     
     """
     def init_heap(self):
-        self.set_value(self.hp, heap_size - block_meta_info_size)
-        self.set_value(self.hp + sizes.int, 0)
+        self.set_block_size(self.hp, heap_size - block_metadata_size)
+        self.set_block_next_address(self.hp, 0)
 
-    def memory_allocate(self, block_address, size_to_alloc):
-        available_size_in_block = self.get_value(block_address, types.Int)
-        next_block_address = self.get_value(block_address + sizes.int, types.Int)
+    def memory_allocate(self, block_address, block_size):
+        available_size_in_block = self.get_block_size(block_address)
+        next_block_address = self.get_block_next_address(block_address)
 
-        if available_size_in_block < size_to_alloc:
+        if available_size_in_block < block_size:
             if next_block_address == 0:
                 self.error('Out of heap memory')
             else:
                 # recursively go to the next block to check if there is space available
-                self.memory_allocate(next_block_address, size_to_alloc)
+                self.memory_allocate(next_block_address, block_size)
             return
 
-        memory_used = block_meta_info_size + size_to_alloc
+        memory_used = block_metadata_size + block_size
         if next_block_address == 0:
             new_block_address = block_address + memory_used
-            new_block_size = heap_size - memory_used
+            new_block_size = available_size_in_block - memory_used - block_metadata_size
             new_block_next_address = 0
         else:
             raise NotImplementedError()
 
-        # set allocated block meta info
-        self.set_value(block_address, size_to_alloc)
-        self.set_value(block_address + sizes.int, new_block_address)
+        # if next block size is not bigger than metadata, then we can't allocate new block
+        # so just add leftover memory to previous block
+        if new_block_size <= block_metadata_size:
+            block_size += new_block_size
+            new_block_address = 0
+        else:
+            # set next block metadata
+            self.set_block_size(new_block_address, new_block_size)
+            self.set_block_next_address(new_block_address, new_block_next_address)
+            self.hp = new_block_address
 
-        # if new block's size is 0, it means there is no next new block
-        if new_block_size != 0:
-            self.set_value(next_block_address, new_block_size)
-            self.set_value(next_block_address + sizes.int, next_block_address)
+        # set allocated block metadata
+        self.set_block_size(block_address, block_size)
+        self.set_block_next_address(block_address, new_block_address)
 
-        # push address of allocated data to stack
-        self.push_type(block_address + block_meta_info_size)
+        # push address of allocated block data section to the stack
+        self.push_type(block_address + block_metadata_size)
+
+    def get_block_size(self, block_address):
+        return self.get_value(block_address, types.Int)
+
+    def set_block_size(self, block_address, size):
+        self.set_value(block_address, size)
+
+    def get_block_next_address(self, block_address):
+        return self.get_value(block_address + sizes.int, types.Int)
+
+    def set_block_next_address(self, block_address, next_block_address):
+        self.set_value(block_address + sizes.int, next_block_address)
 
     """
     Helpers
@@ -307,8 +332,7 @@ class VM:
 
     def pop_type(self, type_: Type[types.Type]):
         self.sp -= type_.size_in_bytes()
-        val, _ = self.get_value(self.sp, type_)
-        return val
+        return self.get_value(self.sp, type_)
 
     def read_op_code(self):
         op_code, self.ip = codec.op_code_from_bytes(self.memory, self.ip)
@@ -331,7 +355,8 @@ class VM:
         return bool_
 
     def get_value(self, start, type_):
-        return codec.select_from_bytes_func(type_)(self.memory, start)
+        val, _ = codec.select_from_bytes_func(type_)(self.memory, start)
+        return val
 
     def get_bytes(self, offset, bytes_len):
         return self.memory[offset:offset + bytes_len]
@@ -348,8 +373,9 @@ class VM:
             self.memory[offset + i] = bytes_[i]
 
     def error(self, message):
-        print(message)
-        self.running = False
+        if self.running:
+            print(f'VM error: {message}')
+            self.running = False
 
     @staticmethod
     def reverse_binary(op, val1, val2):

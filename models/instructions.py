@@ -174,7 +174,7 @@ add_instruction(0x61, InstructionType.MEMORY_FREE, [])
 #  Pop integer from stack then pop N bytes from stack and set them at the address provided
 add_instruction(0x62, InstructionType.MEMORY_SET, [Int])
 #  Same as MEMORY_SET but additionally pushes the address back into memory
-add_instruction(0x63, InstructionType.MEMORY_SET_PUSH, [Int])
+add_instruction(0x63, InstructionType.MEMORY_SET_PUSH, [Int, Int])
 #  Pop address from stack and push N bytes from that address
 add_instruction(0x64, InstructionType.MEMORY_GET, [Int])
 

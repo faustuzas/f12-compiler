@@ -1,3 +1,6 @@
 fun main {
     int[] array = new int[4];
+    array[2] = 5444654;
+    char[] opa =  new ['a', 'b', 'c'];
+    --> array[2], opa[2];
 }

@@ -505,13 +505,14 @@ class ExprNewFromArrayLit(ExprNew):
         code_writer.write(InstructionType.MEMORY_ALLOCATE)
 
         el_size = self.array.single_el_size
-        for i in range(self.array.length):
-            code_writer.write(InstructionType.MEMORY_SET_PUSH, el_size)
-            if i + 1 != self.array.length:
-                code_writer.write(InstructionType.PUSH_INT, el_size)
-                code_writer.write(InstructionType.ADD_INT)
+        len_ = self.array.length
+        for i in range(len_):
+            code_writer.write(InstructionType.MEMORY_SET_PUSH, el_size, 1)
+            code_writer.write(InstructionType.PUSH_INT, el_size)
+            code_writer.write(InstructionType.ADD_INT)
+
         # calculate the original address and leave it in the stack
-        code_writer.write(InstructionType.PUSH_INT, self.array.length * (el_size - 1) - 1)
+        code_writer.write(InstructionType.PUSH_INT, el_size * len_)
         code_writer.write(InstructionType.SUB_INT)
 
 
