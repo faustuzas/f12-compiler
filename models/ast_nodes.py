@@ -930,26 +930,6 @@ class ExprVar(Expr, Assignable):
         self.identifier = identifier
         self.decl_node = None
 
-    def resolve_names(self, scope: Scope):
-        self.decl_node = scope.resolve_name(self.resolve_identifier())
-        return self.decl_node
-
-    def resolve_types(self):
-        if self.decl_node:
-            if isinstance(self.decl_node, (DeclVar, StmntDeclVar, FunParam)):
-                return self.decl_node.type
-            else:
-                handle_typing_error(f'Not a valid type for variable', self.reference_token)
-
-    def write_code(self, code_writer: CodeWriter):
-        if self.is_local:
-            code_writer.write(InstructionType.GET_LOCAL, self.slot, self.type.size_in_stack)
-        else:
-            code_writer.write(InstructionType.GET_GLOBAL, self.slot, self.type.size_in_stack)
-
-    def resolve_identifier(self):
-        return self.identifier
-
     @property
     def reference_token(self):
         return self.identifier
@@ -979,6 +959,26 @@ class ExprVar(Expr, Assignable):
     @property
     def is_accessible(self):
         return isinstance(self.decl_node.type, AstTypeUnit)
+
+    def resolve_names(self, scope: Scope):
+        self.decl_node = scope.resolve_name(self.resolve_identifier())
+        return self.decl_node
+
+    def resolve_types(self):
+        if self.decl_node:
+            if isinstance(self.decl_node, (DeclVar, StmntDeclVar, FunParam)):
+                return self.decl_node.type
+            else:
+                handle_typing_error(f'Not a valid type for variable', self.reference_token)
+
+    def write_code(self, code_writer: CodeWriter):
+        if self.is_local:
+            code_writer.write(InstructionType.GET_LOCAL, self.slot, self.type.size_in_stack)
+        else:
+            code_writer.write(InstructionType.GET_GLOBAL, self.slot, self.type.size_in_stack)
+
+    def resolve_identifier(self):
+        return self.identifier
 
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
@@ -1067,6 +1067,9 @@ class ExprArrayAccess(Expr, Assignable):
     def resolve_types(self):
         # check if array variable is Iterable
         array_type = self.array.resolve_types()
+        if array_type is None:
+            return None
+
         if isinstance(array_type, AstTypePointer):
             array_type = array_type.of_type
 

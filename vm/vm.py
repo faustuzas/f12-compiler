@@ -9,10 +9,12 @@ from models.instructions import op_code_by_type as op_codes, InstructionType as 
 from utils.list_utils import resize
 
 # total_memory = 1024 * 1024
-total_memory = 500
+total_memory = 300
 pointer_size = sizes.int
+
 heap_size = int(total_memory / 4)
 block_metadata_size = 2 * sizes.int
+heap_end_address = total_memory
 
 
 class VM:
@@ -139,6 +141,8 @@ class VM:
                 lambda x, y: x <= y, ctx.pop_type(types.Float), ctx.pop_type(types.Float))),
 
         op_codes.get(IType.MEMORY_ALLOCATE): lambda ctx: ctx.memory_allocate(ctx.hp, ctx.pop_type(types.Int)),
+        op_codes.get(IType.MEMORY_FREE):
+            lambda ctx: ctx.memory_free(ctx.pop_type(types.Int) - block_metadata_size),
         op_codes.get(IType.MEMORY_GET):
             lambda ctx: ctx.push_bytes(ctx.get_bytes(ctx.pop_type(types.Int), ctx.read_int())),
         op_codes.get(IType.MEMORY_SET):
@@ -160,7 +164,7 @@ class VM:
         op_code = self.read_op_code()
         instr = instructions_by_op_code.get(op_code)
         if instructions_by_op_code.get(op_code) is None:
-            self.op_code_not_defined()
+            self.op_code_not_defined(op_code)
         instr = instr.type
         self.op_codes_actions.exec(self, op_code)
 
@@ -235,9 +239,7 @@ class VM:
         for i in range(push_times):
             self.push_type(offset)
 
-    def op_code_not_defined(self):
-        self.ip -= sizes.op_code
-        op_code = self.read_op_code()
+    def op_code_not_defined(self, op_code):
         throw(ValueError('Op code 0x{:x} is not defined'.format(op_code)))
 
     def behaviour_not_defined(self):
@@ -251,63 +253,126 @@ class VM:
 
     """
     Heap management
-    
-    Each memory block has to integers in front of it:
-    1. Available size
-    2. Next block address
-    
-    TODO: 
-    1. No more space left
-    2. Last block mark with 0000000
-    
     """
     def init_heap(self):
-        self.set_block_size(self.hp, heap_size - block_metadata_size)
-        self.set_block_next_address(self.hp, 0)
+        self.set_block_data_size(self.hp, heap_size - block_metadata_size)
+        self.set_block_next_address(self.hp, heap_end_address)
 
-    def memory_allocate(self, block_address, block_size):
-        available_size_in_block = self.get_block_size(block_address)
-        next_block_address = self.get_block_next_address(block_address)
-
-        if available_size_in_block < block_size:
-            if next_block_address == 0:
-                self.error('Out of heap memory')
-            else:
-                # recursively go to the next block to check if there is space available
-                self.memory_allocate(next_block_address, block_size)
+    def memory_allocate(self, leftmost_free_block, required_data_size):
+        # If leftmost free block address is at the end of the heap - Out of memory
+        if leftmost_free_block == heap_end_address:
+            self.error('Out of heap memory')
             return
 
-        memory_used = block_metadata_size + block_size
-        if next_block_address == 0:
-            new_block_address = block_address + memory_used
-            new_block_size = available_size_in_block - memory_used - block_metadata_size
-            new_block_next_address = 0
-        else:
-            raise NotImplementedError()
+        # find block with enough space
+        big_enough_block = leftmost_free_block
+        available_memory = self.get_block_data_size(big_enough_block)
+        previous_blocks = [big_enough_block]
+        while available_memory < required_data_size:
+            big_enough_block = self.get_block_next_address(big_enough_block)
+            if big_enough_block == heap_end_address:
+                self.error('Out of heap memory')
+                return
+            available_memory = self.get_block_data_size(big_enough_block)
+            previous_blocks.append(big_enough_block)
 
-        # if next block size is not bigger than metadata, then we can't allocate new block
-        # so just add leftover memory to previous block
-        if new_block_size <= block_metadata_size:
-            block_size += new_block_size
-            new_block_address = 0
-        else:
-            # set next block metadata
-            self.set_block_size(new_block_address, new_block_size)
-            self.set_block_next_address(new_block_address, new_block_next_address)
-            self.hp = new_block_address
+        previous_free_block = previous_blocks[-2] if len(previous_blocks) >= 2 else None
 
-        # set allocated block metadata
-        self.set_block_size(block_address, block_size)
-        self.set_block_next_address(block_address, new_block_address)
+        memory_to_allocate = available_memory
+        leftover_block = heap_end_address
+        leftover_block_data_size = 0
+        leftover_block_next_block = self.get_block_next_address(big_enough_block)
+
+        # check if another block can be created from leftover memory
+        leftover_memory = available_memory - required_data_size
+        if leftover_memory > block_metadata_size:
+            leftover_block = big_enough_block + block_metadata_size + required_data_size
+            leftover_block_data_size = leftover_memory - block_metadata_size
+            memory_to_allocate = required_data_size
+
+        # create block from leftover memory
+        if leftover_block != heap_end_address:
+            self.set_block_data_size(leftover_block, leftover_block_data_size)
+            self.set_block_next_address(leftover_block, leftover_block_next_block)
+
+        # find next free block
+        next_free_block = leftover_block
+        if next_free_block == heap_end_address:
+            next_free_block = leftover_block_next_block
+
+        # if there is no previous block, it means we used the first free block
+        if previous_free_block:
+            self.set_block_next_address(previous_free_block, next_free_block)
+
+        # if leftmost block is consumed, move heap pointer
+        if self.hp == big_enough_block:
+            self.hp = next_free_block
+
+        # set the allocated size of the current block
+        self.set_block_data_size(big_enough_block, memory_to_allocate)
+        self.set_block_next_address(big_enough_block, heap_end_address)
 
         # push address of allocated block data section to the stack
-        self.push_type(block_address + block_metadata_size)
+        self.push_type(big_enough_block + block_metadata_size)
 
-    def get_block_size(self, block_address):
+    def memory_free(self, block_address):
+        leftmost_free_block_address = self.hp
+
+        # check if freed block is the leftmost
+        if block_address < leftmost_free_block_address:
+            # check if the last leftmost available block is adjacent from the right to the freed one
+            if self.get_used_block_adjacent_address(block_address) == leftmost_free_block_address:  # [1]
+                self.merge_from_right(block_address, leftmost_free_block_address)
+            else:  # [2]
+                self.set_block_next_address(block_address, leftmost_free_block_address)
+            self.hp = block_address
+        else:
+            # find nearest free block from the left
+            free_block_from_left = leftmost_free_block_address
+            while True:
+                address = self.get_block_next_address(free_block_from_left)
+                if address < block_address:
+                    free_block_from_left = address
+                else:
+                    break
+
+            free_block_from_right = self.get_block_next_address(free_block_from_left)
+            if self.get_used_block_adjacent_address(block_address) == free_block_from_right:
+                self.merge_from_right(block_address, free_block_from_right)
+
+            if self.get_used_block_adjacent_address(free_block_from_left) == block_address:
+                self.merge_from_right(free_block_from_left, block_address)
+
+    def merge_from_right(self, block, right_block):
+        right_block_size = self.get_free_block_size(right_block)
+        combined_data_size = self.get_block_data_size(block) + right_block_size
+
+        right_block_next_address = self.get_block_next_address(right_block)
+        block_next_address = self.get_block_next_address(block)
+
+        if right_block_next_address < block + block_metadata_size + combined_data_size \
+                and right_block_next_address < block_next_address:
+            next_address = right_block_next_address
+        else:
+            next_address = block_next_address
+
+        self.set_block_data_size(block, combined_data_size)
+        self.set_block_next_address(block, next_address)
+
+    def get_free_block_size(self, block_address):
+        return self.get_block_data_size(block_address) + block_metadata_size
+
+    def get_block_data_size(self, block_address):
         return self.get_value(block_address, types.Int)
 
-    def set_block_size(self, block_address, size):
-        self.set_value(block_address, size)
+    def set_block_data_size(self, block_address, data_size):
+        self.set_value(block_address, data_size)
+
+    def get_used_block_adjacent_address(self, block_address):
+        return block_address + block_metadata_size + self.get_block_data_size(block_address)
+
+    def get_free_block_adjacent_address(self, block_address):
+        return block_address + block_metadata_size + self.get_block_data_size(block_address)
 
     def get_block_next_address(self, block_address):
         return self.get_value(block_address + sizes.int, types.Int)

@@ -44,8 +44,8 @@ def compile_file(file_to_compile):
             with FileOutput('instructions.f12b') as output:
                 code_writer.print_instructions(output)
 
-            # with FileOutput('output.f12b') as output:
-            #     code_writer.dump_code(output)
+            # # with FileOutput('output.f12b') as output:
+            # #     code_writer.dump_code(output)
 
             del ast_root
             vm = VM(code_writer.code)
