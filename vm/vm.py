@@ -9,7 +9,7 @@ from models.instructions import op_code_by_type as op_codes, InstructionType as 
 from utils.list_utils import resize
 
 # total_memory = 1024 * 1024
-total_memory = 300
+total_memory = 400
 pointer_size = sizes.int
 
 heap_size = int(total_memory / 4)
@@ -162,10 +162,8 @@ class VM:
 
     def exec_one(self):
         op_code = self.read_op_code()
-        instr = instructions_by_op_code.get(op_code)
         if instructions_by_op_code.get(op_code) is None:
             self.op_code_not_defined(op_code)
-        instr = instr.type
         self.op_codes_actions.exec(self, op_code)
 
     def fn_call_begin(self):
@@ -335,26 +333,35 @@ class VM:
                     free_block_from_left = address
                 else:
                     break
-
             free_block_from_right = self.get_block_next_address(free_block_from_left)
-            if self.get_used_block_adjacent_address(block_address) == free_block_from_right:
-                self.merge_from_right(block_address, free_block_from_right)
 
-            if self.get_used_block_adjacent_address(free_block_from_left) == block_address:
+            if free_block_from_left != heap_end_address \
+                    and self.get_used_block_adjacent_address(free_block_from_left) == block_address:
                 self.merge_from_right(free_block_from_left, block_address)
+                block_address = free_block_from_left
+            elif free_block_from_left != heap_end_address:
+                self.set_block_next_address(free_block_from_left, block_address)
+
+            if free_block_from_right != heap_end_address \
+                    and self.get_used_block_adjacent_address(block_address) == free_block_from_right:
+                self.merge_from_right(block_address, free_block_from_right)
+            elif free_block_from_right != heap_end_address:
+                self.set_block_next_address(block_address, free_block_from_right)
 
     def merge_from_right(self, block, right_block):
         right_block_size = self.get_free_block_size(right_block)
         combined_data_size = self.get_block_data_size(block) + right_block_size
 
-        right_block_next_address = self.get_block_next_address(right_block)
         block_next_address = self.get_block_next_address(block)
+        right_block_next_address = self.get_block_next_address(right_block)
 
-        if right_block_next_address < block + block_metadata_size + combined_data_size \
-                and right_block_next_address < block_next_address:
-            next_address = right_block_next_address
+        [lower_address, higher_address] = sorted([block_next_address, right_block_next_address])
+        adjacent_block = block + block_metadata_size + combined_data_size
+
+        if adjacent_block <= lower_address:
+            next_address = lower_address
         else:
-            next_address = block_next_address
+            next_address = higher_address
 
         self.set_block_data_size(block, combined_data_size)
         self.set_block_next_address(block, next_address)
