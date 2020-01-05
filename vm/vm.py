@@ -114,6 +114,7 @@ class VM:
         op_codes.get(IType.UNARY_MINUS_INT): lambda ctx: ctx.push_type(-ctx.pop_type(types.Int)),
         op_codes.get(IType.UNARY_MINUS_FLOAT): lambda ctx: ctx.push_type(-ctx.pop_type(types.Float)),
 
+        op_codes.get(IType.NOT): lambda ctx: ctx.push_type(not ctx.pop_type(types.Bool)),
         op_codes.get(IType.OR): lambda ctx: ctx.push_type(ctx.pop_type(types.Bool) or ctx.pop_type(types.Bool)),
         op_codes.get(IType.AND): lambda ctx: ctx.push_type(ctx.pop_type(types.Bool) and ctx.pop_type(types.Bool)),
         op_codes.get(IType.EQ): lambda ctx: ctx.eq(ctx.read_int()),

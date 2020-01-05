@@ -291,9 +291,10 @@ class Parser:
     def parse_expr_3(self) -> ast.Expr:
         if self.accept(TokenType.OP_PLUS):
             return ast.ExprUPlus(self.parse_expr_3())
-
         elif self.accept(TokenType.OP_MINUS):
             return ast.ExprUMinus(self.parse_expr_3())
+        elif self.accept(TokenType.OP_NOT):
+            return ast.ExprNot(self.parse_expr_3())
 
         return self.parse_expr_2()
 

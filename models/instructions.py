@@ -4,6 +4,8 @@ from utils.bytes_utils import select_from_bytes_func
 
 
 class InstructionType(ExtendedEnum):
+    NOT = 'NOT'
+
     OR = 'OR'
     AND = 'AND'
 
@@ -158,18 +160,19 @@ add_instruction(0x4D, InstructionType.UNARY_MINUS_INT, [])
 add_instruction(0x4E, InstructionType.UNARY_PLUS_FLOAT, [])
 add_instruction(0x4F, InstructionType.UNARY_MINUS_FLOAT, [])
 
-add_instruction(0x50, InstructionType.OR, [])
-add_instruction(0x51, InstructionType.AND, [])
-add_instruction(0x52, InstructionType.EQ, [Int])
-add_instruction(0x53, InstructionType.NE, [Int])
-add_instruction(0x54, InstructionType.GT_INT, [])
-add_instruction(0x55, InstructionType.GE_INT, [])
-add_instruction(0x56, InstructionType.LT_INT, [])
-add_instruction(0x57, InstructionType.LE_INT, [])
-add_instruction(0x58, InstructionType.GT_FLOAT, [])
-add_instruction(0x59, InstructionType.GE_FLOAT, [])
-add_instruction(0x5A, InstructionType.LT_FLOAT, [])
-add_instruction(0x5B, InstructionType.LE_FLOAT, [])
+add_instruction(0x50, InstructionType.NOT, [])
+add_instruction(0x51, InstructionType.OR, [])
+add_instruction(0x52, InstructionType.AND, [])
+add_instruction(0x53, InstructionType.EQ, [Int])
+add_instruction(0x54, InstructionType.NE, [Int])
+add_instruction(0x55, InstructionType.GT_INT, [])
+add_instruction(0x56, InstructionType.GE_INT, [])
+add_instruction(0x57, InstructionType.LT_INT, [])
+add_instruction(0x58, InstructionType.LE_INT, [])
+add_instruction(0x59, InstructionType.GT_FLOAT, [])
+add_instruction(0x5A, InstructionType.GE_FLOAT, [])
+add_instruction(0x5B, InstructionType.LT_FLOAT, [])
+add_instruction(0x5C, InstructionType.LE_FLOAT, [])
 
 #  Pop integer from stack, allocate that much memory and push address of allocated memory to stack
 add_instruction(0x60, InstructionType.MEMORY_ALLOCATE, [])

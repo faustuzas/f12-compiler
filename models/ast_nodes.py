@@ -648,6 +648,43 @@ class ExprBinaryEquality(ExprBinary, ABC):
         code_writer.write(self.instruction_type, self.left.resolve_types().size_in_stack)
 
 
+class ExprNot(Expr):
+
+    def __init__(self, expr) -> None:
+        super().__init__()
+        self.add_children(expr)
+        self.expr = expr
+
+    @property
+    def reference_token(self):
+        return self.expr.reference_token
+
+    @property
+    def size_in_stack(self):
+        return sizes.bool
+
+    @property
+    def instruction_type(self):
+        raise NotImplementedError(f'Instruction type is not implemented for: {self.__class__} ')
+
+    def resolve_names(self, scope: Scope):
+        self.expr.resolve_names(scope)
+
+    def resolve_types(self):
+        expr_type = self.expr.resolve_types()
+
+        if not expr_type:
+            return None
+
+        unify_types(self.expr.reference_token, expr_type, AstTypePrimitive(types.Bool))
+
+        return AstTypePrimitive(types.Bool)
+
+    def write_code(self, code_writer: CodeWriter):
+        self.expr.write_code(code_writer)
+        code_writer.write(InstructionType.NOT)
+
+
 class ExprBinaryLogic(ExprBinary, ABC):
 
     @property
