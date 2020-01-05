@@ -1,5 +1,6 @@
 import sys
 from typing import Type
+from blessed import Terminal
 
 import utils.bytes_utils as codec
 from models import types
@@ -21,6 +22,8 @@ class VM:
 
     def __init__(self, opcodes) -> None:
         self.running = True
+
+        self.terminal = Terminal()
 
         self.memory = opcodes.copy()
         resize(self.memory, total_memory, 0)
@@ -158,6 +161,7 @@ class VM:
         op_codes.get(IType.TO_STDOUT_STRING): lambda ctx: ctx.to_stdout(types.String),
 
         op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
+        op_codes.get(IType.CLEAR_SCREEN): lambda ctx: ctx.clear_screen()
     }).default(lambda ctx: ctx.behaviour_not_defined())
 
     def exec_one(self):
@@ -248,6 +252,9 @@ class VM:
 
     def exit(self):
         self.running = False
+
+    def clear_screen(self):
+        print(self.terminal.clear())
 
     """
     Heap management

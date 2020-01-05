@@ -77,8 +77,8 @@ class InstructionType(ExtendedEnum):
     FROM_STDIN = 'FROM_STDIN'
 
     EXIT = 'EXIT'
-
     MARKER_STATIC_START = 'MARKER_STATIC_START'
+    CLEAR_SCREEN = 'CLEAR_SCREEN'
 
 
 class Instruction:
@@ -187,3 +187,4 @@ add_instruction(0x75, InstructionType.FROM_STDIN, [])
 
 add_instruction(0xE0, InstructionType.MARKER_STATIC_START, [])
 add_instruction(0xE1, InstructionType.EXIT, [])
+add_instruction(0xE2, InstructionType.CLEAR_SCREEN, [])

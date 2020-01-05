@@ -1,1 +1,4 @@
+blessed==1.16.1
+six==1.13.0
 termcolor==1.1.0
+wcwidth==0.1.8

@@ -1180,10 +1180,19 @@ class ExprFnCall(Expr):
         return self.function_decl_node.return_type
 
     def write_code(self, code_writer: CodeWriter):
+        if self.function_decl_node.std_instr:
+            return self.write_std_fn_code(code_writer)
+
         code_writer.write(InstructionType.FN_CALL_BEGIN)
         for arg in self.args:
             arg.write_code(code_writer)
         code_writer.write(InstructionType.FN_CALL, self.function_decl_node.label, self.function_decl_node.params_offset)
+
+    def write_std_fn_code(self, code_writer: CodeWriter):
+        for arg in self.args:
+            arg.write_code(code_writer)
+
+        code_writer.write(self.function_decl_node.std_instr)
 
 
 class ExprCreateUnit(Expr):
@@ -1638,7 +1647,7 @@ class Decl(Node, ABC):
 
 class DeclFun(Decl):
 
-    def __init__(self, name, params: List[FunParam], return_type: AstType, body: StmntBlock) -> None:
+    def __init__(self, name, params: List[FunParam], return_type: AstType, body: StmntBlock, std_instr=None) -> None:
         super().__init__()
         self.add_children(*params, return_type, body)
         self.name = name
@@ -1647,6 +1656,7 @@ class DeclFun(Decl):
         self.body = body
         self._label = Label()
         self._locals_offset = 0
+        self._std_instr = std_instr
 
     @property
     def reference_token(self):
@@ -1666,6 +1676,10 @@ class DeclFun(Decl):
         for param in self.params:
             sum_ += param.size_in_stack
         return sum_
+
+    @property
+    def std_instr(self):
+        return self._std_instr
 
     def resolve_names(self, scope: Scope):
         fn_scope = Scope(scope)
@@ -1886,6 +1900,11 @@ class Program(Node):
         self.root_elements = new_root_elements
 
     def resolve_names(self, scope: Scope):
+        import std
+
+        for fn in std.functions:
+            scope.add(fn.name, fn)
+
         # register function and unit declarations
         for decl in self.root_elements:
             if isinstance(decl, DeclFun):
