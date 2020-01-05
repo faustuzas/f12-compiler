@@ -76,9 +76,13 @@ class InstructionType(ExtendedEnum):
 
     FROM_STDIN = 'FROM_STDIN'
 
+    CLEAR_SCREEN = 'CLEAR_SCREEN'
+    PUT_CHAR_X_Y = 'PUT_CHAR_X_Y'
+    GET_INPUT = 'GET_INPUT'
+    SLEEP = 'SLEEP'
+
     EXIT = 'EXIT'
     MARKER_STATIC_START = 'MARKER_STATIC_START'
-    CLEAR_SCREEN = 'CLEAR_SCREEN'
 
 
 class Instruction:
@@ -185,6 +189,11 @@ add_instruction(0x73, InstructionType.TO_STDOUT_CHAR, [])
 add_instruction(0x74, InstructionType.TO_STDOUT_BOOL, [])
 add_instruction(0x75, InstructionType.FROM_STDIN, [])
 
+# Std functions
+add_instruction(0xA0, InstructionType.CLEAR_SCREEN, [])
+add_instruction(0xA1, InstructionType.PUT_CHAR_X_Y, [])
+add_instruction(0xA2, InstructionType.GET_INPUT, [])
+add_instruction(0xA3, InstructionType.SLEEP, [])
+
 add_instruction(0xE0, InstructionType.MARKER_STATIC_START, [])
 add_instruction(0xE1, InstructionType.EXIT, [])
-add_instruction(0xE2, InstructionType.CLEAR_SCREEN, [])

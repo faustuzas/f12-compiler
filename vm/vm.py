@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 from typing import Type
 from blessed import Terminal
 
@@ -9,8 +10,8 @@ from utils import FasterSwitcher as Switcher, throw, sizes
 from models.instructions import op_code_by_type as op_codes, InstructionType as IType, instructions_by_op_code
 from utils.list_utils import resize
 
-total_memory = 1024 * 1024
-# total_memory = 400
+# total_memory = 1024 * 1024
+total_memory = 1000
 pointer_size = sizes.int
 
 heap_size = int(total_memory / 4)
@@ -41,8 +42,9 @@ class VM:
         self.init_heap()
 
     def exec(self):
-        while self.running:
-            self.exec_one()
+        with self.terminal.hidden_cursor():
+            while self.running:
+                self.exec_one()
 
     op_codes_actions = Switcher.from_dict({
         op_codes.get(IType.POP): lambda ctx: ctx.pop_bytes(ctx.read_int()),
@@ -160,8 +162,13 @@ class VM:
         op_codes.get(IType.TO_STDOUT_BOOL): lambda ctx: ctx.to_stdout(types.Bool),
         op_codes.get(IType.TO_STDOUT_STRING): lambda ctx: ctx.to_stdout(types.String),
 
-        op_codes.get(IType.EXIT): lambda ctx: ctx.exit(),
-        op_codes.get(IType.CLEAR_SCREEN): lambda ctx: ctx.clear_screen()
+        op_codes.get(IType.CLEAR_SCREEN): lambda ctx: ctx.clear_screen(),
+        op_codes.get(IType.GET_INPUT): lambda ctx: ctx.get_input(ctx.pop_type(types.Int)),
+        op_codes.get(IType.PUT_CHAR_X_Y):
+            lambda ctx: ctx.put_char_x_y(ctx.pop_type(types.Int), ctx.pop_type(types.Int), ctx.pop_type(types.Char)),
+        op_codes.get(IType.SLEEP): lambda ctx: ctx.sleep(ctx.pop_type(types.Int)),
+
+        op_codes.get(IType.EXIT): lambda ctx: ctx.exit()
     }).default(lambda ctx: ctx.behaviour_not_defined())
 
     def exec_one(self):
@@ -250,11 +257,33 @@ class VM:
         instr = instructions_by_op_code.get(op_code)
         throw(ValueError(f'Behaviour for {instr.type} is not defined'))
 
-    def exit(self):
-        self.running = False
-
     def clear_screen(self):
         print(self.terminal.clear())
+
+    def get_input(self, buff_addr):
+        chars_read = 0
+
+        char = self.get_symbol()
+        while char:
+            if len(char) != 1:
+                char = self.get_symbol()
+                continue
+
+            self.set_value(buff_addr + chars_read * sizes.int, ord(char))
+            char = self.get_symbol()
+            chars_read += 1
+
+        self.push_type(chars_read)
+
+    def put_char_x_y(self, y, x, char):
+        with self.terminal.location(x, y):
+            print(char)
+
+    def sleep(self, ms):
+        sleep(int(ms / 1000))
+
+    def exit(self):
+        self.running = False
 
     """
     Heap management
@@ -455,6 +484,10 @@ class VM:
         if self.running:
             print(f'VM error: {message}')
             self.running = False
+
+    def get_symbol(self):
+        with self.terminal.raw():
+            return self.terminal.inkey(timeout=0)
 
     @staticmethod
     def reverse_binary(op, val1, val2):

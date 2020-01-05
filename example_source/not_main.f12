@@ -1,14 +1,3 @@
 fun main {
-    char[] a1 = new char[2];
-    char[] a2 = new char[22];
-    char[] a3 = new char[2];
-    char[] a4 = new char[32];
-    char[] a5 = new char[2];
-
-    free a5;
-
-    free a2;
-    free a3;
-
-    // char[] a6 = new char[32];
+    put_char_x_y('a', 1, 1);
 }

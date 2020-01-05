@@ -1,0 +1,43 @@
+int left_direction = 97; // a
+int right_direction = 100; // d
+
+char falling_symbol = 'a';
+
+int height = 50;
+
+fun direction(int c) => int {
+    if c == left_direction {
+        ret -1;
+    }
+
+    if c == right_direction {
+        ret 1;
+    }
+
+    ret 0;
+}
+
+fun main {
+    int x = 25;
+    int y = 0;
+
+    int[] input_buff = new int[20];
+    while y <= height {
+        y = y + 1;
+
+        int chars_read = get_input(input_buff);
+        int i = 0;
+        while i < chars_read {
+            i = i + 1;
+
+            x = x + direction(input_buff[i]);
+        }
+
+        put_char_x_y(falling_symbol, x, y);
+
+        sleep(1000);
+        clear_screen();
+    }
+
+    free input_buff;
+}
