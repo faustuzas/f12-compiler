@@ -8,8 +8,8 @@ from utils import FasterSwitcher as Switcher, throw, sizes
 from models.instructions import op_code_by_type as op_codes, InstructionType as IType, instructions_by_op_code
 from utils.list_utils import resize
 
-# total_memory = 1024 * 1024
-total_memory = 400
+total_memory = 1024 * 1024
+# total_memory = 400
 pointer_size = sizes.int
 
 heap_size = int(total_memory / 4)

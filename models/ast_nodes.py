@@ -137,6 +137,8 @@ class AstTypePointer(AstType):
 
     @property
     def size_in_heap(self):
+        if isinstance(self.of_type, AstTypePointer):
+            return sizes.address
         return self.of_type.size_in_heap
 
     @property
@@ -174,6 +176,8 @@ class AstTypeArray(AstType):
 
     @property
     def size_in_heap(self):
+        if isinstance(self.inner_type, AstTypePointer):
+            return sizes.address
         return self.inner_type.size_in_heap
 
     @property
@@ -954,7 +958,7 @@ class ExprVar(Expr, Assignable):
 
     @property
     def size_in_heap(self):
-        return self.type.size_in_heap
+        return self.decl_node.size_in_heap
 
     @property
     def is_accessible(self):
@@ -1050,6 +1054,10 @@ class ExprArrayAccess(Expr, Assignable):
         return self.array.resolve_types().size_in_stack
 
     @property
+    def size_in_heap(self):
+        return sizes.address
+
+    @property
     def is_accessible(self):
         return self.array.is_accessible()
 
@@ -1089,17 +1097,18 @@ class ExprArrayAccess(Expr, Assignable):
 
     def write_code(self, code_writer: CodeWriter):
         self.array.write_code(code_writer)
+
         self.index_expr.write_code(code_writer)
         code_writer.write(InstructionType.PUSH_INT, self.array.size_in_heap)
         code_writer.write(InstructionType.MUL_INT)
         code_writer.write(InstructionType.ADD_INT)
 
         type_ = self.array.resolve_types()
-        # if isinstance(type_, AstTypePointer):
-        #     bytes_to_get = type_.size_in_heap
-        # else:
-        #     bytes_to_get = type_.size_in_stack
-        bytes_to_get = type_.size_in_heap
+        if isinstance(type_, AstTypePointer):
+            bytes_to_get = type_.size_in_heap
+        else:
+            bytes_to_get = type_.size_in_stack
+
         code_writer.write(InstructionType.MEMORY_GET, bytes_to_get)
 
     def write_assigment_code(self, code_writer, value):
@@ -1107,19 +1116,19 @@ class ExprArrayAccess(Expr, Assignable):
         # pop the value and push it two times into the stack because assignment has to have value
         code_writer.write(InstructionType.POP_PUSH_N, value.size_in_heap, 2)
 
+        self.array.write_code(code_writer)
+
+        type_ = self.array.resolve_types()
+
         # offset bytes depending on the type
         self.index_expr.write_code(code_writer)
-        code_writer.write(InstructionType.PUSH_INT, self.array.size_in_heap)
+        code_writer.write(InstructionType.PUSH_INT, type_.size_in_heap)
         code_writer.write(InstructionType.MUL_INT)
 
-        if self.array.is_local:
-            code_writer.write(InstructionType.GET_LOCAL, self.array.slot, self.array.size_in_stack)
-        else:
-            code_writer.write(InstructionType.GET_GLOBAL, self.array.slot, self.array.size_in_stack)
         # add offset to address stored in variable
         code_writer.write(InstructionType.ADD_INT)
 
-        code_writer.write(InstructionType.MEMORY_SET, self.array.size_in_heap)
+        code_writer.write(InstructionType.MEMORY_SET, type_.size_in_heap)
 
 
 class ExprFnCall(Expr):
@@ -1152,9 +1161,11 @@ class ExprFnCall(Expr):
     def resolve_types(self):
         if not self.function_decl_node:
             return None
+
         if not isinstance(self.function_decl_node, DeclFun):
             handle_typing_error(f'Item "{self.function_name}" is not a function', self.reference_token)
             return None
+
         params = self.function_decl_node.params
         if len(params) != len(self.args):
             handle_typing_error(
@@ -1162,8 +1173,10 @@ class ExprFnCall(Expr):
                 self.reference_token
             )
         else:
-            for arg in self.args:
-                arg.resolve_types()
+            for i, arg in enumerate(self.args):
+                param = params[i]
+                arg_type = arg.resolve_types()
+                unify_types(arg.reference_token, param.type, arg_type)
         return self.function_decl_node.return_type
 
     def write_code(self, code_writer: CodeWriter):
@@ -1323,6 +1336,10 @@ class StmntDeclVar(Stmnt):
     def reference_token(self):
         return self.name
 
+    @property
+    def size_in_heap(self):
+        return self.type.size_in_heap
+
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
         if self.value:
@@ -1344,7 +1361,7 @@ class StmntDeclVar(Stmnt):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot, self.value.size_in_stack)
+            code_writer.write(InstructionType.SET_LOCAL, self.stack_slot, self.type.size_in_stack)
 
 
 class StmntIf(Stmnt):
@@ -1714,7 +1731,7 @@ class DeclVar(Decl):
     def write_code(self, code_writer: CodeWriter):
         if self.value:
             self.value.write_code(code_writer)
-            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot, self.value.size_in_stack)
+            code_writer.write(InstructionType.SET_GLOBAL, self.global_slot, self.type.size_in_stack)
 
 
 class DeclUnitField(Node):
