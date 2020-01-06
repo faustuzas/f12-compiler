@@ -39,7 +39,7 @@ def init_functions():
             Token(TokenType.IDENTIFIER, 0, 'std', 0, value='get_input'),
             [
                 ast.FunParam(
-                    ast.AstTypePointer(ast.AstTypeArray(ast.AstTypePrimitive(types.Int))),
+                    ast.AstTypePointer(ast.AstTypeArray(ast.AstTypePrimitive(types.Char))),
                     Token(TokenType.IDENTIFIER, 0, 'std', 0, value='buff'),
                 )
             ],

@@ -270,7 +270,7 @@ class VM:
                 char = self.get_symbol()
                 continue
 
-            self.set_value(buff_addr + chars_read * sizes.int, ord(char))
+            self.set_value(buff_addr + chars_read * sizes.char, char, types.Char)
             char = self.get_symbol()
             chars_read += 1
 
