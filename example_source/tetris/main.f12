@@ -23,4 +23,6 @@ fun main {
     } else {
         --> "\n\n", "You won!!!", "\n\n";
     }
+
+    clean_board();
 }

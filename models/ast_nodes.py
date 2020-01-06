@@ -1362,24 +1362,24 @@ class StmntEmpty(Stmnt):
 
 class StmntFree(Stmnt):
 
-    def __init__(self, address) -> None:
+    def __init__(self, expr_address) -> None:
         super().__init__()
-        self.add_children(address)
-        self.address = address
+        self.add_children(expr_address)
+        self.expr_address = expr_address
 
     @property
     def reference_token(self):
-        return self.address.reference_token
+        return self.expr_address.reference_token
 
     def resolve_names(self, scope: Scope):
-        self.address.resolve_names(scope)
+        self.expr_address.resolve_names(scope)
 
     def resolve_types(self):
-        type_ = self.address.resolve_types()
+        type_ = self.expr_address.resolve_types()
         unify_types(self.reference_token, AstTypePointer(None), type_)
 
     def write_code(self, code_writer: CodeWriter):
-        self.address.write_code(code_writer)
+        self.expr_address.write_code(code_writer)
         code_writer.write(InstructionType.MEMORY_FREE)
 
 

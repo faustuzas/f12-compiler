@@ -145,3 +145,27 @@ fun next_type_index => int {
     block_type_counter = (block_type_counter + 1) % total_block_types;
     ret block_type_counter;
 }
+
+fun clean_blocks {
+    int type_i = 0;
+    while type_i < total_block_types {
+        int direction_i = 0;
+
+        while direction_i < 4 {
+            int row_i = 0;
+
+            while row_i < BLOCK_MAX_ROWS {
+                free block_types[type_i][direction_i][row_i];
+                row_i = row_i + 1;
+            }
+
+            free block_types[type_i][direction_i];
+            direction_i = direction_i + 1;
+        }
+
+        free block_types[type_i];
+        type_i = type_i + 1;
+    }
+
+    free block_types;
+}

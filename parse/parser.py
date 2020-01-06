@@ -173,9 +173,9 @@ class Parser:
             return self.parse_stmnt_if()
 
         if self.accept(TokenType.FREE):
-            ident = self.expect(TokenType.IDENTIFIER)
+            expr = self.parse_expr()
             self.expect(TokenType.C_SEMI)
-            return ast.StmntFree(ast.ExprVar(ident))
+            return ast.StmntFree(expr)
 
         expr = self.parse_expr()
         self.expect(TokenType.C_SEMI, '";"')

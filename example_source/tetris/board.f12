@@ -251,3 +251,13 @@ fun is_wall(int x, int y) => bool {
 fun is_floor(int x, int y) => bool {
     ret y == FLOOR;
 }
+
+fun clean_board {
+    clean_blocks();
+
+    int row = 0;
+    while row < BOARD_HEIGHT {
+        free board[row];
+        row = row + 1;
+    }
+}
