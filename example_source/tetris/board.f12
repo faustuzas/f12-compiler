@@ -1,4 +1,4 @@
-const int BOARD_HEIGHT = 20;
+const int BOARD_HEIGHT = 30;
 const int BOARD_WIDTH = 50;
 
 const int LEFT_WALL = 0;
@@ -9,12 +9,18 @@ const char WALL_CHAR = '|';
 const char FLOOR_CHAR = '-';
 const char BACKGROUND_CHAR = ' ';
 
+const char MOVE_LEFT = 'a';
+const char MOVE_RIGHT = 'd';
+const char MOVE_DOWN = 's';
+const char ROTATE = 'w';
+
 const char BLOCK_CHAR = '*';
 
 int falling_block_centre_x;
 int falling_block_centre_y;
 
 char[][] board;
+char[] input_buff = new char[15];
 
 fun init_board {
     board = new char[][BOARD_HEIGHT];
@@ -53,7 +59,31 @@ fun process_frame {
 
     falling_block_centre_y = falling_block_centre_y + 1;
 
+    int chars_read = get_input(input_buff);
+    process_input(chars_read);
+
     paint_falling_block(BLOCK_CHAR);
+}
+
+fun process_input(int chars_read) {
+    int i = 0;
+    while i < chars_read {
+        char c = input_buff[i];
+
+        if c == MOVE_LEFT {
+            falling_block_centre_x = falling_block_centre_x - 1;
+        }
+
+        if c == MOVE_RIGHT {
+            falling_block_centre_x = falling_block_centre_x + 1;
+        }
+
+        if c == MOVE_DOWN {
+            falling_block_centre_y = falling_block_centre_y + 1;
+        }
+
+        i = i + 1;
+    }
 }
 
 fun paint_falling_block(char c) {
