@@ -49,7 +49,12 @@ fun process_frame => int {
 
     if will_block_collide(falling_block, 0, 1) {
         paint_falling_block(BLOCK_CHAR);
-        check_for_full_rows();
+        
+        if remove_full_rows() > 0 {
+            if is_game_won() {
+                ret RESULT_WON;
+            }
+        }
 
         if is_game_over() {
             ret RESULT_LOST;
@@ -97,6 +102,20 @@ fun process_input(int chars_read) {
     }
 }
 
+fun is_game_won => bool {
+    int column = LEFT_WALL + 1;
+    int first_row = FLOOR - 1;
+    while column < RIGHT_WALL {
+        if board[first_row][column] != BACKGROUND_CHAR {
+            ret false;
+        }
+
+        column = column + 1;
+    }
+
+    ret true;
+}
+
 fun is_game_over => bool {
     int column = LEFT_WALL + 1;
     while column < RIGHT_WALL {
@@ -110,7 +129,9 @@ fun is_game_over => bool {
     ret false;
 }
 
-fun check_for_full_rows {
+fun remove_full_rows => int{
+    int rows_removed = 0;
+
     int row = 0;
     while row < FLOOR {
         int column = 0;
@@ -127,10 +148,13 @@ fun check_for_full_rows {
 
         if is_full {
             remove_full_row(row);
+            rows_removed = rows_removed + 1;
         }
 
         row = row + 1;
     }
+
+    ret rows_removed;
 }
 
 fun remove_full_row(int row_to_remove) {

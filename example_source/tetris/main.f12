@@ -21,6 +21,6 @@ fun main {
     if result == RESULT_LOST {
         --> "\n\n", "You lost", "\n\n";
     } else {
-        --> "\n\n", "You win!!!", "\n\n";
+        --> "\n\n", "You won!!!", "\n\n";
     }
 }
