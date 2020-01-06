@@ -19,3 +19,6 @@ const char ROTATE = 'w';
 const char BLOCK_CHAR = '*';
 const int BLOCK_MAX_ROWS = 3;
 const int BLOCK_MAX_COLUMNS = 3;
+
+const int STARTING_ROTATION = 3;
+const int TOTAL_ROTATIONS = 4;

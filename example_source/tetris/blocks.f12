@@ -3,21 +3,46 @@
 const char e = BACKGROUND_CHAR; // void symbol
 const char x = BLOCK_CHAR; // value symbol
 
-char[][] block_type_1 = new [
-    new [ e, x, e ],
-    new [ x, x, x ],
-    new [ e, e, e ]
+char[][][] block_type_1 = new [
+    new [
+        new [ e, x, e ],
+        new [ x, x, x ],
+        new [ e, e, e ]
+    ],
+    new [
+        new [ e, x, e ],
+        new [ e, x, x ],
+        new [ e, x, e ]
+    ],
+    new [
+        new [ e, e, e ],
+        new [ x, x, x ],
+        new [ e, x, e ]
+    ],
+    new [
+        new [ e, x, e ],
+        new [ x, x, e ],
+        new [ e, x, e ]
+    ]
 ];
 
-char[][][] block_types = new [
+char[][][][] block_types = new [
     block_type_1
 ];
 
 int block_type_counter = 0;
 int total_block_types = 1;
 
-fun get_next_block => char[][] {
+int rotation;
+
+fun get_next_block_type => char[][][] {
+    rotation = STARTING_ROTATION;
     ret block_types[next_type_index()];
+}
+
+fun rotate_block(char[][][] block_type) => char[][] {
+    rotation = (rotation + 1) % TOTAL_ROTATIONS;
+    ret block_type[rotation];
 }
 
 fun next_type_index => int {

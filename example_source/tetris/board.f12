@@ -4,6 +4,7 @@ char[] input_buff = new char[15];
 
 char[][] board;
 
+char[][][] falling_block_type;
 char[][] falling_block;
 int falling_block_corner_x;
 int falling_block_corner_y;
@@ -77,6 +78,10 @@ fun process_input(int chars_read) {
             falling_block_corner_y = falling_block_corner_y + 1;
         }
 
+        if c == ROTATE {
+            falling_block = rotate_block(falling_block_type);
+        }
+
         i = i + 1;
     }
 }
@@ -109,7 +114,8 @@ fun reset_falling_block {
     falling_block_corner_x = BOARD_WIDTH / 2;
     falling_block_corner_y = 0;
 
-    falling_block = get_next_block();
+    falling_block_type = get_next_block_type();
+    falling_block = rotate_block(falling_block_type);
 }
 
 fun determine_char(int column, int row) => char {
