@@ -1,3 +1,4 @@
+>include "example_source/tetris/config.f12";
 >include "example_source/tetris/board.f12";
 
 fun main {

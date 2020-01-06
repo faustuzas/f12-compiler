@@ -1,0 +1,19 @@
+const int BOARD_HEIGHT = 20;
+const int BOARD_WIDTH = 50;
+
+const int TOP_OFFSET = 2;
+
+const int LEFT_WALL = 0;
+const int RIGHT_WALL = BOARD_WIDTH - 1;
+const int FLOOR = BOARD_HEIGHT - 1;
+
+const char WALL_CHAR = '|';
+const char FLOOR_CHAR = '-';
+const char BACKGROUND_CHAR = ' ';
+
+const char MOVE_LEFT = 'a';
+const char MOVE_RIGHT = 'd';
+const char MOVE_DOWN = 's';
+const char ROTATE = 'w';
+
+const char BLOCK_CHAR = '*';

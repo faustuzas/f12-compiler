@@ -1,21 +1,3 @@
-const int BOARD_HEIGHT = 30;
-const int BOARD_WIDTH = 50;
-
-const int LEFT_WALL = 0;
-const int RIGHT_WALL = BOARD_WIDTH - 1;
-const int FLOOR = BOARD_HEIGHT - 1;
-
-const char WALL_CHAR = '|';
-const char FLOOR_CHAR = '-';
-const char BACKGROUND_CHAR = ' ';
-
-const char MOVE_LEFT = 'a';
-const char MOVE_RIGHT = 'd';
-const char MOVE_DOWN = 's';
-const char ROTATE = 'w';
-
-const char BLOCK_CHAR = '*';
-
 int falling_block_centre_x;
 int falling_block_centre_y;
 
@@ -46,7 +28,7 @@ fun print_board {
     while row < BOARD_HEIGHT {
         int column = 0;
         while column < BOARD_WIDTH {
-            put_char_x_y(board[row][column], column, row);
+            put_char_x_y(board[row][column], column, row + TOP_OFFSET);
             column = column + 1;
         }
 
@@ -57,10 +39,16 @@ fun print_board {
 fun process_frame {
     paint_falling_block(BACKGROUND_CHAR);
 
-    falling_block_centre_y = falling_block_centre_y + 1;
-
     int chars_read = get_input(input_buff);
     process_input(chars_read);
+
+    if will_collide(falling_block_centre_x, falling_block_centre_y + 1) {
+        paint_falling_block(BLOCK_CHAR);
+        reset_falling_block();
+        paint_falling_block(BLOCK_CHAR);
+    } else {
+        falling_block_centre_y = falling_block_centre_y + 1;
+    }
 
     paint_falling_block(BLOCK_CHAR);
 }
@@ -69,21 +57,31 @@ fun process_input(int chars_read) {
     int i = 0;
     while i < chars_read {
         char c = input_buff[i];
+        int x = falling_block_centre_x;
+        int y = falling_block_centre_y;
 
-        if c == MOVE_LEFT {
+        if c == MOVE_LEFT && !will_collide(x - 1, y) {
             falling_block_centre_x = falling_block_centre_x - 1;
         }
 
-        if c == MOVE_RIGHT {
+        if c == MOVE_RIGHT && !will_collide(x + 1, y) {
             falling_block_centre_x = falling_block_centre_x + 1;
         }
 
-        if c == MOVE_DOWN {
+        if c == MOVE_DOWN && !will_collide(x, y + 1) {
             falling_block_centre_y = falling_block_centre_y + 1;
         }
 
         i = i + 1;
     }
+}
+
+fun will_collide(int x, int y) => bool {
+    if x <= LEFT_WALL || x >= RIGHT_WALL || y >= FLOOR {
+        ret true;
+    }
+
+    ret board[y][x] != BACKGROUND_CHAR;
 }
 
 fun paint_falling_block(char c) {
