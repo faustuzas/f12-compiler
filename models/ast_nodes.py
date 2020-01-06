@@ -472,7 +472,7 @@ class ExprNewFromSizedType(ExprNew):
 
     def write_code(self, code_writer: CodeWriter):
         self.size_expr.write_code(code_writer)
-        code_writer.write(InstructionType.PUSH_INT, self.type.size_in_heap)
+        code_writer.write(InstructionType.PUSH_INT, self.type.size_in_stack)
         code_writer.write(InstructionType.MUL_INT)
         code_writer.write(InstructionType.MEMORY_ALLOCATE)
 
@@ -1774,10 +1774,11 @@ class DeclVar(Decl):
         self.type.resolve_types()
         if not self.type.is_valid_var_type:
             handle_typing_error('Cannot create a variable of the given type', self.reference_token)
-            return None
+            return
 
         if self.value:
-            return self.value.resolve_types()
+            value_type = self.value.resolve_types()
+            unify_types(self.reference_token, self.type, value_type)
 
     def write_code(self, code_writer: CodeWriter):
         if self.value:

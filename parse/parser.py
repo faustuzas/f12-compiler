@@ -369,6 +369,7 @@ class Parser:
                 array_open = self.get_next_token()
                 items = self.parse_array_values()
                 return ast.ExprNewFromArrayLit(ast.ExprLitArray(items, array_open))
+
             type_ = self.expect_type()
             self.expect(TokenType.C_SQUARE_L, '[')
             size = self.parse_expr()
