@@ -9,6 +9,9 @@ const char WALL_CHAR = '|';
 const char FLOOR_CHAR = '-';
 const char BACKGROUND_CHAR = ' ';
 
+int dropping_block_centre_x;
+int dropping_block_centre_y;
+
 char[][] board;
 
 fun init_board {
@@ -16,9 +19,15 @@ fun init_board {
 
     int row = 0;
     while row < BOARD_HEIGHT {
-        row = row + 1;
-
         board[row] = new char[BOARD_WIDTH];
+
+        int column = 0;
+        while column < BOARD_WIDTH {
+            board[row][column] = determine_char(column, row);
+            column = column + 1;
+        }
+
+        row = row + 1;
     }
 }
 
@@ -27,14 +36,17 @@ fun print_board {
     while row < BOARD_HEIGHT {
         int column = 0;
         while column < BOARD_WIDTH {
-            char c = determine_char(column, row);
-            put_char_x_y(c, column, row);
-
+            put_char_x_y(board[row][column], column, row);
             column = column + 1;
         }
 
         row = row + 1;
     }
+}
+
+fun reset_dropping_block {
+    dropping_block_centre_x = BOARD_WIDTH / 2;
+    dropping_block_centre_y = 0;
 }
 
 fun determine_char(int column, int row) => char {

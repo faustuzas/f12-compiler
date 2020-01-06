@@ -1147,18 +1147,18 @@ class ExprArrayAccess(Expr, Assignable):
     def write_code(self, code_writer: CodeWriter):
         self.array.write_code(code_writer)
 
+        type_ = self.array.resolve_types()
+        if isinstance(type_, AstTypePointer):
+            el_size = type_.size_in_heap
+        else:
+            el_size = type_.size_in_stack
+
         self.index_expr.write_code(code_writer)
-        code_writer.write(InstructionType.PUSH_INT, self.array.size_in_heap)
+        code_writer.write(InstructionType.PUSH_INT, el_size)
         code_writer.write(InstructionType.MUL_INT)
         code_writer.write(InstructionType.ADD_INT)
 
-        type_ = self.array.resolve_types()
-        if isinstance(type_, AstTypePointer):
-            bytes_to_get = type_.size_in_heap
-        else:
-            bytes_to_get = type_.size_in_stack
-
-        code_writer.write(InstructionType.MEMORY_GET, bytes_to_get)
+        code_writer.write(InstructionType.MEMORY_GET, el_size)
 
     def write_assigment_code(self, code_writer, value):
         value.write_code(code_writer)
@@ -1200,6 +1200,10 @@ class ExprFnCall(Expr):
     @property
     def size_in_stack(self):
         return self.function_decl_node.return_type.size_in_stack
+
+    @property
+    def size_in_heap(self):
+        return self.function_decl_node.return_type.size_in_heap
 
     def resolve_names(self, scope: Scope):
         self.function_decl_node = scope.resolve_name(self.function_name)
@@ -1557,7 +1561,7 @@ class StmntExpr(Stmnt):
 
     def write_code(self, code_writer: CodeWriter):
         self.expr.write_code(code_writer)
-        code_writer.write(InstructionType.POP, self.expr.size_in_stack)
+        code_writer.write(InstructionType.POP, self.expr.resolve_types().size_in_stack)
 
 
 class StmntToStdout(Stmnt):
@@ -1773,6 +1777,10 @@ class DeclVar(Decl):
     @property
     def size_in_stack(self):
         return self.type.size_in_stack
+
+    @property
+    def size_in_heap(self):
+        return self.type.size_in_heap
 
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)

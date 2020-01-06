@@ -58,7 +58,7 @@ def compile_file(file_to_compile):
 
 if __name__ == '__main__':
     file = 'example_source/tetris/main.f12'
-    # file = 'example_source/playground.f12'
+    # file = 'example_source/not_main.f12'
     if len(argv) == 2:
         file = argv[1]
     compile_file(file)

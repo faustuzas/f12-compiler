@@ -11,6 +11,7 @@ from models.instructions import op_code_by_type as op_codes, InstructionType as 
 from utils.list_utils import resize
 
 total_memory = 1024 * 1024
+# total_memory = 400
 
 pointer_size = sizes.int
 
