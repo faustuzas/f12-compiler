@@ -1,0 +1,11 @@
+>include "example_source/tetris/board.f12";
+
+fun main {
+    init_board();
+
+    clear_screen();
+    while true {
+        print_board();
+        sleep(1000);
+    }
+}

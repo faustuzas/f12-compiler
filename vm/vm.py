@@ -12,6 +12,8 @@ from utils.list_utils import resize
 
 total_memory = 1024 * 1024
 
+pointer_size = sizes.int
+
 heap_size = int(total_memory / 4)
 block_metadata_size = 2 * sizes.int
 heap_end_address = total_memory

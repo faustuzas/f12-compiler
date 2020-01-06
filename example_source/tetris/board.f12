@@ -1,0 +1,62 @@
+const int BOARD_HEIGHT = 20;
+const int BOARD_WIDTH = 50;
+
+const int LEFT_WALL = 0;
+const int RIGHT_WALL = BOARD_WIDTH - 1;
+const int FLOOR = BOARD_HEIGHT - 1;
+
+const char WALL_CHAR = '|';
+const char FLOOR_CHAR = '-';
+const char BACKGROUND_CHAR = ' ';
+
+char[][] board;
+
+fun init_board {
+    board = new char[][BOARD_HEIGHT];
+
+    int row = 0;
+    while row < BOARD_HEIGHT {
+        row = row + 1;
+
+        board[row] = new char[BOARD_WIDTH];
+    }
+}
+
+fun print_board {
+    int row = 0;
+    while row < BOARD_HEIGHT {
+        int column = 0;
+        while column < BOARD_WIDTH {
+            char c = determine_char(column, row);
+            put_char_x_y(c, column, row);
+
+            column = column + 1;
+        }
+
+        row = row + 1;
+    }
+}
+
+fun determine_char(int column, int row) => char {
+    if is_wall(column, row) {
+        ret WALL_CHAR;
+    }
+
+    if is_floor(column, row) {
+        ret FLOOR_CHAR;
+    }
+
+    ret BACKGROUND_CHAR;
+}
+
+fun is_wall(int x, int y) => bool {
+    if y == BOARD_HEIGHT {
+        ret false;
+    }
+
+    ret x == LEFT_WALL || x == RIGHT_WALL;
+}
+
+fun is_floor(int x, int y) => bool {
+    ret y == FLOOR;
+}

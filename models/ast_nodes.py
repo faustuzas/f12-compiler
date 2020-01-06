@@ -461,6 +461,14 @@ class ExprNewFromSizedType(ExprNew):
     def reference_token(self):
         return self.token
 
+    @property
+    def size_in_stack(self):
+        return sizes.address
+
+    @property
+    def size_in_heap(self):
+        return self.size_in_stack
+
     def resolve_names(self, scope: Scope):
         self.type.resolve_names(scope)
         self.size_expr.resolve_names(scope)
@@ -491,6 +499,10 @@ class ExprNewFromArrayLit(ExprNew):
     @property
     def size_in_stack(self):
         return sizes.address
+
+    @property
+    def size_in_heap(self):
+        return self.size_in_stack
 
     def resolve_names(self, scope: Scope):
         self.array.resolve_names(scope)
