@@ -1,0 +1,26 @@
+>include "example_source/tetris/config.f12";
+
+const char e = BACKGROUND_CHAR; // void symbol
+const char x = BLOCK_CHAR; // value symbol
+
+char[][] block_type_1 = new [
+    new [ e, x, e ],
+    new [ x, x, x ],
+    new [ e, e, e ]
+];
+
+char[][][] block_types = new [
+    block_type_1
+];
+
+int block_type_counter = 0;
+int total_block_types = 1;
+
+fun get_next_block => char[][] {
+    ret block_types[next_type_index()];
+}
+
+fun next_type_index => int {
+    block_type_counter = (block_type_counter + 1) % total_block_types;
+    ret block_type_counter;
+}
