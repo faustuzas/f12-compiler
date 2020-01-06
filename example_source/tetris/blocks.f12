@@ -1,28 +1,28 @@
 >include "example_source/tetris/config.f12";
 
-const char e = BACKGROUND_CHAR; // void symbol
+const char o = BACKGROUND_CHAR; // void symbol
 const char x = BLOCK_CHAR; // value symbol
 
 char[][][] block_type_1 = new [
     new [
-        new [ e, x, e ],
+        new [ o, x, o ],
         new [ x, x, x ],
-        new [ e, e, e ]
+        new [ o, o, o ]
     ],
     new [
-        new [ e, x, e ],
-        new [ e, x, x ],
-        new [ e, x, e ]
+        new [ o, x, o ],
+        new [ o, x, x ],
+        new [ o, x, o ]
     ],
     new [
-        new [ e, e, e ],
+        new [ o, o, o ],
         new [ x, x, x ],
-        new [ e, x, e ]
+        new [ o, x, o ]
     ],
     new [
-        new [ e, x, e ],
-        new [ x, x, e ],
-        new [ e, x, e ]
+        new [ o, x, o ],
+        new [ x, x, o ],
+        new [ o, x, o ]
     ]
 ];
 

@@ -8,6 +8,6 @@ fun main {
     while true {
         print_board();
         process_frame();
-        sleep(300);
+        sleep(FRAME_DURATION_MS);
     }
 }

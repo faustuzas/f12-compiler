@@ -48,7 +48,7 @@ fun process_frame {
     int chars_read = get_input(input_buff);
     process_input(chars_read);
 
-    if will_collide(falling_block_corner_x, falling_block_corner_y + 1) {
+    if will_block_collide(0, 1) {
         paint_falling_block(BLOCK_CHAR);
         reset_falling_block();
         paint_falling_block(BLOCK_CHAR);
@@ -66,15 +66,15 @@ fun process_input(int chars_read) {
         int x = falling_block_corner_x;
         int y = falling_block_corner_y;
 
-        if c == MOVE_LEFT && !will_collide(x - 1, y) {
+        if c == MOVE_LEFT && !will_block_collide(-1, 0) {
             falling_block_corner_x = falling_block_corner_x - 1;
         }
 
-        if c == MOVE_RIGHT && !will_collide(x + 1, y) {
+        if c == MOVE_RIGHT && !will_block_collide(1, 0) {
             falling_block_corner_x = falling_block_corner_x + 1;
         }
 
-        if c == MOVE_DOWN && !will_collide(x, y + 1) {
+        if c == MOVE_DOWN && !will_block_collide(0, +1) {
             falling_block_corner_y = falling_block_corner_y + 1;
         }
 
@@ -86,7 +86,27 @@ fun process_input(int chars_read) {
     }
 }
 
-fun will_collide(int x, int y) => bool {
+fun will_block_collide(int dx, int dy) => bool {
+    int row = 0;
+    while row < BLOCK_MAX_ROWS {
+        int column = 0;
+        while column < BLOCK_MAX_COLUMNS {
+            if falling_block[row][column] == BLOCK_CHAR {
+                if will_point_collide(falling_block_corner_x + column + dx, falling_block_corner_y + row + dy) {
+                    ret true;
+                }
+            }
+
+            column = column + 1;
+        }
+
+        row = row + 1;
+    }
+
+    ret false;
+}
+
+fun will_point_collide(int x, int y) => bool {
     if x <= LEFT_WALL || x >= RIGHT_WALL || y >= FLOOR {
         ret true;
     }
