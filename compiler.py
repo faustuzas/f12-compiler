@@ -7,7 +7,7 @@ from models.scope import Scope
 from parse.parser import Parser
 from utils import printer
 
-from utils.ast_printer import AstPrinter, FileOutput
+from utils.ast_printer import FileOutput
 from vm.vm import VM
 
 
@@ -34,10 +34,6 @@ def compile_file(file_to_compile):
             else:
                 printer.success('', f'Compilation successful', header_len=80)
 
-            # with FileOutput('ast_tree.yaml') as output:
-            #     ast_printer = AstPrinter(output)
-            #     ast_printer.print('root', ast_root)
-
             code_writer = CodeWriter()
             ast_root.write_code(code_writer)
 
@@ -57,8 +53,7 @@ def compile_file(file_to_compile):
 
 
 if __name__ == '__main__':
-    file = 'example_source/tetris/main.f12'
-    # file = 'example_source/not_main.f12'
+    file = 'example_source/fib/main.f12'
     if len(argv) == 2:
         file = argv[1]
     compile_file(file)
