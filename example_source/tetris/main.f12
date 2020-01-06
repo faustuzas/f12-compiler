@@ -4,8 +4,10 @@ fun main {
     init_board();
 
     clear_screen();
+
     while true {
         print_board();
-        sleep(1000);
+        process_frame();
+        sleep(300);
     }
 }

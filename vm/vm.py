@@ -83,7 +83,7 @@ class VM:
                 lambda x, y: x * y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
         op_codes.get(IType.DIV_INT):
             lambda ctx: ctx.push_type(VM.reverse_binary(
-                lambda x, y: x / y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
+                lambda x, y: int(x / y), ctx.pop_type(types.Int), ctx.pop_type(types.Int))),
         op_codes.get(IType.MOD_INT):
             lambda ctx: ctx.push_type(VM.reverse_binary(
                 lambda x, y: x % y, ctx.pop_type(types.Int), ctx.pop_type(types.Int))),

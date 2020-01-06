@@ -1676,6 +1676,10 @@ class FunParam(Node):
         return self.type.size_in_stack
 
     @property
+    def size_in_heap(self):
+        return self.type.size_in_heap
+
+    @property
     def reference_token(self):
         return self.name
 
