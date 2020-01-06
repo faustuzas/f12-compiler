@@ -1,12 +1,12 @@
-const int BOARD_HEIGHT = 6;
-const int BOARD_WIDTH = 11;
+const int BOARD_HEIGHT = 12;
+const int BOARD_WIDTH = 20;
 
 const int TOP_OFFSET = 2;
 
 const int LEFT_WALL = 0;
 const int RIGHT_WALL = BOARD_WIDTH - 1;
 const int FLOOR = BOARD_HEIGHT - 1;
-const int CEILING = 0;
+const int CEILING = 3;
 
 const char WALL_CHAR = '|';
 const char FLOOR_CHAR = '-';
