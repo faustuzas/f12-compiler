@@ -1,11 +1,12 @@
-const int BOARD_HEIGHT = 20;
-const int BOARD_WIDTH = 40;
+const int BOARD_HEIGHT = 6;
+const int BOARD_WIDTH = 11;
 
 const int TOP_OFFSET = 2;
 
 const int LEFT_WALL = 0;
 const int RIGHT_WALL = BOARD_WIDTH - 1;
 const int FLOOR = BOARD_HEIGHT - 1;
+const int CEILING = 0;
 
 const char WALL_CHAR = '|';
 const char FLOOR_CHAR = '-';
@@ -23,4 +24,4 @@ const int BLOCK_MAX_COLUMNS = 3;
 const int STARTING_ROTATION = 3;
 const int TOTAL_ROTATIONS = 4;
 
-const int FRAME_DURATION_MS = 500;
+const int FRAME_DURATION_MS = 1000;
