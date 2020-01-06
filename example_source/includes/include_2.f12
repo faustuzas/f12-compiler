@@ -1,3 +1,0 @@
-fun function_from_include_2(int a, int b) {
-    ret 5;
-}

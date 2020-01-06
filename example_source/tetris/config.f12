@@ -25,3 +25,7 @@ const int STARTING_ROTATION = 3;
 const int TOTAL_ROTATIONS = 4;
 
 const int FRAME_DURATION_MS = 1000;
+
+const int RESULT_PLAYING = 0;
+const int RESULT_WON = 1;
+const int RESULT_LOST = 1;

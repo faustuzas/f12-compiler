@@ -1,3 +1,0 @@
-fun function_from_include(int a, int b) => string {
-    ret 5;
-}

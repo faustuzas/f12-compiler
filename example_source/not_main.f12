@@ -1,27 +1,3 @@
 fun main {
-    char[][] op = new char[][3];
-
-    int row = 0;
-    while row < 3 {
-        op[row] = new char[4];
-
-        int column = 0;
-        while column < 4 {
-            op[row][column] = 'a';
-            column = column + 1;
-        }
-
-        row = row + 1;
-    }
-
-    row = 0;
-    while row < 3 {
-        int column = 0;
-        while column < 4 {
-            --> op[row][column];
-            column = column + 1;
-        }
-
-        row = row + 1;
-    }
+    --> "pize", ' ', "xD ";
 }

@@ -5,9 +5,22 @@ fun main {
 
     clear_screen();
 
+    int result;
     while true {
         print_board();
-        process_frame();
+        result = process_frame();
+        if result != RESULT_PLAYING {
+            break;
+        }
+
         sleep(FRAME_DURATION_MS);
+    }
+
+    clear_screen();
+
+    if result == RESULT_LOST {
+        --> "\n\n", "You lost", "\n\n";
+    } else {
+        --> "\n\n", "You win!!!", "\n\n";
     }
 }

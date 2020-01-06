@@ -9,7 +9,6 @@ char[][] falling_block;
 int falling_block_corner_x;
 int falling_block_corner_y;
 
-
 fun init_board {
     board = new char[][BOARD_HEIGHT];
 
@@ -42,7 +41,7 @@ fun print_board {
     }
 }
 
-fun process_frame {
+fun process_frame => int {
     paint_falling_block(BACKGROUND_CHAR);
 
     int chars_read = get_input(input_buff);
@@ -51,6 +50,11 @@ fun process_frame {
     if will_block_collide(falling_block, 0, 1) {
         paint_falling_block(BLOCK_CHAR);
         check_for_full_rows();
+
+        if is_game_over() {
+            ret RESULT_LOST;
+        }
+
         reset_falling_block();
         paint_falling_block(BLOCK_CHAR);
     } else {
@@ -58,6 +62,8 @@ fun process_frame {
     }
 
     paint_falling_block(BLOCK_CHAR);
+
+    ret RESULT_PLAYING;
 }
 
 fun process_input(int chars_read) {
@@ -91,21 +97,14 @@ fun process_input(int chars_read) {
     }
 }
 
-fun will_block_collide(char[][] block, int dx, int dy) => bool {
-    int row = 0;
-    while row < BLOCK_MAX_ROWS {
-        int column = 0;
-        while column < BLOCK_MAX_COLUMNS {
-            if block[row][column] == BLOCK_CHAR {
-                if will_point_collide(falling_block_corner_x + column + dx, falling_block_corner_y + row + dy) {
-                    ret true;
-                }
-            }
-
-            column = column + 1;
+fun is_game_over => bool {
+    int column = LEFT_WALL + 1;
+    while column < RIGHT_WALL {
+        if board[CEILING][column] != BACKGROUND_CHAR {
+            ret true;
         }
 
-        row = row + 1;
+        column = column + 1;
     }
 
     ret false;
@@ -151,6 +150,26 @@ fun remove_full_row(int row_to_remove) {
         board[CEILING][column] = BACKGROUND_CHAR;
         column = column + 1;
     }
+}
+
+fun will_block_collide(char[][] block, int dx, int dy) => bool {
+    int row = 0;
+    while row < BLOCK_MAX_ROWS {
+        int column = 0;
+        while column < BLOCK_MAX_COLUMNS {
+            if block[row][column] == BLOCK_CHAR {
+                if will_point_collide(falling_block_corner_x + column + dx, falling_block_corner_y + row + dy) {
+                    ret true;
+                }
+            }
+
+            column = column + 1;
+        }
+
+        row = row + 1;
+    }
+
+    ret false;
 }
 
 fun will_point_collide(int x, int y) => bool {
