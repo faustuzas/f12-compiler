@@ -1,13 +1,17 @@
 >include "example_source/tetris/blocks.f12";
 
-char[] input_buff = new char[15];
+unit FallingBlock {
+    Block block;
+    int current_rotation;
 
+    int corner_x;
+    int corner_y;
+}
+
+char[] input_buff = new char[15];
 char[][] board;
 
-char[][][] falling_block_type;
-char[][] falling_block;
-int falling_block_corner_x;
-int falling_block_corner_y;
+FallingBlock falling_block;
 
 fun init_board {
     board = new char[][BOARD_HEIGHT];
@@ -25,7 +29,7 @@ fun init_board {
         row = row + 1;
     }
 
-    reset_falling_block();
+    falling_block = new_falling_block();
 }
 
 fun print_board {
@@ -47,7 +51,7 @@ fun process_frame => int {
     int chars_read = get_input(input_buff);
     process_input(chars_read);
 
-    if will_block_collide(falling_block, 0, 1) {
+    if will_block_collide(get_current_falling_block_value(), 0, 1) {
         paint_falling_block(BLOCK_CHAR);
         
         if remove_full_rows() > 0 {
@@ -63,7 +67,7 @@ fun process_frame => int {
         reset_falling_block();
         paint_falling_block(BLOCK_CHAR);
     } else {
-        falling_block_corner_y = falling_block_corner_y + 1;
+        falling_block.corner_y = falling_block.corner_y + 1;
     }
 
     paint_falling_block(BLOCK_CHAR);
@@ -75,26 +79,26 @@ fun process_input(int chars_read) {
     int i = 0;
     while i < chars_read {
         char c = input_buff[i];
-        int x = falling_block_corner_x;
-        int y = falling_block_corner_y;
+        char[][] current_val = get_current_falling_block_value();
+        int x = falling_block.corner_x;
+        int y = falling_block.corner_y;
 
-        if c == MOVE_LEFT && !will_block_collide(falling_block, -1, 0) {
-            falling_block_corner_x = falling_block_corner_x - 1;
+        if c == MOVE_LEFT && !will_block_collide(current_val, -1, 0) {
+            falling_block.corner_x = falling_block.corner_x - 1;
         }
 
-        if c == MOVE_RIGHT && !will_block_collide(falling_block, 1, 0) {
-            falling_block_corner_x = falling_block_corner_x + 1;
+        if c == MOVE_RIGHT && !will_block_collide(current_val, 1, 0) {
+            falling_block.corner_x = falling_block.corner_x + 1;
         }
 
-        if c == MOVE_DOWN && !will_block_collide(falling_block, 0, +1) {
-            falling_block_corner_y = falling_block_corner_y + 1;
+        if c == MOVE_DOWN && !will_block_collide(current_val, 0, +1) {
+            falling_block.corner_y = falling_block.corner_y + 1;
         }
 
         if c == ROTATE {
-            char[][] rotated_block = rotate_block(falling_block_type);
-
-            if !will_block_collide(rotated_block, 0, 0) {
-                falling_block = rotated_block;
+            int nxt_rotation = next_rotation(falling_block.current_rotation);
+            if !will_block_collide(get_block_value(falling_block.block, nxt_rotation), 0, 0) {
+                falling_block.current_rotation = nxt_rotation;
             }
         }
 
@@ -182,7 +186,7 @@ fun will_block_collide(char[][] block, int dx, int dy) => bool {
         int column = 0;
         while column < BLOCK_MAX_COLUMNS {
             if block[row][column] == BLOCK_CHAR {
-                if will_point_collide(falling_block_corner_x + column + dx, falling_block_corner_y + row + dy) {
+                if will_point_collide(falling_block.corner_x + column + dx, falling_block.corner_y + row + dy) {
                     ret true;
                 }
             }
@@ -205,12 +209,14 @@ fun will_point_collide(int x, int y) => bool {
 }
 
 fun paint_falling_block(char c) {
+    char[][] block_value = get_current_falling_block_value();
+
     int row = 0;
     while row < BLOCK_MAX_ROWS {
         int column = 0;
         while column < BLOCK_MAX_COLUMNS {
-            if falling_block[row][column] == BLOCK_CHAR {
-                board[falling_block_corner_y + row][falling_block_corner_x + column] = c;
+            if block_value[row][column] == BLOCK_CHAR {
+                board[falling_block.corner_y + row][falling_block.corner_x + column] = c;
             }
 
             column = column + 1;
@@ -220,12 +226,22 @@ fun paint_falling_block(char c) {
     }
 }
 
-fun reset_falling_block {
-    falling_block_corner_x = BOARD_WIDTH / 2;
-    falling_block_corner_y = 0;
+fun new_falling_block => FallingBlock {
+    ret new FallingBlock |
+        corner_x: BOARD_WIDTH / 2,
+        corner_y: 0,
+        current_rotation: STARTING_ROTATION,
+        block: get_next_block()
+    |;
+}
 
-    falling_block_type = get_next_block_type();
-    falling_block = rotate_block(falling_block_type);
+fun reset_falling_block {
+    free falling_block;
+    falling_block = new_falling_block();
+}
+
+fun get_current_falling_block_value => char[][] {
+    ret get_block_value(falling_block.block, falling_block.current_rotation);
 }
 
 fun determine_char(int column, int row) => char {
@@ -260,4 +276,6 @@ fun clean_board {
         free board[row];
         row = row + 1;
     }
+
+    free falling_block;
 }

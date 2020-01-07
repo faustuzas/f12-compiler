@@ -1111,6 +1111,9 @@ class ExprAccess(Expr, Assignable):
             handle_typing_error('Item has to be unit', self.object.reference_token)
             return None
 
+        if unit_decl_node is None:
+            return None
+
         self.field_decl_node = unit_decl_node.fields_scope.resolve_name(self.field)
         return self.field_decl_node
 
@@ -1118,9 +1121,13 @@ class ExprAccess(Expr, Assignable):
         return self.object.resolve_identifier()
 
     def resolve_types(self):
+        self.object.resolve_types()
         return self.field_decl_node.type if self.field_decl_node else None
 
     def write_code(self, code_writer: CodeWriter):
+        if self.field_decl_node is None:
+            print('a')
+
         self.object.write_code(code_writer)
         code_writer.write(InstructionType.PUSH_INT, self.field_decl_node.field_slot)
         code_writer.write(InstructionType.ADD_INT)
@@ -1156,7 +1163,9 @@ class ExprArrayAccess(Expr, Assignable):
 
     @property
     def is_accessible(self):
-        if isinstance(self.array, ExprVar) and isinstance(self.array.type, AstTypePointer) and isinstance(self.array.type.of_type, AstTypeArray):
+        if isinstance(self.array, ExprVar) and \
+                isinstance(self.array.type, AstTypePointer) and \
+                isinstance(self.array.type.of_type, AstTypeArray):
             return True
 
         return self.array.is_accessible
@@ -1759,6 +1768,7 @@ class FunParam(Node):
         return True
 
     def resolve_names(self, scope: Scope):
+        self.type.resolve_names(scope)
         scope.add(self.name, self)
 
     def resolve_types(self):

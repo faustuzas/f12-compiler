@@ -3,142 +3,153 @@
 const char o = BACKGROUND_CHAR; // void symbol
 const char x = BLOCK_CHAR; // value symbol
 
-char[][][] block_type_1 = new [
-    new [
-        new [ o, x, o ],
-        new [ x, x, x ],
-        new [ o, o, o ]
-    ],
-    new [
-        new [ o, x, o ],
-        new [ o, x, x ],
-        new [ o, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, x ],
-        new [ o, x, o ]
-    ],
-    new [
-        new [ o, x, o ],
-        new [ x, x, o ],
-        new [ o, x, o ]
-    ]
-];
+unit Block {
+    char[][][] rotations;
+}
 
-char[][][] block_type_2 = new [
-    new [
-        new [ o, x, o ],
-        new [ o, x, o ],
-        new [ o, x, x ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, x ],
-        new [ x, o, o ]
-    ],
-    new [
-        new [ x, x, o ],
-        new [ o, x, o ],
-        new [ o, x, o ]
-    ],
-    new [
-        new [ o, o, x ],
-        new [ x, x, x ],
-        new [ o, o, o ]
+Block block1 = new Block |
+    rotations: new [
+        new [
+            new [ o, x, o ],
+            new [ x, x, x ],
+            new [ o, o, o ]
+        ],
+        new [
+            new [ o, x, o ],
+            new [ o, x, x ],
+            new [ o, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, x ],
+            new [ o, x, o ]
+        ],
+        new [
+            new [ o, x, o ],
+            new [ x, x, o ],
+            new [ o, x, o ]
+        ]
     ]
-];
+|;
 
-char[][][] block_type_3 = new [
-    new [
-        new [ o, x, o ],
-        new [ o, x, o ],
-        new [ x, x, o ]
-    ],
-    new [
-        new [ x, o, o ],
-        new [ x, x, x ],
-        new [ o, o, o ]
-    ],
-    new [
-        new [ o, x, x ],
-        new [ o, x, o ],
-        new [ o, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, x ],
-        new [ o, o, x ]
+Block block2 = new Block |
+    rotations: new [
+        new [
+            new [ o, x, o ],
+            new [ o, x, o ],
+            new [ o, x, x ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, x ],
+            new [ x, o, o ]
+        ],
+        new [
+            new [ x, x, o ],
+            new [ o, x, o ],
+            new [ o, x, o ]
+        ],
+        new [
+            new [ o, o, x ],
+            new [ x, x, x ],
+            new [ o, o, o ]
+        ]
     ]
-];
+|;
 
-char[][][] block_type_4 = new [
-    new [
-        new [ o, x, o ],
-        new [ o, x, o ],
-        new [ o, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, x ],
-        new [ o, o, o ]
-    ],
-    new [
-        new [ o, x, o ],
-        new [ o, x, o ],
-        new [ o, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, x ],
-        new [ o, o, o ]
+Block block3 = new Block |
+    rotations: new [
+        new [
+            new [ o, x, o ],
+            new [ o, x, o ],
+            new [ x, x, o ]
+        ],
+        new [
+            new [ x, o, o ],
+            new [ x, x, x ],
+            new [ o, o, o ]
+        ],
+        new [
+            new [ o, x, x ],
+            new [ o, x, o ],
+            new [ o, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, x ],
+            new [ o, o, x ]
+        ]
     ]
-];
+|;
 
-char[][][] block_type_5 = new [
-    new [
-        new [ o, o, o ],
-        new [ x, x, o ],
-        new [ x, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, o ],
-        new [ x, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, o ],
-        new [ x, x, o ]
-    ],
-    new [
-        new [ o, o, o ],
-        new [ x, x, o ],
-        new [ x, x, o ]
+Block block4 = new Block |
+    rotations: new [
+        new [
+            new [ o, x, o ],
+            new [ o, x, o ],
+            new [ o, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, x ],
+            new [ o, o, o ]
+        ],
+        new [
+            new [ o, x, o ],
+            new [ o, x, o ],
+            new [ o, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, x ],
+            new [ o, o, o ]
+        ]
     ]
-];
+|;
 
-char[][][][] block_types = new [
-    block_type_1,
-    block_type_2,
-    block_type_3,
-    block_type_4,
-    block_type_5
+Block block5 = new Block |
+    rotations: new [
+        new [
+            new [ o, o, o ],
+            new [ x, x, o ],
+            new [ x, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, o ],
+            new [ x, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, o ],
+            new [ x, x, o ]
+        ],
+        new [
+            new [ o, o, o ],
+            new [ x, x, o ],
+            new [ x, x, o ]
+        ]
+    ]
+|;
+
+Block[] blocks = new [
+    block1,
+    block2,
+    block3,
+    block4,
+    block5
 ];
 
 int block_type_counter = 0;
 int total_block_types = 5;
 
-int rotation;
-
-fun get_next_block_type => char[][][] {
-    rotation = STARTING_ROTATION;
-    ret block_types[next_type_index()];
+fun get_next_block => Block {
+    int next_index = next_type_index();
+    ret blocks[next_index];
 }
 
-fun rotate_block(char[][][] block_type) => char[][] {
-    rotation = (rotation + 1) % TOTAL_ROTATIONS;
-    ret block_type[rotation];
+fun next_rotation(int current_rotation) => int {
+    ret (current_rotation + 1) % TOTAL_ROTATIONS;
 }
 
 fun next_type_index => int {
@@ -146,26 +157,31 @@ fun next_type_index => int {
     ret block_type_counter;
 }
 
-fun clean_blocks {
-    int type_i = 0;
-    while type_i < total_block_types {
-        int direction_i = 0;
+fun get_block_value(Block block, int rotation) => char[][] {
+    ret block.rotations[rotation];
+}
 
-        while direction_i < 4 {
+fun clean_blocks {
+    int block_i = 0;
+    while block_i < total_block_types {
+        Block block = blocks[block_i];
+        int rotation_i = 0;
+
+        while rotation_i < 4 {
             int row_i = 0;
 
             while row_i < BLOCK_MAX_ROWS {
-                free block_types[type_i][direction_i][row_i];
+                free block.rotations[rotation_i][row_i];
                 row_i = row_i + 1;
             }
 
-            free block_types[type_i][direction_i];
-            direction_i = direction_i + 1;
+            free block.rotations[rotation_i];
+            rotation_i = rotation_i + 1;
         }
 
-        free block_types[type_i];
-        type_i = type_i + 1;
+        free block;
+        block_i = block_i + 1;
     }
 
-    free block_types;
+    free blocks;
 }
