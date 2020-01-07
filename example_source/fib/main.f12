@@ -7,5 +7,6 @@ fun fib(int n) => int {
 }
 
 fun main {
-    --> "Result: ", fib(10), '\n';
+    int n = 10;
+    --> "Fib number of ", n, " is ", fib(n), '\n';
 }
