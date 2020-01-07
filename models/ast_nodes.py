@@ -1405,7 +1405,7 @@ class CreateUnitArg(Node):
         return self.value.resolve_types()
 
     def write_code(self, code_writer: CodeWriter):
-        raise NotImplementedError('This feature is not implemented yet')
+        self.value.write_code(code_writer)
 
 
 class Stmnt(Node, ABC):
