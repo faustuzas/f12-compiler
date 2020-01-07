@@ -122,7 +122,7 @@ class AstType(Node, ABC):
         raise TypeError(f'You cannot iterate through {prepare_for_printing(self)}')
 
     def write_code(self, code_writer: CodeWriter):
-        pass
+        raise Exception('Unreachable code')
 
 
 class AstTypePointer(AstType):
@@ -152,6 +152,10 @@ class AstTypePointer(AstType):
     @property
     def iterable_element_type(self):
         return self.of_type
+
+    @property
+    def is_accessible(self):
+        return isinstance(self.of_type, AstTypeUnit)
 
     def resolve_names(self, scope: Scope):
         return self.of_type.resolve_names(scope)
@@ -514,9 +518,6 @@ class ExprNewUnit(ExprNew):
 
     def write_code(self, code_writer: CodeWriter):
         self.create_unit_expr.write_code(code_writer)
-        code_writer.write(InstructionType.PUSH_INT, self.create_unit_expr.size_in_stack)
-        code_writer.write(InstructionType.MUL_INT)
-        code_writer.write(InstructionType.MEMORY_ALLOCATE)
 
 
 class ExprNewFromArrayLit(ExprNew):
@@ -1045,7 +1046,7 @@ class ExprVar(Expr, Assignable):
 
     @property
     def is_accessible(self):
-        return isinstance(self.decl_node.type, AstTypeUnit)
+        return self.decl_node.type.is_accessible
 
     def resolve_names(self, scope: Scope):
         self.decl_node = scope.resolve_name(self.resolve_identifier())
@@ -1091,23 +1092,25 @@ class ExprAccess(Expr, Assignable):
 
     @property
     def size_in_stack(self):
-        raise Exception('Unreachable code')
+        return self.field_decl_node.size_in_stack
 
     @property
     def is_accessible(self):
-        return self.field_decl_node and self.field_decl_node.is_accessible()
+        return self.field_decl_node and self.field_decl_node.is_accessible
 
     def resolve_names(self, scope: Scope):
         object_decl_node = self.object.resolve_names(scope)
 
-        if not object_decl_node or not isinstance(object_decl_node.type, (AstTypeUnit, AstTypeArray)):
-            # print error maybe
+        if not self.object.is_accessible:
+            handle_typing_error('You cannot access this type', self.object.reference_token)
             return None
 
-        if isinstance(object_decl_node.type, AstTypeArray):
-            unit_decl_node = object_decl_node.type.inner_type.decl_node
+        if isinstance(object_decl_node.type, AstTypePointer):
+            unit_decl_node = object_decl_node.type.of_type.kind.decl_node
         else:
-            unit_decl_node = object_decl_node.type.decl_node
+            handle_typing_error('Item has to be unit', self.object.reference_token)
+            return None
+
         self.field_decl_node = unit_decl_node.fields_scope.resolve_name(self.field)
         return self.field_decl_node
 
@@ -1115,13 +1118,24 @@ class ExprAccess(Expr, Assignable):
         return self.object.resolve_identifier()
 
     def resolve_types(self):
-        type_ = self.object.resolve_types()
-        if not type_ or not type_.is_accessible():
-            handle_typing_error('You cannot access this type', self.object.reference_token)
         return self.field_decl_node.type if self.field_decl_node else None
 
     def write_code(self, code_writer: CodeWriter):
-        raise Exception('Unreachable code')
+        self.object.write_code(code_writer)
+        code_writer.write(InstructionType.PUSH_INT, self.field_decl_node.field_slot)
+        code_writer.write(InstructionType.ADD_INT)
+
+        code_writer.write(InstructionType.MEMORY_GET, self.field_decl_node.size_in_stack)
+
+    def write_assigment_code(self, code_writer, value):
+        value.write_code(code_writer)
+        code_writer.write(InstructionType.POP_PUSH_N, self.size_in_stack, 2)
+
+        self.object.write_code(code_writer)
+        code_writer.write(InstructionType.PUSH_INT, self.field_decl_node.field_slot)
+        code_writer.write(InstructionType.ADD_INT)
+
+        code_writer.write(InstructionType.MEMORY_SET, self.size_in_stack)
 
 
 class ExprArrayAccess(Expr, Assignable):
@@ -1142,7 +1156,10 @@ class ExprArrayAccess(Expr, Assignable):
 
     @property
     def is_accessible(self):
-        return self.array.is_accessible()
+        if isinstance(self.array, ExprVar) and isinstance(self.array.type, AstTypePointer) and isinstance(self.array.type.of_type, AstTypeArray):
+            return True
+
+        return self.array.is_accessible
 
     @property
     def reference_token(self):
@@ -1297,7 +1314,11 @@ class ExprCreateUnit(Expr):
 
     @property
     def size_in_stack(self):
-        raise NotImplementedError()
+        return sizes.address
+
+    @property
+    def size_in_heap(self):
+        return self.size_in_stack
 
     def resolve_names(self, scope: Scope):
         self.unit_decl_node = scope.resolve_name(self.unit_name)
@@ -1336,7 +1357,23 @@ class ExprCreateUnit(Expr):
         return AstTypeUnit(self.unit_decl_node.name, self.unit_decl_node)
 
     def write_code(self, code_writer: CodeWriter):
-        raise NotImplementedError('This feature is not implemented yet')
+        fields = self.unit_decl_node.fields
+        for field in reversed(fields):
+            arg_for_field = find_in_list(self.args, lambda a: field.name.value == a.field.value)
+            arg_for_field.write_code(code_writer)
+
+        code_writer.write(InstructionType.PUSH_INT, self.unit_decl_node.size_in_heap)
+        code_writer.write(InstructionType.MEMORY_ALLOCATE)
+
+        field_sizes = [f.size_in_stack for f in fields]
+        for f_size in field_sizes:
+            code_writer.write(InstructionType.MEMORY_SET_PUSH, f_size, 1)
+            code_writer.write(InstructionType.PUSH_INT, f_size)
+            code_writer.write(InstructionType.ADD_INT)
+
+        # calculate the original address and leave it in the stack
+        code_writer.write(InstructionType.PUSH_INT, sum(field_sizes))
+        code_writer.write(InstructionType.SUB_INT)
 
 
 class CreateUnitArg(Node):
@@ -1897,6 +1934,14 @@ class DeclUnit(Decl):
     @property
     def size_in_stack(self):
         return sizes.address
+
+    @property
+    def size_in_heap(self):
+        sizes_sum = 0
+        for field in self.fields:
+            sizes_sum += field.size_in_stack
+
+        return sizes_sum
 
     def resolve_names(self, scope: Scope):
         self._fields_scope = Scope(scope)
