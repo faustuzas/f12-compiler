@@ -485,6 +485,40 @@ class ExprNewFromSizedType(ExprNew):
         code_writer.write(InstructionType.MEMORY_ALLOCATE)
 
 
+class ExprNewUnit(ExprNew):
+
+    def __init__(self, create_unit_expr) -> None:
+        super().__init__()
+        self.add_children(create_unit_expr)
+        self.create_unit_expr = create_unit_expr
+
+    @property
+    def reference_token(self):
+        return self.create_unit_expr.reference_token
+
+    @property
+    def size_in_stack(self):
+        return sizes.address
+
+    @property
+    def size_in_heap(self):
+        return self.size_in_stack
+
+    def resolve_names(self, scope: Scope):
+        self.create_unit_expr.resolve_names(scope)
+
+    def resolve_types(self):
+        type_ = self.create_unit_expr.resolve_types()
+        if type_:
+            return AstTypePointer(type_)
+
+    def write_code(self, code_writer: CodeWriter):
+        self.create_unit_expr.write_code(code_writer)
+        code_writer.write(InstructionType.PUSH_INT, self.create_unit_expr.size_in_stack)
+        code_writer.write(InstructionType.MUL_INT)
+        code_writer.write(InstructionType.MEMORY_ALLOCATE)
+
+
 class ExprNewFromArrayLit(ExprNew):
 
     def __init__(self, array: ExprLitArray) -> None:

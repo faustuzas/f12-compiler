@@ -3,7 +3,7 @@ from utils.error_printer import print_error_from_token as print_error
 
 
 def select_compare_func(type_):
-    from models.ast_nodes import AstTypePrimitive, AstTypePointer, AstTypeArray
+    from models.ast_nodes import AstTypePrimitive, AstTypePointer, AstTypeArray, AstTypeUnit
 
     if isinstance(type_, AstTypePrimitive):
         return compare_primitives
@@ -11,6 +11,8 @@ def select_compare_func(type_):
         return compare_pointers
     elif isinstance(type_, AstTypeArray):
         return compare_array
+    elif isinstance(type_, AstTypeUnit):
+        return compare_unit
     else:
         raise NotImplementedError(str(type_))
 
@@ -43,6 +45,10 @@ def compare_array(array1, array2) -> bool:
         return False
 
     return select_compare_func(inner_type1)(inner_type1, inner_type2)
+
+
+def compare_unit(unit1, unit2) -> bool:
+    return unit1.name.value == unit2.name.value
 
 
 def prepare_for_printing(item):
