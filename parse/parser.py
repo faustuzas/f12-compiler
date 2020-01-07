@@ -371,6 +371,11 @@ class Parser:
                 return ast.ExprNewFromArrayLit(ast.ExprLitArray(items, array_open))
 
             type_ = self.expect_type()
+            if isinstance(type_, ast.AstTypePointer) and \
+                    isinstance(type_.of_type, ast.AstTypeUnit) and \
+                    self.next_token_type() == TokenType.C_PIPE:
+                return ast.ExprNewUnit(self.parse_unit_call(type_.of_type.name))
+
             self.expect(TokenType.C_SQUARE_L, '[')
             size = self.parse_expr()
             self.expect(TokenType.C_SQUARE_R, ']')
@@ -481,7 +486,7 @@ class Parser:
         if type_token.type in primitive_type_tokens:
             type_ = ast.AstTypePrimitive(primitive_types_by_token_type.get(type_token.type))
         else:
-            type_ = ast.AstTypeUnit(type_token)  # type token will hold the name of the unit
+            type_ = ast.AstTypePointer(ast.AstTypeUnit(type_token))  # type token will hold the name of the unit
 
         for i in range(array_nesting):
             type_ = ast.AstTypePointer(ast.AstTypeArray(type_))
