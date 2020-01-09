@@ -1125,9 +1125,6 @@ class ExprAccess(Expr, Assignable):
         return self.field_decl_node.type if self.field_decl_node else None
 
     def write_code(self, code_writer: CodeWriter):
-        if self.field_decl_node is None:
-            print('a')
-
         self.object.write_code(code_writer)
         code_writer.write(InstructionType.PUSH_INT, self.field_decl_node.field_slot)
         code_writer.write(InstructionType.ADD_INT)
