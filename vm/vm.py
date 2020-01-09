@@ -15,6 +15,8 @@ total_memory = 1024 * 1024 * 5
 pointer_size = sizes.int
 
 heap_size = int(total_memory * 0.5)
+stack_size = total_memory - heap_size
+
 block_metadata_size = 2 * sizes.int
 heap_end_address = total_memory
 
@@ -23,8 +25,12 @@ class VM:
 
     def __init__(self, opcodes) -> None:
         self.running = True
-
         self.terminal = Terminal()
+
+        if len(opcodes) > stack_size:
+            VM.print_vm_error('Stack is too small for code to be loaded')
+            self.running = False
+            return
 
         self.memory = opcodes.copy()
         resize(self.memory, total_memory, 0)
@@ -473,22 +479,39 @@ class VM:
     def set_value(self, start, value, type_=None):
         if type_ is None:
             type_ = types.find_type(type(value))
-        bytes_ = codec.select_to_bytes_func(type_)(value)
-        self.set_bytes(start, bytes_)
-        return len(bytes_)
+
+        if self.stack_overflow_guard(type_.size_in_bytes()):
+            bytes_ = codec.select_to_bytes_func(type_)(value)
+            self.set_bytes(start, bytes_)
+            return len(bytes_)
+        return 0
 
     def set_bytes(self, offset, bytes_):
+        if offset + len(bytes_) > len(self.memory):
+            self.error(f'Trying to set memory at address {offset} was out of bounds ({len(self.memory) - 1})')
+            return
+
         for i in range(len(bytes_)):
             self.memory[offset + i] = bytes_[i]
 
     def error(self, message):
         if self.running:
-            print(f'VM error: {message}')
+            VM.print_vm_error(message)
             self.running = False
 
     def get_symbol(self):
         with self.terminal.raw():
             return self.terminal.inkey(timeout=0)
+
+    def stack_overflow_guard(self, offset):
+        if self.ip + offset > stack_size:
+            self.error('Stack overflow')
+            return False
+        return True
+
+    @staticmethod
+    def print_vm_error(message):
+        print(f'VM error: {message}')
 
     @staticmethod
     def reverse_binary(op, val1, val2):
